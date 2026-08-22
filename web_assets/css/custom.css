@@ -1412,3 +1412,56 @@ body {
     border-color: #06245f;
     color: #fff !important;
 }
+
+/* =================================================
+   IMPORTANT LINKS
+================================================= */
+
+.important-links-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.important-links-content a {
+    display: inline-block;
+    padding: 9px 15px;
+    background: #0d3b8f;
+    color: #fff !important;
+    text-decoration: none !important;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    transition: all 0.2s ease;
+}
+
+.important-links-content a:hover {
+    background: #08275f;
+    color: #fff !important;
+    text-decoration: none !important;
+}
+
+
+/* =================================================
+   OFFICIAL WEBSITE BUTTON
+================================================= */
+
+.job-official-btn {
+    display: inline-block;
+    padding: 12px 18px;
+    background: #0d3b8f;
+    color: #fff !important;
+    text-decoration: none !important;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    transition: all 0.2s ease;
+}
+
+.job-official-btn:hover {
+    background: #08275f;
+    color: #fff !important;
+    text-decoration: none !important;
+}

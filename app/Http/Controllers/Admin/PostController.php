@@ -287,9 +287,95 @@ class PostController extends Controller
             ->orderBy('name')
             ->get();
 
+        $aiJob = session('ai_import_job');
+
+        $post = new Post();
+
+        /*
+    |--------------------------------------------------------------------------
+    | AI Imported Job
+    |--------------------------------------------------------------------------
+    */
+
+        if (is_array($aiJob)) {
+
+            foreach ($aiJob as $field => $value) {
+
+                if ($field === 'category') {
+                    continue;
+                }
+
+                if (in_array($field, [
+                    'title',
+                    'excerpt',
+                    'short_description',
+                    'content',
+                    'important_dates',
+                    'application_fee',
+                    'age_limit',
+                    'vacancy_details',
+                    'eligibility',
+                    'selection_process',
+                    'salary_details',
+                    'how_to_apply',
+                    'important_links',
+                    'official_website',
+                    'seo_title',
+                    'meta_description',
+                    'meta_keywords',
+                ])) {
+                    $post->{$field} = $value;
+                }
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Generate Slug From Title
+        |--------------------------------------------------------------------------
+        */
+
+            if (!empty($post->title)) {
+                $post->slug = \Illuminate\Support\Str::slug($post->title);
+            }
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Default Publishing Settings
+        |--------------------------------------------------------------------------
+        */
+
+            $post->status = 'published';
+
+            $post->published_at = now();
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Match AI Category With Existing Category
+        |--------------------------------------------------------------------------
+        */
+
+            if (!empty($aiJob['category'])) {
+
+                $category = Category::where('status', true)
+                    ->whereRaw(
+                        'LOWER(name) = ?',
+                        [strtolower(trim($aiJob['category']))]
+                    )
+                    ->first();
+
+                if ($category) {
+                    $post->category_id = $category->id;
+                }
+            }
+        }
+
+
         return view(
             'admin.posts.create',
-            compact('categories')
+            compact('categories', 'post')
         );
     }
     public function store(Request $request)
@@ -384,8 +470,7 @@ class PostController extends Controller
 
             'official_website' => [
                 'nullable',
-                'url',
-                'max:255',
+                'string'
             ],
 
             'seo_title' => [
@@ -434,7 +519,15 @@ class PostController extends Controller
         $validated['slug'] = $validated['slug']
             ? \Illuminate\Support\Str::slug($validated['slug'])
             : \Illuminate\Support\Str::slug($validated['title']);
+        /*
+|--------------------------------------------------------------------------
+| Canonical URL
+|--------------------------------------------------------------------------
+*/
 
+        $validated['canonical_url'] =
+            $validated['canonical_url']
+            ?? url('/post/' . $validated['slug']);
 
         /*
     |--------------------------------------------------------------------------

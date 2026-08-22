@@ -1,3 +1,24 @@
 ssh offerlity.shop@ssh.gb.stackcp.com
 https://localhost/printhomedelivery/cron/payu-pending-check?key=2*2**
 cloudflared tunnel --url http://localhost:80
+
+{
+  "title": "BTSC Technician (Bench Chemist) Recruitment 2026",
+  "category": "Bihar Government Job Recruitment",
+  "excerpt": "BTSC has invited applications for the Technician (Bench Chemist) post in Bihar.",
+  "short_description": "BTSC Technician Bench Chemist recruitment 2026 for eligible candidates.",
+  "content": "<p>The Bihar Technical Service Commission (BTSC) has published Advertisement No. 26/2026 for recruitment to Technician (Bench Chemist) posts.</p><p>Eligible candidates can apply online through the official BTSC website.</p>",
+  "important_dates": "Registration started on 24/07/2026. Application last date: 23/08/2026.",
+  "application_fee": "As prescribed in the official BTSC Advertisement No. 26/2026.",
+  "age_limit": "As prescribed in the official BTSC recruitment notification.",
+  "vacancy_details": "Technician (Bench Chemist) posts.",
+  "eligibility": "Candidates must fulfil the prescribed educational and technical qualification requirements.",
+  "selection_process": "Selection will be conducted according to the recruitment rules specified in the official notification.",
+  "salary_details": "Salary and allowances will be provided according to the applicable pay rules.",
+  "how_to_apply": "Eligible candidates should complete the online application through the official BTSC recruitment portal.",
+  "important_links": "<a href=\"https://btsc.bihar.gov.in/recruitment/\" target=\"_blank\" rel=\"noopener noreferrer\">Official Recruitment Page</a>",
+  "official_website": "https://btsc.bihar.gov.in/",
+  "seo_title": "BTSC Technician Bench Chemist Recruitment 2026",
+  "meta_description": "BTSC Technician Bench Chemist Recruitment 2026 with eligibility, important dates, vacancy details and application information.",
+  "meta_keywords": "BTSC Technician Recruitment 2026, Bench Chemist, Bihar Government Jobs"
+}

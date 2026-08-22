@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AiJobImportController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PostController;
 use Illuminate\Support\Facades\Route;
@@ -19,14 +21,21 @@ use Illuminate\Support\Facades\Auth;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 // Auth::routes();
 Auth::routes(['register' => false]);
 
 Route::get('/', [FrontController::class, 'home'])
     ->name('home');
 
+Route::get('/admin/ai-jobs/import', [
+    AiJobImportController::class,
+    'create'
+])->name('admin.ai-jobs.import');
 
+Route::post('/admin/ai-jobs/import', [
+    AiJobImportController::class,
+    'preview'
+])->name('admin.ai-jobs.import.preview');
 /*
 |--------------------------------------------------------------------------
 | Category

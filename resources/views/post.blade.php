@@ -156,6 +156,53 @@
 }
 </script>
 
+
+{{-- =========================================================
+     BREADCRUMB SCHEMA
+========================================================= --}}
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": @json(url('/'))
+        }
+
+        @if($post->category)
+
+        ,
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": @json($post->category->name),
+            "item": @json(
+                url('/category/' . $post->category->slug)
+            )
+        }
+
+        @endif
+
+        ,
+        {
+            "@type": "ListItem",
+            "position": {{ $post->category ? 3 : 2 }},
+            "name": @json($post->title),
+            "item": @json(
+                $post->canonical_url
+                    ?: url('/post/' . $post->slug)
+            )
+        }
+
+    ]
+}
+</script>
+
 @endpush
 
 
@@ -662,55 +709,59 @@
                     @endif
 
 
+                        {{-- =================================================
+                            IMPORTANT LINKS
+                        ================================================== --}}
 
-                    {{-- =================================================
-                         IMPORTANT LINKS
-                    ================================================== --}}
+                        @if($post->important_links)
 
-                    @if($post->important_links)
+                            <section class="job-detail-box">
 
-                        <section class="job-detail-box">
+                                <div class="job-detail-title">
+                                    Important Links
+                                </div>
 
-                            <div class="job-detail-title">
+                                <div class="job-detail-content important-links-content">
 
-                                Important Links
+                                    {!! $post->important_links !!}
+
+                                </div>
+
+                            </section>
+
+                        @endif
+
+
+                        {{-- =================================================
+                            OFFICIAL WEBSITE
+                        ================================================== --}}
+
+                        @if($post->official_website)
+
+                            <div class="p-3 p-md-4">
+
+                                @php
+                                    $officialWebsite = $post->official_website;
+
+                                    // If AI returned an <a> tag, extract its href.
+                                    if (preg_match('/href=["\']([^"\']+)["\']/i', $officialWebsite, $matches)) {
+                                        $officialWebsite = $matches[1];
+                                    }
+                                @endphp
+
+                                <a
+                                    href="{{ $officialWebsite }}"
+                                    target="_blank"
+                                    rel="nofollow noopener noreferrer"
+                                    class="job-official-btn">
+
+                                    Visit Official Website
+
+                                </a>
 
                             </div>
 
-
-                            <div class="job-detail-content">
-
-                                {!! $post->important_links !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-
-                    {{-- =================================================
-                         OFFICIAL WEBSITE
-                    ================================================== --}}
-
-                    @if($post->official_website)
-
-                        <div class="p-3 p-md-4">
-
-                            <a
-                                href="{{ $post->official_website }}"
-                                target="_blank"
-                                rel="nofollow noopener noreferrer"
-                                class="job-official-btn">
-
-                                Visit Official Website
-
-                            </a>
-
-                        </div>
-
-                    @endif
+                        @endif
 
 
                 </article>

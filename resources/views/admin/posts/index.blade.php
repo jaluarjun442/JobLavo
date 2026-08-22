@@ -29,13 +29,23 @@
     </div>
 
 
-    <a
-        href="{{ route('admin.posts.create') }}"
-        class="btn btn-primary">
+    <div class="d-flex gap-2">
 
-        + Add Post
+        <a href="{{ route('admin.ai-jobs.import') }}"
+            class="btn btn-dark">
 
-    </a>
+            🤖 AI Import
+
+        </a>
+
+        <a href="{{ route('admin.posts.create') }}"
+            class="btn btn-primary">
+
+            + Add Post
+
+        </a>
+
+    </div>
 
 </div>
 
@@ -147,7 +157,6 @@
 
 
 <script>
-
     $(document).ready(function() {
 
         $('#postsTable').DataTable({
@@ -338,7 +347,6 @@
         });
 
     });
-
 </script>
 
 @endpush

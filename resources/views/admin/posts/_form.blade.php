@@ -407,7 +407,7 @@
                         </label>
 
 
-                        <input type="url"
+                        <input type="text"
                                id="official_website"
                                name="official_website"
                                class="form-control"
