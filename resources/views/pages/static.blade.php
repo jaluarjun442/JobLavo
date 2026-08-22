@@ -74,7 +74,7 @@ $metaDescription
 
             {{-- HEADER --}}
 
-            <div class="p-3 p-md-4 border-bottom">
+            <!-- <div class="p-3 p-md-4 border-bottom">
 
 
                 <h1 class="h2 fw-bold text-dark mb-0">
@@ -84,7 +84,7 @@ $metaDescription
                 </h1>
 
 
-            </div>
+            </div> -->
 
 
 
