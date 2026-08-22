@@ -594,7 +594,7 @@ class PostController extends Controller
 
         Post::create($validated);
 
-
+        $this->syncPostSitemaps();
         return redirect()
             ->route('admin.posts.index')
             ->with(
@@ -791,7 +791,7 @@ class PostController extends Controller
     */
 
         $post->update($validated);
-
+        $this->syncPostSitemaps();
 
         return redirect()
             ->route('admin.posts.index')
@@ -823,7 +823,7 @@ class PostController extends Controller
     */
 
         $post->delete();
-
+        $this->syncPostSitemaps();
 
         return redirect()
             ->route('admin.posts.index')
@@ -831,5 +831,72 @@ class PostController extends Controller
                 'success',
                 'Post deleted successfully.'
             );
+    }
+    private function syncPostSitemaps()
+    {
+        $publishedPosts = Post::where(
+            'status',
+            'published'
+        )->count();
+
+        $sitemapCount = max(
+            1,
+            (int) ceil($publishedPosts / 100)
+        );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Update / Create Post Sitemaps
+    |--------------------------------------------------------------------------
+    */
+
+        for ($i = 1; $i <= $sitemapCount; $i++) {
+
+            $count = Post::where(
+                'status',
+                'published'
+            )
+                ->skip(($i - 1) * 100)
+                ->take(100)
+                ->count();
+
+
+            \App\Models\Sitemap::updateOrCreate(
+                [
+                    'filename' => 'sitemap-' . $i . '.xml',
+                ],
+                [
+                    'type' => 'posts',
+                    'url_count' => $count,
+                ]
+            );
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Remove Empty / Old Post Sitemaps
+    |--------------------------------------------------------------------------
+    */
+
+        \App\Models\Sitemap::where(
+            'type',
+            'posts'
+        )
+            ->where(
+                'filename',
+                'like',
+                'sitemap-%.xml'
+            )
+            ->whereNotIn(
+                'filename',
+                collect(range(1, $sitemapCount))
+                    ->map(function ($number) {
+                        return 'sitemap-' . $number . '.xml';
+                    })
+                    ->toArray()
+            )
+            ->delete();
     }
 }

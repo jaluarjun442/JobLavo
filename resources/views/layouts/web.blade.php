@@ -238,7 +238,7 @@
 
                     <div class="site-logo">
 
-                        GI
+                        GL
 
                     </div>
 
@@ -591,7 +591,7 @@
 
                     <small class="footer-muted">
 
-                        Government Jobs & Recruitment Portal
+                        Government Jobs & Recruitment Alert.
 
                     </small>
 

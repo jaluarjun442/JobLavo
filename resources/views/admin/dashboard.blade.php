@@ -144,9 +144,50 @@
 
 {{-- QUICK ACTIONS --}}
 
+
+    <div class="col-md-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="text-secondary small mb-1">
+                    Sitemaps
+                </div>
+
+                <div class="h3 fw-bold mb-1">
+                    {{ $sitemapCount }}
+                </div>
+
+                <div class="small text-secondary">
+                    {{ $sitemapUrls }} URLs
+                </div>
+
+                <div class="mt-3 d-flex gap-2">
+
+                    <span class="badge bg-success">
+                        {{ $sitemapIndexed }} Indexed
+                    </span>
+
+                    <span class="badge bg-warning text-dark">
+                        {{ $sitemapPending }} Pending
+                    </span>
+
+                </div>
+
+                <a href="{{ route('admin.sitemaps.index') }}"
+                    class="btn btn-sm btn-outline-primary mt-3">
+
+                    Manage Sitemap
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
 <div class="card border-0 shadow-sm mt-4">
-
-
     <div class="card-body p-4">
 
 

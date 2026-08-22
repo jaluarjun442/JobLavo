@@ -3,13 +3,39 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Sitemap;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
     public function index()
     {
-        return view('admin.dashboard');
+        $sitemapCount = Sitemap::count();
+
+        $sitemapUrls = Sitemap::sum('url_count');
+
+        $sitemapIndexed = Sitemap::where(
+            'status',
+            'indexed'
+        )->count();
+
+        $sitemapPending = Sitemap::whereIn(
+            'status',
+            [
+                'not_submitted',
+                'submitted',
+                'processing',
+            ]
+        )->count();
+        return view(
+            'admin.dashboard',
+            compact(
+                'sitemapCount',
+                'sitemapUrls',
+                'sitemapIndexed',
+                'sitemapPending'
+            )
+        );
     }
 
 

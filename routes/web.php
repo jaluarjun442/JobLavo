@@ -11,6 +11,29 @@ use App\Http\Controllers\FrontController;
 
 use Illuminate\Support\Facades\Auth;
 
+Route::get('/sitemap.xml', [
+    \App\Http\Controllers\SitemapController::class,
+    'index'
+])->name('sitemap.index');
+
+
+Route::get('/sitemap-{page}.xml', [
+    \App\Http\Controllers\SitemapController::class,
+    'posts'
+])
+    ->where('page', '[1-9][0-9]*')
+    ->name('sitemap.posts');
+/*
+|--------------------------------------------------------------------------
+| Robots.txt
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/robots.txt', [
+    \App\Http\Controllers\RobotsController::class,
+    'index'
+])->name('robots');
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -152,7 +175,32 @@ Route::middleware(['auth', 'admin'])
             'data'
         ])->name('posts.data');
 
+        /*
+|--------------------------------------------------------------------------
+| Sitemaps
+|--------------------------------------------------------------------------
+*/
 
+        Route::get('/sitemaps', [
+            \App\Http\Controllers\Admin\SitemapController::class,
+            'index'
+        ])->name('sitemaps.index');
+
+
+        Route::get('/sitemaps/{sitemap}/edit', [
+            \App\Http\Controllers\Admin\SitemapController::class,
+            'edit'
+        ])->name('sitemaps.edit');
+
+
+        Route::put('/sitemaps/{sitemap}', [
+            \App\Http\Controllers\Admin\SitemapController::class,
+            'update'
+        ])->name('sitemaps.update');
+        Route::post('/sitemaps/refresh', [
+            \App\Http\Controllers\Admin\SitemapController::class,
+            'refresh'
+        ])->name('sitemaps.refresh');
         Route::post('/logout', [
             AdminController::class,
             'logout'

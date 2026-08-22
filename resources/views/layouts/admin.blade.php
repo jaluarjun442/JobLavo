@@ -84,6 +84,16 @@
                     </li>
                     <li class="nav-item">
 
+                        <a href="{{ route('admin.sitemaps.index') }}"
+                            class="nav-link">
+
+                            Sitemaps
+
+                        </a>
+
+                    </li>
+                    <li class="nav-item">
+
                         <a href="{{ url('/') }}"
                             target="_blank"
                             class="nav-link">

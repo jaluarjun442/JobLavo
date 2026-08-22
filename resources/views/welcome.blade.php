@@ -226,11 +226,6 @@
                 </h2>
 
 
-                <span class="job-badge">
-
-                    Latest
-
-                </span>
 
             </div>
 
