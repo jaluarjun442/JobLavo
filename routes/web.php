@@ -29,10 +29,39 @@ Route::get('/sitemap-{page}.xml', [
 |--------------------------------------------------------------------------
 */
 
-Route::get('/robots.txt', [
-    \App\Http\Controllers\RobotsController::class,
-    'index'
-])->name('robots');
+Route::get('/robots.txt', function () {
+
+    $lines = [
+        'User-agent: *',
+        'Allow: /',
+        '',
+        'Disallow: /admin/',
+        '',
+        'Sitemap: ' . url('/sitemap.xml'),
+    ];
+
+    $totalPosts = \App\Models\Post::where(
+        'status',
+        'published'
+    )->count();
+
+    $sitemapCount = (int) ceil($totalPosts / 100);
+
+    for ($page = 1; $page <= $sitemapCount; $page++) {
+
+        $lines[] =
+            'Sitemap: ' .
+            url('/sitemap-' . $page . '.xml');
+    }
+
+    return response(
+        implode("\n", $lines) . "\n",
+        200
+    )->header(
+        'Content-Type',
+        'text/plain; charset=UTF-8'
+    );
+})->name('robots');
 
 /*
 |--------------------------------------------------------------------------
