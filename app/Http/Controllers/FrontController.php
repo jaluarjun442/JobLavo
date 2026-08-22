@@ -13,41 +13,196 @@ class FrontController extends Controller
      */
     public function home()
     {
-        return view('welcome');
-    }
+        /*
+    |--------------------------------------------------------------------------
+    | Home Small Tiles
+    |--------------------------------------------------------------------------
+    */
 
-    public function category($slug)
-    {
-        $category = Category::where('slug', $slug)
+        $homeTileCategories = \App\Models\Category::query()
+
             ->where('status', true)
-            ->firstOrFail();
+
+            ->where('display_home_tiles', true)
+
+            ->whereNull('parent_id')
+
+            ->orderBy('sort_order')
+
+            ->orderBy('name')
+
+            ->get();
+
 
 
         /*
     |--------------------------------------------------------------------------
-    | Sub Categories
+    | Home Large Categories
     |--------------------------------------------------------------------------
     */
 
-        $subCategories = Category::where('parent_id', $category->id)
+        $homeLargeCategories = \App\Models\Category::query()
+
             ->where('status', true)
+
+            ->where('display_home_large', true)
+
+            ->whereNull('parent_id')
+
+            ->with([
+                'posts' => function ($query) {
+
+                    $query
+                        ->where('status', 'published')
+                        ->whereNotNull('published_at')
+                        ->where(
+                            'published_at',
+                            '<=',
+                            now()
+                        )
+                        ->latest('published_at');
+                }
+            ])
+
             ->orderBy('sort_order')
+
             ->orderBy('name')
+
             ->get();
 
 
         /*
     |--------------------------------------------------------------------------
-    | Category + Sub Category IDs
+    | Limit Large Section Posts
     |--------------------------------------------------------------------------
     */
 
-        $categoryIds = collect([$category->id])
-            ->merge(
-                $subCategories->pluck('id')
+        $homeLargeCategories->each(function ($category) {
+
+            $category->setRelation(
+                'posts',
+                $category->posts->take(5)
+            );
+        });
+
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Latest Updates
+    |--------------------------------------------------------------------------
+    */
+
+        $latestPosts = \App\Models\Post::query()
+
+            ->with('category')
+
+            ->where('status', 'published')
+
+            ->whereNotNull('published_at')
+
+            ->where(
+                'published_at',
+                '<=',
+                now()
             )
-            ->unique()
-            ->values();
+
+            ->latest('published_at')
+
+            ->take(10)
+
+            ->get();
+
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Home View
+    |--------------------------------------------------------------------------
+    */
+
+        return view(
+            'welcome',
+            compact(
+                'homeTileCategories',
+                'homeLargeCategories',
+                'latestPosts'
+            )
+        );
+    }
+    public function latestJobs()
+    {
+        $posts = \App\Models\Post::query()
+
+            ->with('category')
+
+            ->where('status', 'published')
+
+            ->whereNotNull('published_at')
+
+            ->where(
+                'published_at',
+                '<=',
+                now()
+            )
+
+            ->latest('published_at')
+
+            ->paginate(15)
+
+            ->withQueryString();
+
+
+        return view(
+            'latest-jobs',
+            compact('posts')
+        );
+    }
+    public function category($slug)
+    {
+        $category = \App\Models\Category::query()
+
+            ->with([
+                'children' => function ($query) {
+
+                    $query
+                        ->where('status', true)
+                        ->orderBy('sort_order')
+                        ->orderBy('name');
+                }
+            ])
+
+            ->where('slug', $slug)
+
+            ->where('status', true)
+
+            ->firstOrFail();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Category IDs
+    |--------------------------------------------------------------------------
+    |
+    | Parent category:
+    | current category + all direct sub-categories
+    |
+    | Sub-category:
+    | only itself
+    |
+    */
+
+        $categoryIds = collect([
+            $category->id
+        ]);
+
+
+        if ($category->children->count()) {
+
+            $categoryIds = $categoryIds->merge(
+                $category->children->pluck('id')
+            );
+        }
 
 
         /*
@@ -56,20 +211,56 @@ class FrontController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $posts = Post::whereIn('category_id', $categoryIds)
+        $posts = \App\Models\Post::query()
+
+            ->with('category')
+
+            ->whereIn(
+                'category_id',
+                $categoryIds->unique()->values()->all()
+            )
+
             ->where('status', 'published')
+
             ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+
+            ->where(
+                'published_at',
+                '<=',
+                now()
+            )
+
             ->latest('published_at')
-            ->paginate(15);
+
+            ->paginate(15)
+
+            ->withQueryString();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | SEO
+    |--------------------------------------------------------------------------
+    */
+
+        $seoTitle = $category->seo_title
+            ?: $category->name . ' - Latest Government Jobs';
+
+
+        $metaDescription = $category->meta_description
+            ?: $category->description
+            ?: 'Check the latest ' .
+            $category->name .
+            ' government jobs, recruitment notifications and updates.';
 
 
         return view(
             'category',
             compact(
                 'category',
-                'subCategories',
-                'posts'
+                'posts',
+                'seoTitle',
+                'metaDescription'
             )
         );
     }
@@ -106,35 +297,61 @@ class FrontController extends Controller
     }
 
 
-    /**
-     * Search
-     */
     public function search(Request $request)
     {
         $query = trim($request->get('q', ''));
 
-        $posts = collect();
+        $posts = \App\Models\Post::query()
 
-        if ($query !== '') {
+            ->with('category')
 
-            $posts = Post::with('category')
-                ->where('status', 'published')
-                ->whereNotNull('published_at')
-                ->where('published_at', '<=', now())
-                ->where(function ($q) use ($query) {
+            ->where('status', 'published')
 
-                    $q->where('title', 'like', '%' . $query . '%')
-                        ->orWhere('excerpt', 'like', '%' . $query . '%')
-                        ->orWhere('content', 'like', '%' . $query . '%');
-                })
-                ->latest('published_at')
-                ->paginate(15)
-                ->withQueryString();
-        }
+            ->whereNotNull('published_at')
 
-        return view('search', compact('query', 'posts'));
+            ->where(
+                'published_at',
+                '<=',
+                now()
+            )
+
+            ->when($query, function ($builder) use ($query) {
+
+                $builder->where(function ($q) use ($query) {
+
+                    $q->where('title', 'LIKE', '%' . $query . '%')
+
+                        ->orWhere('excerpt', 'LIKE', '%' . $query . '%')
+
+                        ->orWhere(
+                            'short_description',
+                            'LIKE',
+                            '%' . $query . '%'
+                        )
+
+                        ->orWhere(
+                            'content',
+                            'LIKE',
+                            '%' . $query . '%'
+                        );
+                });
+            })
+
+            ->latest('published_at')
+
+            ->paginate(15)
+
+            ->withQueryString();
+
+
+        return view(
+            'search',
+            compact(
+                'posts',
+                'query'
+            )
+        );
     }
-
 
     /**
      * Static Pages

@@ -8,24 +8,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 
-
 class CategoryController extends Controller
 {
-    /**
-     * Category List
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Category Listing
+    |--------------------------------------------------------------------------
+    */
+
     public function index()
     {
-        $categories = Category::orderBy('sort_order')
-            ->orderBy('name')
-            ->paginate(20);
-
-        return view('admin.categories.index', compact('categories'));
+        return view('admin.categories.index');
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DataTable
+    |--------------------------------------------------------------------------
+    */
+
     public function data(Request $request)
     {
-        $query = Category::select('categories.*')
-            ->with('parent')
+        $query = Category::with('parent')
+
+            ->select('categories.*')
             ->withCount('posts');
 
 
@@ -44,8 +51,8 @@ class CategoryController extends Controller
                 }
 
                 return '<span class="text-secondary">
-                        Main Category
-                    </span>';
+                            Main Category
+                        </span>';
             })
 
 
@@ -54,13 +61,43 @@ class CategoryController extends Controller
                 if ($category->status) {
 
                     return '<span class="badge bg-success">
-                            Active
-                        </span>';
+                                Active
+                            </span>';
                 }
 
                 return '<span class="badge bg-secondary">
-                        Inactive
-                    </span>';
+                            Inactive
+                        </span>';
+            })
+
+
+            ->addColumn('home_tiles', function ($category) {
+
+                if ($category->display_home_tiles) {
+
+                    return '<span class="badge bg-primary">
+                                Yes
+                            </span>';
+                }
+
+                return '<span class="badge bg-light text-dark border">
+                            No
+                        </span>';
+            })
+
+
+            ->addColumn('home_large', function ($category) {
+
+                if ($category->display_home_large) {
+
+                    return '<span class="badge bg-success">
+                                Yes
+                            </span>';
+                }
+
+                return '<span class="badge bg-light text-dark border">
+                            No
+                        </span>';
             })
 
 
@@ -70,6 +107,7 @@ class CategoryController extends Controller
                     'admin.categories.edit',
                     $category->id
                 );
+
 
                 $deleteUrl = route(
                     'admin.categories.destroy',
@@ -107,13 +145,15 @@ class CategoryController extends Controller
                     </form>
 
                 </div>
-            ';
+                ';
             })
 
 
             ->rawColumns([
                 'parent',
                 'status_badge',
+                'home_tiles',
+                'home_large',
                 'action',
             ])
 
@@ -121,38 +161,57 @@ class CategoryController extends Controller
             ->make(true);
     }
 
-    /**
-     * Create Category
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create
+    |--------------------------------------------------------------------------
+    */
+
     public function create()
     {
-        $parentCategories = Category::whereNull('parent_id')
+        $parentCategories = Category::query()
+
             ->where('status', true)
+
+            ->whereNull('parent_id')
+
             ->orderBy('sort_order')
+
             ->orderBy('name')
+
             ->get();
+
 
         return view(
             'admin.categories.create',
             compact('parentCategories')
         );
     }
-    /**
-     * Store Category
-     */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store
+    |--------------------------------------------------------------------------
+    */
+
     public function store(Request $request)
     {
         $validated = $request->validate([
+
+            'parent_id' => [
+                'nullable',
+                'integer',
+                'exists:categories,id',
+            ],
 
             'name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-            'parent_id' => [
-                'nullable',
-                'exists:categories,id',
-            ],
+
             'slug' => [
                 'nullable',
                 'string',
@@ -193,6 +252,16 @@ class CategoryController extends Controller
                 'boolean',
             ],
 
+            'display_home_tiles' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'display_home_large' => [
+                'nullable',
+                'boolean',
+            ],
+
             'sort_order' => [
                 'nullable',
                 'integer',
@@ -201,24 +270,63 @@ class CategoryController extends Controller
 
         ]);
 
-        $validated['parent_id'] = $request->input('parent_id') ?: null;
-        $validated['slug'] = $validated['slug']
-            ? Str::slug($validated['slug'])
-            : Str::slug($validated['name']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Generate Slug
+        |--------------------------------------------------------------------------
+        */
+
+        if (empty($validated['slug'])) {
+
+            $validated['slug'] = $this->generateUniqueSlug(
+                $validated['name']
+            );
+        }
 
 
-        $validated['status'] = $request->boolean('status');
+        /*
+        |--------------------------------------------------------------------------
+        | Checkbox Values
+        |--------------------------------------------------------------------------
+        */
 
+        $validated['status'] = $request->boolean(
+            'status'
+        );
+
+        $validated['display_home_tiles'] = $request->boolean(
+            'display_home_tiles'
+        );
+
+        $validated['display_home_large'] = $request->boolean(
+            'display_home_large'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Defaults
+        |--------------------------------------------------------------------------
+        */
 
         $validated['sort_order'] =
             $validated['sort_order'] ?? 0;
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Create
+        |--------------------------------------------------------------------------
+        */
+
         Category::create($validated);
 
 
         return redirect()
+
             ->route('admin.categories.index')
+
             ->with(
                 'success',
                 'Category created successfully.'
@@ -226,17 +334,31 @@ class CategoryController extends Controller
     }
 
 
-    /**
-     * Edit Category
-     */
-    public function edit(Category $category)
+    /*
+    |--------------------------------------------------------------------------
+    | Edit
+    |--------------------------------------------------------------------------
+    */
+
+    public function edit($id)
     {
-        $parentCategories = Category::whereNull('parent_id')
+        $category = Category::findOrFail($id);
+
+
+        $parentCategories = Category::query()
+
             ->where('status', true)
+
+            ->whereNull('parent_id')
+
             ->where('id', '!=', $category->id)
+
             ->orderBy('sort_order')
+
             ->orderBy('name')
+
             ->get();
+
 
         return view(
             'admin.categories.edit',
@@ -246,25 +368,35 @@ class CategoryController extends Controller
             )
         );
     }
-    /**
-     * Update Category
-     */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update
+    |--------------------------------------------------------------------------
+    */
+
     public function update(
         Request $request,
-        Category $category
+        $id
     ) {
+        $category = Category::findOrFail($id);
+
 
         $validated = $request->validate([
+
+            'parent_id' => [
+                'nullable',
+                'integer',
+                'exists:categories,id',
+            ],
 
             'name' => [
                 'required',
                 'string',
                 'max:255',
             ],
-            'parent_id' => [
-                'nullable',
-                'exists:categories,id',
-            ],
+
             'slug' => [
                 'nullable',
                 'string',
@@ -305,6 +437,16 @@ class CategoryController extends Controller
                 'boolean',
             ],
 
+            'display_home_tiles' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'display_home_large' => [
+                'nullable',
+                'boolean',
+            ],
+
             'sort_order' => [
                 'nullable',
                 'integer',
@@ -313,24 +455,64 @@ class CategoryController extends Controller
 
         ]);
 
-        $validated['parent_id'] = $request->input('parent_id') ?: null;
-        $validated['slug'] = $validated['slug']
-            ? Str::slug($validated['slug'])
-            : Str::slug($validated['name']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Generate Slug If Empty
+        |--------------------------------------------------------------------------
+        */
+
+        if (empty($validated['slug'])) {
+
+            $validated['slug'] = $this->generateUniqueSlug(
+                $validated['name'],
+                $category->id
+            );
+        }
 
 
-        $validated['status'] = $request->boolean('status');
+        /*
+        |--------------------------------------------------------------------------
+        | Checkbox Values
+        |--------------------------------------------------------------------------
+        */
 
+        $validated['status'] = $request->boolean(
+            'status'
+        );
+
+        $validated['display_home_tiles'] = $request->boolean(
+            'display_home_tiles'
+        );
+
+        $validated['display_home_large'] = $request->boolean(
+            'display_home_large'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Defaults
+        |--------------------------------------------------------------------------
+        */
 
         $validated['sort_order'] =
             $validated['sort_order'] ?? 0;
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Update
+        |--------------------------------------------------------------------------
+        */
+
         $category->update($validated);
 
 
         return redirect()
+
             ->route('admin.categories.index')
+
             ->with(
                 'success',
                 'Category updated successfully.'
@@ -338,19 +520,105 @@ class CategoryController extends Controller
     }
 
 
-    /**
-     * Delete Category
-     */
-    public function destroy(Category $category)
+    /*
+    |--------------------------------------------------------------------------
+    | Delete
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroy($id)
     {
+        $category = Category::findOrFail($id);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Parent Delete If It Has Children
+        |--------------------------------------------------------------------------
+        */
+
+        if ($category->children()->exists()) {
+
+            return redirect()
+
+                ->route('admin.categories.index')
+
+                ->with(
+                    'error',
+                    'This category has sub-categories. Delete or move them first.'
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete
+        |--------------------------------------------------------------------------
+        */
+
         $category->delete();
 
 
         return redirect()
+
             ->route('admin.categories.index')
+
             ->with(
                 'success',
                 'Category deleted successfully.'
             );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Generate Unique Slug
+    |--------------------------------------------------------------------------
+    */
+
+    private function generateUniqueSlug(
+        string $name,
+        ?int $ignoreId = null
+    ): string {
+
+        $slug = Str::slug($name);
+
+        $originalSlug = $slug;
+
+        $counter = 1;
+
+
+        while (
+
+            Category::query()
+
+            ->where('slug', $slug)
+
+            ->when(
+                $ignoreId,
+                function ($query) use ($ignoreId) {
+
+                    $query->where(
+                        'id',
+                        '!=',
+                        $ignoreId
+                    );
+                }
+            )
+
+            ->exists()
+
+        ) {
+
+            $slug =
+                $originalSlug .
+                '-' .
+                $counter;
+
+            $counter++;
+        }
+
+
+        return $slug;
     }
 }

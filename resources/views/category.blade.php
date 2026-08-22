@@ -2,35 +2,41 @@
 
 
 @section('title',
-$category->seo_title
-?: $category->name . ' - Latest Government Jobs & Updates'
+    $category->seo_title
+    ?: $category->name . ' - Latest Government Jobs & Updates'
 )
 
 
 @section('meta_description',
-$category->meta_description
-?: 'Latest ' . $category->name . ', government job notifications, recruitment updates, admit cards, results and important exam information.'
+    $category->meta_description
+    ?: 'Latest ' . $category->name . ', government job notifications, recruitment updates, admit cards, results and important exam information.'
 )
 
 
 @section('meta_keywords',
-$category->meta_keywords
-?: strtolower($category->name . ', government jobs, govt jobs, recruitment, latest jobs, exam updates')
+    $category->meta_keywords
+    ?: strtolower(
+        $category->name .
+        ', government jobs, govt jobs, recruitment, latest jobs, exam updates'
+    )
 )
 
 
-@section('canonical', url('/category/' . $category->slug))
+@section(
+    'canonical',
+    url('/category/' . $category->slug)
+)
 
 
 @section('og_title',
-$category->seo_title
-?: $category->name . ' - Latest Government Jobs & Updates'
+    $category->seo_title
+    ?: $category->name . ' - Latest Government Jobs & Updates'
 )
 
 
 @section('og_description',
-$category->meta_description
-?: 'Latest ' . $category->name . ' and important government job updates.'
+    $category->meta_description
+    ?: 'Latest ' . $category->name . ' and important government job updates.'
 )
 
 
@@ -39,7 +45,6 @@ $category->meta_description
 
 <div class="bg-light py-4">
 
-
     <div class="container">
 
 
@@ -47,14 +52,17 @@ $category->meta_description
              BREADCRUMB
         ====================================================== --}}
 
-        <nav aria-label="breadcrumb" class="mb-3">
+        <nav
+            aria-label="breadcrumb"
+            class="mb-3">
 
             <ol class="breadcrumb mb-0">
 
 
                 <li class="breadcrumb-item">
 
-                    <a href="{{ url('/') }}"
+                    <a
+                        href="{{ url('/') }}"
                         class="text-decoration-none">
 
                         Home
@@ -64,7 +72,28 @@ $category->meta_description
                 </li>
 
 
-                <li class="breadcrumb-item active"
+                @if($category->parent)
+
+                    <li class="breadcrumb-item">
+
+                        <a
+                            href="{{ route(
+                                'category',
+                                $category->parent->slug
+                            ) }}"
+                            class="text-decoration-none">
+
+                            {{ $category->parent->name }}
+
+                        </a>
+
+                    </li>
+
+                @endif
+
+
+                <li
+                    class="breadcrumb-item active"
                     aria-current="page">
 
                     {{ $category->name }}
@@ -82,11 +111,10 @@ $category->meta_description
              CATEGORY INTRO
         ====================================================== --}}
 
-        <section class="bg-white border rounded-2 shadow-sm mb-4">
-
+        <section
+            class="bg-white border rounded-2 shadow-sm mb-4">
 
             <div class="p-3 p-md-4">
-
 
                 <h1 class="h3 fw-bold text-dark mb-2">
 
@@ -97,29 +125,54 @@ $category->meta_description
 
                 @if($category->description)
 
-                <p class="text-secondary mb-0">
+                    <p class="text-secondary mb-0">
 
-                    {{ $category->description }}
+                        {{ $category->description }}
 
-                </p>
+                    </p>
 
                 @else
 
-                <p class="text-secondary mb-0">
-
-                    Latest {{ $category->name }},
-                    government job notifications, recruitment updates,
-                    exam information, admit cards, answer keys and results.
-
-                </p>
+                   
 
                 @endif
 
+            </div>
+
+        </section>
+
+
+
+        {{-- =====================================================
+             SUB CATEGORIES
+        ====================================================== --}}
+
+        @if($category->children->count())
+
+            <div class="subcategory-grid mb-4">
+
+                @foreach($category->children as $subCategory)
+
+                    @if($subCategory->status)
+
+                        <a
+                            href="{{ route(
+                                'category',
+                                $subCategory->slug
+                            ) }}"
+                            class="subcategory-tile">
+
+                            {{ $subCategory->name }}
+
+                        </a>
+
+                    @endif
+
+                @endforeach
 
             </div>
 
-
-        </section>
+        @endif
 
 
 
@@ -136,19 +189,19 @@ $category->meta_description
 
             <div class="col-lg-8">
 
-
-                <section class="bg-white border rounded-2 shadow-sm">
+                <section
+                    class="bg-white border rounded-2 shadow-sm">
 
 
                     {{-- SECTION HEADER --}}
 
-                    <div class="d-flex
-                                align-items-center
-                                justify-content-between
-                                px-3 py-3
-                                text-white"
+                    <div
+                        class="d-flex
+                               align-items-center
+                               justify-content-between
+                               px-3 py-3
+                               text-white"
                         style="background:#06245f;">
-
 
                         <h2 class="h5 fw-bold mb-0">
 
@@ -157,13 +210,16 @@ $category->meta_description
                         </h2>
 
 
-                        <span class="badge bg-white text-dark">
+                        <span
+                            class="badge bg-white text-dark">
 
                             {{ $posts->total() }}
-                            {{ $posts->total() == 1 ? 'Post' : 'Posts' }}
+
+                            {{ $posts->total() == 1
+                                ? 'Post'
+                                : 'Posts' }}
 
                         </span>
-
 
                     </div>
 
@@ -177,118 +233,152 @@ $category->meta_description
                         @forelse($posts as $post)
 
 
-                        <article class="border-bottom py-3">
+                            <article
+                                class="border-bottom py-3">
 
 
-                            {{-- POST TITLE --}}
+                                {{-- POST TITLE --}}
 
-                            <h3 class="h5 mb-2">
+                                <h3 class="h5 mb-2">
 
+                                    <a
+                                        href="{{ route(
+                                            'post',
+                                            $post->slug
+                                        ) }}"
+                                        class="text-decoration-none fw-semibold"
+                                        style="color:#064fc7;">
 
-                                <a href="{{ url('/post/' . $post->slug) }}"
-                                    class="text-decoration-none fw-semibold"
-                                    style="color:#064fc7;">
+                                        {{ $post->title }}
 
-                                    {{ $post->title }}
+                                    </a>
 
-                                </a>
-
-
-                            </h3>
-
-
-
-                            {{-- DATE --}}
-
-                            <div class="small text-secondary mb-2">
+                                </h3>
 
 
-                                @if($post->published_at)
 
-                                {{ $post->published_at->format('d M Y') }}
+                                {{-- DATE + CATEGORY --}}
 
-                                @else
+                                <div
+                                    class="small text-secondary mb-2">
 
-                                {{ $post->created_at->format('d M Y') }}
+
+                                    @if($post->published_at)
+
+                                        {{ $post->published_at->format(
+                                            'd M Y'
+                                        ) }}
+
+                                    @else
+
+                                        {{ $post->created_at->format(
+                                            'd M Y'
+                                        ) }}
+
+                                    @endif
+
+
+                                    @if($post->category)
+
+                                        <span class="ms-2">
+
+                                            •
+                                            {{ $post->category->name }}
+
+                                        </span>
+
+                                    @endif
+
+
+                                </div>
+
+
+
+                                {{-- EXCERPT --}}
+
+                                @if(
+                                    $post->short_description
+                                    ?: $post->excerpt
+                                )
+
+                                    <p class="text-secondary mb-2">
+
+                                        {{
+                                            $post->short_description
+                                            ?: $post->excerpt
+                                        }}
+
+                                    </p>
 
                                 @endif
 
 
-                            </div>
+
+                                {{-- READ MORE --}}
+
+                                <a
+                                    href="{{ route(
+                                        'post',
+                                        $post->slug
+                                    ) }}"
+                                    class="small fw-semibold text-decoration-none"
+                                    style="color:#06245f;">
+
+                                    Read More →
+
+                                </a>
 
 
-
-                            {{-- EXCERPT --}}
-
-                            @if($post->excerpt)
-
-
-                            <p class="text-secondary mb-2">
-
-                                {{ $post->excerpt }}
-
-                            </p>
-
-
-                            @endif
-
-
-
-                            {{-- READ MORE --}}
-
-                            <a href="{{ url('/post/' . $post->slug) }}"
-                                class="small fw-semibold text-decoration-none"
-                                style="color:#06245f;">
-
-                                Read More →
-
-                            </a>
-
-
-                        </article>
+                            </article>
 
 
                         @empty
 
 
-                        {{-- NO POSTS --}}
+                            {{-- NO POSTS --}}
 
-                        <div class="text-center py-5">
+                            <div class="text-center py-5">
 
 
-                            <div class="mb-3">
+                                <div class="mb-3">
 
-                                <span class="fs-1">
-                                    📄
-                                </span>
+                                    <span class="fs-1"
+                                          aria-hidden="true">
+
+                                        📄
+
+                                    </span>
+
+                                </div>
+
+
+                                <h3
+                                    class="h5 fw-bold text-dark">
+
+                                    No Posts Available
+
+                                </h3>
+
+
+                                <p
+                                    class="text-secondary mb-3">
+
+                                    There are currently no
+                                    published posts in this category.
+
+                                </p>
+
+
+                                <a
+                                    href="{{ url('/') }}"
+                                    class="btn btn-primary">
+
+                                    Back to Home
+
+                                </a>
+
 
                             </div>
-
-
-                            <h3 class="h5 fw-bold text-dark">
-
-                                No Posts Available
-
-                            </h3>
-
-
-                            <p class="text-secondary mb-3">
-
-                                There are currently no published posts
-                                in this category.
-
-                            </p>
-
-
-                            <a href="{{ url('/') }}"
-                                class="btn btn-primary">
-
-                                Back to Home
-
-                            </a>
-
-
-                        </div>
 
 
                         @endforelse
@@ -301,197 +391,32 @@ $category->meta_description
 
                         @if($posts->hasPages())
 
+                            <div class="pt-4">
 
-                        <div class="pt-4">
+                                {{ $posts->links() }}
 
-
-                            {{ $posts->links() }}
-
-
-                        </div>
-
+                            </div>
 
                         @endif
 
 
                     </div>
 
-
                 </section>
-
 
             </div>
 
 
 
             {{-- =================================================
-                 SIDEBAR
+                 COMMON SIDEBAR
             ================================================== --}}
 
             <div class="col-lg-4">
 
-
-                {{-- SEARCH BOX --}}
-
-                <section class="bg-white border rounded-2 shadow-sm mb-4">
-
-
-                    <div class="px-3 py-3 text-white"
-                        style="background:#06245f;">
-
-
-                        <h2 class="h6 fw-bold mb-0">
-
-                            Search Jobs
-
-                        </h2>
-
-
-                    </div>
-
-
-
-                    <div class="p-3">
-
-
-                        <form action="{{ url('/search') }}"
-                            method="GET">
-
-
-                            <label for="category-search"
-                                class="visually-hidden">
-
-                                Search government jobs
-
-                            </label>
-
-
-                            <div class="input-group">
-
-
-                                <input type="search"
-                                    id="category-search"
-                                    name="q"
-                                    value="{{ request('q') }}"
-                                    class="form-control"
-                                    placeholder="Search jobs..."
-                                    autocomplete="off">
-
-
-                                <button type="submit"
-                                    class="btn"
-                                    style="background:#06245f;color:#fff;">
-
-                                    Search
-
-                                </button>
-
-
-                            </div>
-
-
-                        </form>
-
-
-                    </div>
-
-
-                </section>
-
-
-
-                {{-- POPULAR CATEGORIES --}}
-
-                <section class="bg-white border rounded-2 shadow-sm">
-
-
-                    <div class="px-3 py-3 text-white"
-                        style="background:#06245f;">
-
-
-                        <h2 class="h6 fw-bold mb-0">
-
-                            Popular Categories
-
-                        </h2>
-
-
-                    </div>
-
-
-
-                    <div class="list-group list-group-flush">
-
-
-                        <a href="{{ url('/category/latest-government-jobs') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Latest Government Jobs
-
-                        </a>
-
-
-                        <a href="{{ url('/category/admit-card') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Admit Card
-
-                        </a>
-
-
-                        <a href="{{ url('/category/answer-key') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Answer Key
-
-                        </a>
-
-
-                        <a href="{{ url('/category/government-exam-results') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Government Exam Results
-
-                        </a>
-
-
-                        <a href="{{ url('/category/syllabus') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Syllabus
-
-                        </a>
-
-
-                        <a href="{{ url('/category/important-dates') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Important Dates
-
-                        </a>
-
-
-                        <a href="{{ url('/category/railway-jobs') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Railway Jobs
-
-                        </a>
-
-
-                        <a href="{{ url('/category/banking-jobs') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Banking Jobs
-
-                        </a>
-
-
-                    </div>
-
-
-                </section>
-
+                @include(
+                    'layouts.partials.sidebar'
+                )
 
             </div>
 
@@ -506,38 +431,33 @@ $category->meta_description
 
         @if($category->content)
 
+            <section
+                class="bg-white border rounded-2 shadow-sm mt-4">
 
-        <section class="bg-white border rounded-2 shadow-sm mt-4">
+                <div class="p-3 p-md-4">
+
+                    <h2
+                        class="h5 fw-bold text-dark mb-3">
+
+                        About {{ $category->name }}
+
+                    </h2>
 
 
-            <div class="p-3 p-md-4">
+                    <div class="text-secondary">
 
+                        {!! $category->content !!}
 
-                <h2 class="h5 fw-bold text-dark mb-3">
-
-                    About {{ $category->name }}
-
-                </h2>
-
-
-                <div class="text-secondary">
-
-                    {!! $category->content !!}
+                    </div>
 
                 </div>
 
-
-        </div>
-
-
-        </section>
-
+            </section>
 
         @endif
 
 
     </div>
-
 
 </div>
 

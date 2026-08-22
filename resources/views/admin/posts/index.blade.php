@@ -29,7 +29,8 @@
     </div>
 
 
-    <a href="{{ route('admin.posts.create') }}"
+    <a
+        href="{{ route('admin.posts.create') }}"
         class="btn btn-primary">
 
         + Add Post
@@ -49,11 +50,12 @@
         <div class="table-responsive">
 
 
-            <table id="postsTable"
+            <table
+                id="postsTable"
                 class="table table-bordered
-                          table-hover
-                          align-middle
-                          w-100">
+                       table-hover
+                       align-middle
+                       w-100">
 
 
                 <thead class="table-light">
@@ -73,7 +75,7 @@
                         </th>
 
                         <th>
-                            Slug
+                            Category
                         </th>
 
                         <th>
@@ -82,6 +84,14 @@
 
                         <th>
                             Published
+                        </th>
+
+                        <th>
+                            Featured
+                        </th>
+
+                        <th>
+                            Important
                         </th>
 
                         <th>
@@ -115,7 +125,8 @@
 
 @push('styles')
 
-<link rel="stylesheet"
+<link
+    rel="stylesheet"
     href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 
 @endpush
@@ -126,12 +137,17 @@
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script
+    src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js">
+</script>
 
-<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script
+    src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js">
+</script>
 
 
 <script>
+
     $(document).ready(function() {
 
         $('#postsTable').DataTable({
@@ -142,9 +158,13 @@
 
             responsive: false,
 
+
             ajax: {
+
                 url: "{{ route('admin.posts.data') }}",
+
                 type: "GET"
+
             },
 
 
@@ -152,72 +172,173 @@
 
 
             lengthMenu: [
+
                 [10, 25, 50, 100],
+
                 [10, 25, 50, 100]
+
             ],
 
 
             order: [
+
                 [0, 'desc']
+
             ],
 
 
             columns: [
 
+
+                /*
+                |--------------------------------------------------------------------------
+                | No
+                |--------------------------------------------------------------------------
+                */
+
                 {
                     data: 'DT_RowIndex',
+
                     name: 'DT_RowIndex',
+
                     orderable: false,
+
                     searchable: false
                 },
 
+
+                /*
+                |--------------------------------------------------------------------------
+                | Image
+                |--------------------------------------------------------------------------
+                */
 
                 {
                     data: 'image',
+
                     name: 'image',
+
                     orderable: false,
+
                     searchable: false
                 },
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Title
+                |--------------------------------------------------------------------------
+                */
+
                 {
                     data: 'title',
+
                     name: 'title'
                 },
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Category
+                |--------------------------------------------------------------------------
+                */
+
                 {
-                    data: 'slug',
-                    name: 'slug'
+                    data: 'category',
+
+                    name: 'category.name',
+
+                    orderable: false
                 },
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Status
+                |--------------------------------------------------------------------------
+                */
+
                 {
                     data: 'status_badge',
+
                     name: 'status',
+
                     orderable: true,
+
                     searchable: true
                 },
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Published
+                |--------------------------------------------------------------------------
+                */
+
                 {
                     data: 'published_date',
+
                     name: 'published_at'
                 },
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Featured
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    data: 'featured_badge',
+
+                    name: 'is_featured',
+
+                    orderable: true,
+
+                    searchable: false
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Important
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    data: 'important_badge',
+
+                    name: 'is_important',
+
+                    orderable: true,
+
+                    searchable: false
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Action
+                |--------------------------------------------------------------------------
+                */
+
                 {
                     data: 'action',
+
                     name: 'action',
+
                     orderable: false,
+
                     searchable: false
                 }
+
 
             ]
 
         });
 
     });
+
 </script>
 
 @endpush

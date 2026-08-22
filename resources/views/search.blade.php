@@ -1,56 +1,29 @@
 @extends('layouts.web')
 
 
-@section('title')
-
-@if($query)
-Search Results for "{{ $query }}"
-@else
-Search Government Jobs
-@endif
-
-@endsection
-
-
-@section('meta_description')
-
-@if($query)
-Search results for {{ $query }} - Find government jobs,
-recruitment notifications, admit cards, results and exam updates.
-@else
-Search latest government jobs, recruitment notifications,
-admit cards, answer keys and exam results.
-@endif
-
-@endsection
-
-
-@section('meta_keywords',
-'government jobs search, govt jobs, latest government jobs, recruitment, exam jobs'
+@section(
+    'title',
+    $query
+        ? 'Search Results for "' . $query . '"'
+        : 'Search Government Jobs'
 )
 
 
-@section('canonical', url('/search') . ($query ? '?q=' . urlencode($query) : ''))
+@section(
+    'meta_description',
+    $query
+        ? 'Search government jobs and recruitment updates for ' . $query . '. Find the latest job notifications and updates.'
+        : 'Search the latest government jobs, recruitment notifications and government job updates.'
+)
 
 
-@section('og_title')
-
-@if($query)
-Search Results for "{{ $query }}"
-@else
-Search Government Jobs
-@endif
-
-@endsection
-
-
-@section('og_description',
-'Search latest government jobs, recruitment notifications, admit cards, results and exam updates.'
+@section(
+    'canonical',
+    url('/search' . ($query ? '?q=' . urlencode($query) : ''))
 )
 
 
 @section('content')
-
 
 <div class="bg-light py-4">
 
@@ -58,400 +31,341 @@ Search Government Jobs
 
 
         {{-- =====================================================
-             SEARCH HEADER
+             BREADCRUMB
         ====================================================== --}}
 
-        <section class="bg-white border rounded-2 shadow-sm mb-4">
+        <nav
+            aria-label="breadcrumb"
+            class="mb-3">
 
-            <div class="p-3 p-md-4">
+            <ol class="breadcrumb mb-0">
 
+                <li class="breadcrumb-item">
 
-                <h1 class="h3 fw-bold text-dark mb-3">
+                    <a
+                        href="{{ url('/') }}"
+                        class="text-decoration-none">
 
-                    @if($query)
+                        Home
 
-                    Search Results for:
-                    <span style="color:#06245f;">
-                        "{{ $query }}"
-                    </span>
+                    </a>
 
-                    @else
+                </li>
 
-                    Search Government Jobs
+                <li
+                    class="breadcrumb-item active"
+                    aria-current="page">
 
-                    @endif
+                    Search
 
-                </h1>
+                </li>
 
+            </ol>
 
-                {{-- SEARCH FORM --}}
-
-                <form action="{{ url('/search') }}"
-                    method="GET">
-
-
-                    <label for="search-page-input"
-                        class="visually-hidden">
-
-                        Search government jobs
-
-                    </label>
-
-
-                    <div class="input-group input-group-lg">
-
-
-                        <input type="search"
-                            id="search-page-input"
-                            name="q"
-                            value="{{ $query }}"
-                            class="form-control"
-                            placeholder="Search government jobs..."
-                            autocomplete="off">
-
-
-                        <button type="submit"
-                            class="btn"
-                            style="background:#06245f;color:#fff;">
-
-                            Search
-
-                        </button>
-
-
-                    </div>
-
-
-                </form>
-
-
-            </div>
-
-        </section>
+        </nav>
 
 
 
         {{-- =====================================================
-             RESULTS
+             MAIN ROW
         ====================================================== --}}
-
-        @if($query)
-
 
         <div class="row g-4">
 
 
-            {{-- RESULTS LIST --}}
+            {{-- =================================================
+                 SEARCH RESULTS
+            ================================================== --}}
 
             <div class="col-lg-8">
 
 
-                <section class="bg-white border rounded-2 shadow-sm">
+                <section
+                    class="bg-white border rounded-2 shadow-sm">
 
 
-                    <div class="d-flex
-                                    align-items-center
-                                    justify-content-between
-                                    px-3 py-3 text-white"
+                    {{-- HEADER --}}
+
+                    <div
+                        class="px-3 py-3 text-white"
                         style="background:#06245f;">
 
+                        <h1 class="h5 fw-bold mb-0">
 
-                        <h2 class="h5 fw-bold mb-0">
+                            @if($query)
 
-                            Search Results
+                                Search Results for:
+                                "{{ $query }}"
 
-                        </h2>
+                            @else
 
+                                Search Government Jobs
 
-                        <span class="badge bg-white text-dark">
+                            @endif
 
-                            {{ $posts->total() }}
-                            {{ $posts->total() == 1 ? 'Result' : 'Results' }}
-
-                        </span>
-
+                        </h1>
 
                     </div>
 
 
 
+                    {{-- SEARCH FORM --}}
+
+                    <div class="p-3 border-bottom">
+
+                        <form
+                            action="{{ route('search') }}"
+                            method="GET">
+
+                            <label
+                                for="search-page-input"
+                                class="visually-hidden">
+
+                                Search government jobs
+
+                            </label>
+
+
+                            <div class="input-group">
+
+                                <input
+                                    type="search"
+                                    id="search-page-input"
+                                    name="q"
+                                    value="{{ $query }}"
+                                    class="form-control"
+                                    placeholder="Search jobs..."
+                                    autocomplete="off">
+
+
+                                <button
+                                    type="submit"
+                                    class="btn"
+                                    aria-label="Search jobs"
+                                    style="
+                                        background:#06245f;
+                                        color:#fff;
+                                    ">
+
+                                    Search
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+
+
+                    {{-- RESULTS --}}
+
                     <div class="p-3">
 
 
-                        @forelse($posts as $post)
+                        @if(!$query)
 
+                            <div class="text-center py-5">
 
-                        <article class="border-bottom py-3">
+                                <h2 class="h5 fw-bold">
 
+                                    Search Government Jobs
 
-                            {{-- CATEGORY --}}
+                                </h2>
 
-                            @if($post->category)
+                                <p class="text-muted mb-0">
 
-                            <div class="mb-2">
+                                    Enter a job title, department,
+                                    exam or keyword to search.
 
-                                <a href="{{ url('/category/' . $post->category->slug) }}"
-                                    class="badge text-decoration-none"
-                                    style="background:#06245f;">
-
-                                    {{ $post->category->name }}
-
-                                </a>
+                                </p>
 
                             </div>
+
+
+                        @else
+
+
+                            @forelse($posts as $post)
+
+
+                                <article
+                                    class="category-job-item">
+
+
+                                    {{-- TITLE --}}
+
+                                    <h2 class="h5 mb-2">
+
+                                        <a
+                                            href="{{ route(
+                                                'post',
+                                                $post->slug
+                                            ) }}"
+                                            class="category-job-title">
+
+                                            {{ $post->title }}
+
+                                        </a>
+
+                                    </h2>
+
+
+
+                                    {{-- META --}}
+
+                                    <div
+                                        class="small text-secondary mb-2">
+
+
+                                        @if($post->published_at)
+
+                                            {{ $post->published_at->format(
+                                                'd M Y'
+                                            ) }}
+
+                                        @else
+
+                                            {{ $post->created_at->format(
+                                                'd M Y'
+                                            ) }}
+
+                                        @endif
+
+
+                                        @if($post->category)
+
+                                            <span class="ms-2">
+
+                                                •
+                                                {{ $post->category->name }}
+
+                                            </span>
+
+                                        @endif
+
+
+                                    </div>
+
+
+
+                                    {{-- DESCRIPTION --}}
+
+                                    @if(
+                                        $post->short_description
+                                        ?: $post->excerpt
+                                    )
+
+                                        <p
+                                            class="text-secondary mb-2">
+
+                                            {{
+                                                $post->short_description
+                                                ?: $post->excerpt
+                                            }}
+
+                                        </p>
+
+                                    @endif
+
+
+
+                                    <a
+                                        href="{{ route(
+                                            'post',
+                                            $post->slug
+                                        ) }}"
+                                        class="small fw-semibold text-decoration-none"
+                                        style="color:#06245f;">
+
+                                        Read More →
+
+                                    </a>
+
+
+                                </article>
+
+
+                            @empty
+
+
+                                <div
+                                    class="text-center py-5">
+
+
+                                    <h2 class="h5 fw-bold">
+
+                                        No Results Found
+
+                                    </h2>
+
+
+                                    <p class="text-muted mb-3">
+
+                                        No published jobs were found
+                                        for "{{ $query }}".
+
+                                    </p>
+
+
+                                    <a
+                                        href="{{ url('/') }}"
+                                        class="btn btn-primary">
+
+                                        Back to Home
+
+                                    </a>
+
+
+                                </div>
+
+
+                            @endforelse
+
+
+
+                            {{-- PAGINATION --}}
+
+                            @if($posts->hasPages())
+
+                                <div class="pt-4">
+
+                                    {{ $posts->links() }}
+
+                                </div>
 
                             @endif
 
-
-
-                            {{-- TITLE --}}
-
-                            <h3 class="h5 mb-2">
-
-
-                                <a href="{{ url('/post/' . $post->slug) }}"
-                                    class="text-decoration-none fw-semibold"
-                                    style="color:#064fc7;">
-
-                                    {{ $post->title }}
-
-                                </a>
-
-
-                            </h3>
-
-
-
-                            {{-- DATE --}}
-
-                            <div class="small text-secondary mb-2">
-
-                                {{ $post->published_at
-                                            ? $post->published_at->format('d M Y')
-                                            : $post->created_at->format('d M Y') }}
-
-                            </div>
-
-
-
-                            {{-- EXCERPT --}}
-
-                            @if($post->excerpt)
-
-                            <p class="text-secondary mb-2">
-
-                                {{ $post->excerpt }}
-
-                            </p>
-
-                            @endif
-
-
-
-                            <a href="{{ url('/post/' . $post->slug) }}"
-                                class="small fw-semibold text-decoration-none"
-                                style="color:#06245f;">
-
-                                Read More →
-
-                            </a>
-
-
-                        </article>
-
-
-                        @empty
-
-
-                        <div class="text-center py-5">
-
-
-                            <div class="fs-1 mb-3">
-                                🔎
-                            </div>
-
-
-                            <h3 class="h5 fw-bold">
-
-                                No Results Found
-
-                            </h3>
-
-
-                            <p class="text-secondary mb-0">
-
-                                We couldn't find any posts matching
-                                "{{ $query }}".
-
-                            </p>
-
-
-                        </div>
-
-
-                        @endforelse
-
-
-
-                        {{-- PAGINATION --}}
-
-                        @if($posts->hasPages())
-
-                        <div class="pt-4">
-
-                            {{ $posts->links() }}
-
-                        </div>
 
                         @endif
 
 
                     </div>
 
-
                 </section>
-
 
             </div>
 
 
 
             {{-- =================================================
-                     SIDEBAR
-                ================================================== --}}
+                 COMMON SIDEBAR
+            ================================================== --}}
 
             <div class="col-lg-4">
 
-
-                <section class="bg-white border rounded-2 shadow-sm">
-
-
-                    <div class="px-3 py-3 text-white"
-                        style="background:#06245f;">
-
-                        <h2 class="h6 fw-bold mb-0">
-
-                            Popular Categories
-
-                        </h2>
-
-                    </div>
-
-
-                    <div class="list-group list-group-flush">
-
-
-                        <a href="{{ url('/category/latest-government-jobs') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Latest Government Jobs
-
-                        </a>
-
-
-                        <a href="{{ url('/category/admit-card') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Admit Card
-
-                        </a>
-
-
-                        <a href="{{ url('/category/answer-key') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Answer Key
-
-                        </a>
-
-
-                        <a href="{{ url('/category/government-exam-results') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Government Exam Results
-
-                        </a>
-
-
-                        <a href="{{ url('/category/syllabus') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Syllabus
-
-                        </a>
-
-
-                        <a href="{{ url('/category/railway-jobs') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Railway Jobs
-
-                        </a>
-
-
-                        <a href="{{ url('/category/banking-jobs') }}"
-                            class="list-group-item list-group-item-action py-3">
-
-                            Banking Jobs
-
-                        </a>
-
-
-                    </div>
-
-
-                </section>
-
+                @include(
+                    'layouts.partials.sidebar'
+                )
 
             </div>
 
 
         </div>
 
-
-        @else
-
-
-        {{-- =====================================================
-                 EMPTY SEARCH STATE
-            ====================================================== --}}
-
-        <section class="bg-white border rounded-2 shadow-sm">
-
-            <div class="text-center py-5 px-3">
-
-
-                <div class="fs-1 mb-3">
-                    🔎
-                </div>
-
-
-                <h2 class="h4 fw-bold text-dark">
-
-                    Search for Government Jobs
-
-                </h2>
-
-
-                <p class="text-secondary mb-0">
-
-                    Enter a job title, department, exam or keyword
-                    to find relevant updates.
-
-                </p>
-
-
-            </div>
-
-        </section>
-
-
-        @endif
-
-
     </div>
 
 </div>
-
 
 @endsection

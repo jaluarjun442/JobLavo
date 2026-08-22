@@ -716,197 +716,6 @@
                 </article>
 
 
-            </div>
-
-
-
-            {{-- =================================================
-                 SIDEBAR
-            ================================================== --}}
-
-            <div class="col-lg-4">
-
-
-                {{-- =================================================
-                     SEARCH
-                ================================================== --}}
-
-                <section
-                    class="bg-white border rounded-2 shadow-sm mb-4">
-
-
-                    <div
-                        class="px-3 py-3 text-white"
-                        style="background:#06245f;">
-
-                        <h2 class="h6 fw-bold mb-0">
-
-                            Search Jobs
-
-                        </h2>
-
-                    </div>
-
-
-                    <div class="p-3">
-
-                        <form
-                            action="{{ url('/search') }}"
-                            method="GET">
-
-
-                            <label
-                                for="post-search"
-                                class="visually-hidden">
-
-                                Search government jobs
-
-                            </label>
-
-
-                            <div class="input-group">
-
-
-                                <input
-                                    type="search"
-                                    id="post-search"
-                                    name="q"
-                                    value="{{ request('q') }}"
-                                    class="form-control"
-                                    placeholder="Search jobs..."
-                                    autocomplete="off">
-
-
-                                <button
-                                    type="submit"
-                                    class="btn"
-                                    style="
-                                        background:#06245f;
-                                        color:#fff;
-                                    ">
-
-                                    Search
-
-                                </button>
-
-
-                            </div>
-
-                        </form>
-
-                    </div>
-
-                </section>
-
-
-
-                {{-- =================================================
-                     CURRENT CATEGORY
-                ================================================== --}}
-
-                @if($post->category)
-
-                    <section
-                        class="bg-white border rounded-2 shadow-sm mb-4">
-
-
-                        <div
-                            class="px-3 py-3 text-white"
-                            style="background:#06245f;">
-
-                            <h2 class="h6 fw-bold mb-0">
-
-                                Category
-
-                            </h2>
-
-                        </div>
-
-
-                        <div class="p-3">
-
-                            <a
-                                href="{{ route(
-                                    'category',
-                                    $post->category->slug
-                                ) }}"
-                                class="text-decoration-none fw-semibold"
-                                style="color:#064fc7;">
-
-                                {{ $post->category->name }}
-
-                            </a>
-
-                        </div>
-
-                    </section>
-
-                @endif
-
-
-
-                {{-- =================================================
-                     POPULAR CATEGORIES
-                ================================================== --}}
-
-                @if($popularCategories->count())
-
-                    <section
-                        class="bg-white border rounded-2 shadow-sm">
-
-
-                        <div
-                            class="px-3 py-3 text-white"
-                            style="background:#06245f;">
-
-                            <h2 class="h6 fw-bold mb-0">
-
-                                Popular Categories
-
-                            </h2>
-
-                        </div>
-
-
-                        <div
-                            class="list-group list-group-flush">
-
-
-                            @foreach(
-                                $popularCategories
-                                as $popularCategory
-                            )
-
-                                <a
-                                    href="{{ route(
-                                        'category',
-                                        $popularCategory->slug
-                                    ) }}"
-                                    class="list-group-item
-                                           list-group-item-action
-                                           py-3">
-
-                                    {{ $popularCategory->name }}
-
-                                </a>
-
-                            @endforeach
-
-
-                        </div>
-
-                    </section>
-
-                @endif
-
-
-            </div>
-
-
-        </div>
-
-
-
         {{-- =====================================================
              RELATED POSTS
         ====================================================== --}}
@@ -952,7 +761,7 @@
                             )
 
                                 <div
-                                    class="col-md-6 col-lg-4">
+                                    class="col-md-6 col-lg-6">
 
 
                                     <article
@@ -1011,6 +820,25 @@
             </section>
 
         @endif
+
+            </div>
+
+
+
+            {{-- =================================================
+                 SIDEBAR
+            ================================================== --}}
+
+           <div class="col-lg-4">
+
+                @include(
+                    'layouts.partials.sidebar'
+                )
+
+            </div>
+
+        </div>
+
 
 
     </div>

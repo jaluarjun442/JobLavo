@@ -6,7 +6,7 @@
     <meta charset="utf-8">
 
     <meta name="viewport"
-          content="width=device-width, initial-scale=1">
+        content="width=device-width, initial-scale=1">
 
 
     {{-- =========================================================
@@ -15,42 +15,42 @@
 
     <title>
         @yield(
-            'title',
-            'Government Jobs & Recruitment Updates'
+        'title',
+        'Government Jobs & Recruitment Updates'
         )
     </title>
 
 
     <meta name="description"
-          content="@yield(
+        content="@yield(
               'meta_description',
               'Latest government jobs, recruitment notifications, admit cards, answer keys, exam results and important career updates.'
           )">
 
 
     <meta name="keywords"
-          content="@yield(
+        content="@yield(
               'meta_keywords',
               'government jobs, govt jobs, latest government jobs, recruitment, admit card, answer key, results'
           )">
 
 
     <meta name="robots"
-          content="@yield(
+        content="@yield(
               'meta_robots',
               'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
           )">
 
 
     <meta name="author"
-          content="@yield(
+        content="@yield(
               'meta_author',
               config('app.name', 'Government Jobs Portal')
           )">
 
 
     <meta name="theme-color"
-          content="#08245c">
+        content="#08245c">
 
 
     {{-- =========================================================
@@ -58,7 +58,7 @@
     ========================================================== --}}
 
     <link rel="canonical"
-          href="@yield(
+        href="@yield(
               'canonical',
               url()->current()
           )">
@@ -69,38 +69,38 @@
     ========================================================== --}}
 
     <meta property="og:type"
-          content="@yield('og_type', 'website')">
+        content="@yield('og_type', 'website')">
 
 
     <meta property="og:title"
-          content="@yield(
+        content="@yield(
               'og_title',
               config('app.name', 'Government Jobs Portal')
           )">
 
 
     <meta property="og:description"
-          content="@yield(
+        content="@yield(
               'og_description',
               'Latest government jobs, recruitment notifications, admit cards, answer keys and exam results.'
           )">
 
 
     <meta property="og:url"
-          content="@yield(
+        content="@yield(
               'og_url',
               url()->current()
           )">
 
 
     <meta property="og:site_name"
-          content="{{ config('app.name', 'Government Jobs Portal') }}">
+        content="{{ config('app.name', 'Government Jobs Portal') }}">
 
 
     @hasSection('og_image')
 
-        <meta property="og:image"
-              content="@yield('og_image')">
+    <meta property="og:image"
+        content="@yield('og_image')">
 
     @endif
 
@@ -110,18 +110,18 @@
     ========================================================== --}}
 
     <meta name="twitter:card"
-          content="summary_large_image">
+        content="summary_large_image">
 
 
     <meta name="twitter:title"
-          content="@yield(
+        content="@yield(
               'twitter_title',
               config('app.name', 'Government Jobs Portal')
           )">
 
 
     <meta name="twitter:description"
-          content="@yield(
+        content="@yield(
               'twitter_description',
               'Latest government jobs and recruitment updates.'
           )">
@@ -129,8 +129,8 @@
 
     @hasSection('twitter_image')
 
-        <meta name="twitter:image"
-              content="@yield('twitter_image')">
+    <meta name="twitter:image"
+        content="@yield('twitter_image')">
 
     @endif
 
@@ -224,13 +224,13 @@
 
         <nav class="navbar navbar-expand-lg site-navbar">
 
-            <div class="container">
+            <div class="container mx-width-100">
 
 
                 {{-- LOGO --}}
 
                 <a href="{{ url('/') }}"
-                   class="navbar-brand
+                    class="navbar-brand
                           d-flex
                           align-items-center
                           gap-3">
@@ -255,11 +255,6 @@
                         </div>
 
 
-                        <div class="site-brand-tagline">
-
-                            Government Jobs & Recruitment
-
-                        </div>
 
                     </div>
 
@@ -302,150 +297,39 @@
                         <li class="nav-item">
 
                             <a href="{{ url('/') }}"
-                               class="nav-link">
+                                class="nav-link">
 
                                 Home
 
                             </a>
 
                         </li>
+                        {{-- =========================================================
+     PARENT CATEGORIES ONLY
+========================================================= --}}
 
+                        @foreach($headerCategories as $category)
 
+                        <li class="nav-item">
 
-                        {{-- CATEGORIES --}}
+                            <a
+                                href="{{ route('category', $category->slug) }}"
+                                class="nav-link">
 
-                        <li class="nav-item dropdown">
-
-                            <a href="#"
-                               class="nav-link dropdown-toggle"
-                               role="button"
-                               data-bs-toggle="dropdown"
-                               aria-expanded="false">
-
-                                Categories
+                                {{ $category->name }}
 
                             </a>
 
-
-                            <ul class="dropdown-menu">
-
-
-                                <li>
-
-                                    <a
-                                        href="{{ url('/category/latest-government-jobs') }}"
-                                        class="dropdown-item">
-
-                                        Latest Government Jobs
-
-                                    </a>
-
-                                </li>
-
-
-                                <li>
-
-                                    <a
-                                        href="{{ url('/category/central-government-jobs') }}"
-                                        class="dropdown-item">
-
-                                        Central Government Jobs
-
-                                    </a>
-
-                                </li>
-
-
-                                <li>
-
-                                    <a
-                                        href="{{ url('/category/state-government-jobs') }}"
-                                        class="dropdown-item">
-
-                                        State Government Jobs
-
-                                    </a>
-
-                                </li>
-
-
-                                <li>
-
-                                    <a
-                                        href="{{ url('/category/railway-jobs') }}"
-                                        class="dropdown-item">
-
-                                        Railway Jobs
-
-                                    </a>
-
-                                </li>
-
-
-                                <li>
-
-                                    <a
-                                        href="{{ url('/category/banking-jobs') }}"
-                                        class="dropdown-item">
-
-                                        Banking Jobs
-
-                                    </a>
-
-                                </li>
-
-
-                                <li>
-
-                                    <a
-                                        href="{{ url('/category/teaching-jobs') }}"
-                                        class="dropdown-item">
-
-                                        Teaching Jobs
-
-                                    </a>
-
-                                </li>
-
-
-                                <li>
-
-                                    <a
-                                        href="{{ url('/category/defence-jobs') }}"
-                                        class="dropdown-item">
-
-                                        Defence Jobs
-
-                                    </a>
-
-                                </li>
-
-
-                                <li>
-
-                                    <a
-                                        href="{{ url('/category/police-jobs') }}"
-                                        class="dropdown-item">
-
-                                        Police Jobs
-
-                                    </a>
-
-                                </li>
-
-
-                            </ul>
-
                         </li>
 
-
+                        @endforeach
 
                         {{-- ABOUT --}}
 
                         <li class="nav-item">
 
                             <a href="{{ url('/about-us') }}"
-                               class="nav-link">
+                                class="nav-link">
 
                                 About Us
 
@@ -460,7 +344,7 @@
                         <li class="nav-item">
 
                             <a href="{{ url('/contact') }}"
-                               class="nav-link">
+                                class="nav-link">
 
                                 Contact
 
@@ -478,7 +362,7 @@
                                    mt-lg-0">
 
                             <a href="{{ url('/search') }}"
-                               class="site-search-btn">
+                                class="site-search-btn">
 
                                 <span class="search-icon">
                                     ⌕

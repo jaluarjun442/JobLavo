@@ -1,105 +1,157 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Category | Admin')
-
 @section('content')
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+<div class="container-fluid">
 
-    <div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <h1 class="h3 fw-bold mb-1">
-            Edit Category
-        </h1>
+        <div>
 
-        <p class="text-secondary mb-0">
-            Update {{ $category->name }}.
-        </p>
+            <h1 class="h3 mb-1">
+                Edit Category
+            </h1>
+
+            <p class="text-muted mb-0">
+                Update category and homepage settings.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{{ route('admin.categories.index') }}"
+            class="btn btn-outline-secondary">
+
+            ← Back
+
+        </a>
 
     </div>
 
 
-    <a href="{{ route('admin.categories.index') }}"
-        class="btn btn-outline-secondary">
 
-        ← Back
+    {{-- Validation Errors --}}
 
-    </a>
+    @if($errors->any())
 
-</div>
+        <div class="alert alert-danger">
+
+            <strong>
+                Please fix the following errors:
+            </strong>
+
+            <ul class="mb-0 mt-2">
+
+                @foreach($errors->all() as $error)
+
+                    <li>
+                        {{ $error }}
+                    </li>
+
+                @endforeach
+
+            </ul>
+
+        </div>
+
+    @endif
 
 
-<form action="{{ route('admin.categories.update', $category->id) }}"
-    method="POST">
 
-    @csrf
+    <form
+        action="{{ route(
+            'admin.categories.update',
+            $category->id
+        ) }}"
+        method="POST">
 
-    @method('PUT')
+        @csrf
+
+        @method('PUT')
 
 
-    <div class="row g-4">
 
+        {{-- =====================================================
+             BASIC INFORMATION
+        ====================================================== --}}
 
-        <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-4">
 
-            <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
 
-                <div class="card-header bg-white fw-bold py-3">
+                <h5 class="mb-0">
                     Category Information
-                </div>
+                </h5>
+
+            </div>
 
 
-                <div class="card-body p-3 p-md-4">
+            <div class="card-body">
+
+                <div class="row g-3">
 
 
-                    <div class="mb-3">
+                    {{-- NAME --}}
 
-                        <label for="name"
-                            class="form-label fw-semibold">
+                    <div class="col-md-8">
+
+                        <label class="form-label">
 
                             Category Name
+                            <span class="text-danger">*</span>
 
                         </label>
 
-
-                        <input type="text"
-                            id="name"
+                        <input
+                            type="text"
                             name="name"
+                            value="{{ old(
+                                'name',
+                                $category->name
+                            ) }}"
                             class="form-control"
-                            value="{{ old('name', $category->name) }}"
-                            maxlength="255"
                             required>
 
                     </div>
 
 
-                    <div class="mb-3">
 
-                        <label for="parent_id"
-                            class="form-label fw-semibold">
+                    {{-- PARENT CATEGORY --}}
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
 
                             Parent Category
 
                         </label>
 
-
-                        <select id="parent_id"
+                        <select
                             name="parent_id"
                             class="form-select">
 
                             <option value="">
+
                                 Main Category
+
                             </option>
 
 
                             @foreach($parentCategories as $parent)
 
-                            <option value="{{ $parent->id }}"
-                                {{ old('parent_id', $category->parent_id) == $parent->id ? 'selected' : '' }}>
+                                <option
+                                    value="{{ $parent->id }}"
+                                    {{ old(
+                                        'parent_id',
+                                        $category->parent_id
+                                    ) == $parent->id
+                                        ? 'selected'
+                                        : '' }}>
 
-                                {{ $parent->name }}
+                                    {{ $parent->name }}
 
-                            </option>
+                                </option>
 
                             @endforeach
 
@@ -108,65 +160,129 @@
 
                         <div class="form-text">
 
-                            Leave as Main Category if this is a top-level category.
+                            Select a parent to make this
+                            category a sub-category.
 
                         </div>
 
                     </div>
 
 
-                    <div class="mb-3">
 
-                        <label for="slug"
-                            class="form-label fw-semibold">
+                    {{-- SLUG --}}
+
+                    <div class="col-md-8">
+
+                        <label class="form-label">
 
                             Slug
 
                         </label>
 
-
-                        <input type="text"
-                            id="slug"
+                        <input
+                            type="text"
                             name="slug"
-                            class="form-control"
-                            value="{{ old('slug', $category->slug) }}"
-                            maxlength="255">
+                            value="{{ old(
+                                'slug',
+                                $category->slug
+                            ) }}"
+                            class="form-control">
 
                     </div>
 
 
-                    <div class="mb-3">
 
-                        <label for="description"
-                            class="form-label fw-semibold">
+                    {{-- STATUS --}}
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+
+                            Status
+
+                        </label>
+
+                        <select
+                            name="status"
+                            class="form-select">
+
+                            <option
+                                value="1"
+                                {{ old(
+                                    'status',
+                                    $category->status
+                                ) == 1
+                                    ? 'selected'
+                                    : '' }}>
+
+                                Active
+
+                            </option>
+
+                            <option
+                                value="0"
+                                {{ old(
+                                    'status',
+                                    $category->status
+                                ) == 0
+                                    ? 'selected'
+                                    : '' }}>
+
+                                Inactive
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    {{-- DESCRIPTION --}}
+
+                    <div class="col-12">
+
+                        <label class="form-label">
 
                             Description
 
                         </label>
 
-
-                        <textarea id="description"
+                        <textarea
                             name="description"
                             rows="4"
-                            class="form-control">{{ old('description', $category->description) }}</textarea>
+                            class="form-control">{{ old(
+                                'description',
+                                $category->description
+                            ) }}</textarea>
 
                     </div>
 
 
-                    <div>
 
-                        <label for="content"
-                            class="form-label fw-semibold">
+                    {{-- CONTENT --}}
 
-                            Category Content
+                    <div class="col-12">
+
+                        <label class="form-label">
+
+                            Content
 
                         </label>
 
-
-                        <textarea id="content"
+                        <textarea
                             name="content"
-                            rows="8"
-                            class="form-control">{{ old('content', $category->content) }}</textarea>
+                            rows="10"
+                            class="form-control">{{ old(
+                                'content',
+                                $category->content
+                            ) }}</textarea>
+
+                        <div class="form-text">
+
+                            HTML content is supported.
+
+                        </div>
 
                     </div>
 
@@ -179,135 +295,230 @@
 
 
 
-        <div class="col-lg-4">
+        {{-- =====================================================
+             HOME DISPLAY SETTINGS
+        ====================================================== --}}
+
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+                    Home Page Display
+                </h5>
+
+            </div>
 
 
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
 
-                <div class="card-header bg-white fw-bold py-3">
-                    Settings
-                </div>
+                <div class="row g-4">
 
 
-                <div class="card-body">
+                    {{-- HOME TILES --}}
+
+                    <div class="col-md-6">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <div class="form-check form-switch">
+
+                                <input
+                                    type="checkbox"
+                                    name="display_home_tiles"
+                                    value="1"
+                                    class="form-check-input"
+                                    id="display_home_tiles"
+                                    {{ old(
+                                        'display_home_tiles',
+                                        $category->display_home_tiles
+                                    ) ? 'checked' : '' }}>
+
+                                <label
+                                    class="form-check-label fw-semibold"
+                                    for="display_home_tiles">
+
+                                    Display in Home Tiles
+
+                                </label>
+
+                            </div>
 
 
-                    <div class="mb-3">
+                            <div class="text-muted small mt-2">
 
-                        <label for="sort_order"
-                            class="form-label fw-semibold">
+                                Show this category in the
+                                small homepage tiles section.
 
-                            Sort Order
+                            </div>
 
-                        </label>
-
-
-                        <input type="number"
-                            id="sort_order"
-                            name="sort_order"
-                            min="0"
-                            class="form-control"
-                            value="{{ old('sort_order', $category->sort_order) }}">
+                        </div>
 
                     </div>
 
 
-                    <div class="form-check form-switch">
 
-                        <input type="hidden"
-                            name="status"
-                            value="0">
+                    {{-- HOME LARGE --}}
+
+                    <div class="col-md-6">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <div class="form-check form-switch">
+
+                                <input
+                                    type="checkbox"
+                                    name="display_home_large"
+                                    value="1"
+                                    class="form-check-input"
+                                    id="display_home_large"
+                                    {{ old(
+                                        'display_home_large',
+                                        $category->display_home_large
+                                    ) ? 'checked' : '' }}>
+
+                                <label
+                                    class="form-check-label fw-semibold"
+                                    for="display_home_large">
+
+                                    Display in Home Large Grid
+
+                                </label>
+
+                            </div>
 
 
-                        <input type="checkbox"
-                            class="form-check-input"
-                            id="status"
-                            name="status"
-                            value="1"
-                            {{ old('status', $category->status) ? 'checked' : '' }}>
+                            <div class="text-muted small mt-2">
 
+                                Show this category as a
+                                large job section on homepage.
 
-                        <label for="status"
-                            class="form-check-label">
+                            </div>
 
-                            Active Category
-
-                        </label>
+                        </div>
 
                     </div>
+
 
                 </div>
 
             </div>
 
+        </div>
 
 
-            <div class="card border-0 shadow-sm">
 
-                <div class="card-header bg-white fw-bold py-3">
-                    SEO
-                </div>
+        {{-- =====================================================
+             SEO
+        ====================================================== --}}
+
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+                    SEO Settings
+                </h5>
+
+            </div>
 
 
-                <div class="card-body">
+            <div class="card-body">
+
+                <div class="row g-3">
 
 
-                    <div class="mb-3">
+                    {{-- SEO TITLE --}}
 
-                        <label for="seo_title"
-                            class="form-label fw-semibold">
+                    <div class="col-12">
+
+                        <label class="form-label">
 
                             SEO Title
 
                         </label>
 
-
-                        <input type="text"
-                            id="seo_title"
+                        <input
+                            type="text"
                             name="seo_title"
-                            maxlength="255"
-                            class="form-control"
-                            value="{{ old('seo_title', $category->seo_title) }}">
+                            value="{{ old(
+                                'seo_title',
+                                $category->seo_title
+                            ) }}"
+                            class="form-control">
 
                     </div>
 
 
-                    <div class="mb-3">
 
-                        <label for="meta_description"
-                            class="form-label fw-semibold">
+                    {{-- META DESCRIPTION --}}
+
+                    <div class="col-12">
+
+                        <label class="form-label">
 
                             Meta Description
 
                         </label>
 
-
-                        <textarea id="meta_description"
+                        <textarea
                             name="meta_description"
-                            rows="5"
+                            rows="4"
                             maxlength="500"
-                            class="form-control">{{ old('meta_description', $category->meta_description) }}</textarea>
+                            class="form-control">{{ old(
+                                'meta_description',
+                                $category->meta_description
+                            ) }}</textarea>
 
                     </div>
 
 
-                    <div>
 
-                        <label for="meta_keywords"
-                            class="form-label fw-semibold">
+                    {{-- META KEYWORDS --}}
+
+                    <div class="col-12">
+
+                        <label class="form-label">
 
                             Meta Keywords
 
                         </label>
 
-
-                        <textarea id="meta_keywords"
+                        <textarea
                             name="meta_keywords"
                             rows="3"
                             maxlength="500"
-                            class="form-control">{{ old('meta_keywords', $category->meta_keywords) }}</textarea>
+                            class="form-control">{{ old(
+                                'meta_keywords',
+                                $category->meta_keywords
+                            ) }}</textarea>
 
                     </div>
+
+
+
+                    {{-- SORT ORDER --}}
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+
+                            Sort Order
+
+                        </label>
+
+                        <input
+                            type="number"
+                            name="sort_order"
+                            value="{{ old(
+                                'sort_order',
+                                $category->sort_order
+                            ) }}"
+                            min="0"
+                            class="form-control">
+
+                    </div>
+
 
                 </div>
 
@@ -315,28 +526,36 @@
 
         </div>
 
-    </div>
 
 
-    <div class="mt-4 mb-4">
+        {{-- =====================================================
+             ACTIONS
+        ====================================================== --}}
 
-        <button type="submit"
-            class="btn btn-primary px-4">
+        <div class="d-flex justify-content-end gap-2 mb-5">
 
-            Update Category
+            <a
+                href="{{ route('admin.categories.index') }}"
+                class="btn btn-outline-secondary">
 
-        </button>
+                Cancel
+
+            </a>
 
 
-        <a href="{{ route('admin.categories.index') }}"
-            class="btn btn-outline-secondary ms-2">
+            <button
+                type="submit"
+                class="btn btn-primary">
 
-            Cancel
+                Update Category
 
-        </a>
+            </button>
 
-    </div>
+        </div>
 
-</form>
+
+    </form>
+
+</div>
 
 @endsection

@@ -24,100 +24,196 @@ class PostController extends Controller
      */
     public function data(Request $request)
     {
-        $query = Post::with('category')
+        $query = \App\Models\Post::query()
+
+            ->with('category')
+
             ->select('posts.*');
 
 
-        return DataTables::eloquent($query)
+        return \Yajra\DataTables\Facades\DataTables::eloquent($query)
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Index
+        |--------------------------------------------------------------------------
+        */
 
             ->addIndexColumn()
 
 
+
             /*
-            |--------------------------------------------------------------------------
-            | Image
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Category
+        |--------------------------------------------------------------------------
+        */
 
-            ->addColumn('image', function ($post) {
+            ->addColumn('category', function ($post) {
 
-                if (!$post->featured_image) {
+                if ($post->category) {
 
-                    return '<span class="text-secondary">No Image</span>';
+                    return '<span class="badge bg-light text-dark border">'
+                        . e($post->category->name) .
+                        '</span>';
                 }
 
 
-                return '
-                    <img
-                        src="' . asset($post->featured_image) . '"
-                        alt="' . e($post->title) . '"
-                        width="60"
-                        height="45"
-                        style="object-fit:cover;border-radius:4px;"
-                    >
-                ';
+                return '<span class="text-muted">
+                        —
+                    </span>';
             })
 
 
+
             /*
+        |--------------------------------------------------------------------------
+        | Image
+        |--------------------------------------------------------------------------
+        */
+
+            ->addColumn('image', function ($post) {
+
+                /*
             |--------------------------------------------------------------------------
-            | Status
+            | Image is currently optional
             |--------------------------------------------------------------------------
             */
+
+                if (
+                    empty($post->featured_image)
+                ) {
+
+                    return '<span class="text-muted">
+                            No Image
+                        </span>';
+                }
+
+
+                $imageUrl = asset(
+                    'storage/' . $post->featured_image
+                );
+
+
+                return '
+                <img
+                    src="' . e($imageUrl) . '"
+                    alt="' . e($post->title) . '"
+                    width="60"
+                    height="45"
+                    style="
+                        object-fit:cover;
+                        border-radius:4px;
+                    "
+                >
+            ';
+            })
+
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Status
+        |--------------------------------------------------------------------------
+        */
 
             ->addColumn('status_badge', function ($post) {
 
                 if ($post->status === 'published') {
 
-                    return '
-                        <span class="badge bg-success">
+                    return '<span class="badge bg-success">
                             Published
-                        </span>
-                    ';
+                        </span>';
                 }
 
 
-                return '
-                    <span class="badge bg-secondary">
+                return '<span class="badge bg-secondary">
                         Draft
-                    </span>
-                ';
+                    </span>';
             })
 
 
+
             /*
-            |--------------------------------------------------------------------------
-            | Published Date
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Published Date
+        |--------------------------------------------------------------------------
+        */
 
             ->addColumn('published_date', function ($post) {
 
-                if (!$post->published_at) {
+                if ($post->published_at) {
 
-                    return '<span class="text-secondary">—</span>';
+                    return $post->published_at
+                        ->format('d M Y H:i');
                 }
 
 
-                return $post->published_at->format('d M Y');
+                return '<span class="text-muted">
+                        —
+                    </span>';
             })
 
 
+
             /*
-            |--------------------------------------------------------------------------
-            | Action
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Featured
+        |--------------------------------------------------------------------------
+        */
+
+            ->addColumn('featured_badge', function ($post) {
+
+                if ($post->is_featured) {
+
+                    return '<span class="badge bg-primary">
+                            Yes
+                        </span>';
+                }
+
+
+                return '<span class="badge bg-light text-dark border">
+                        No
+                    </span>';
+            })
+
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Important
+        |--------------------------------------------------------------------------
+        */
+
+            ->addColumn('important_badge', function ($post) {
+
+                if ($post->is_important) {
+
+                    return '<span class="badge bg-danger">
+                            Yes
+                        </span>';
+                }
+
+
+                return '<span class="badge bg-light text-dark border">
+                        No
+                    </span>';
+            })
+
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Action
+        |--------------------------------------------------------------------------
+        */
+
             ->addColumn('action', function ($post) {
 
                 $editUrl = route(
                     'admin.posts.edit',
                     $post->id
-                );
-
-
-                $viewUrl = url(
-                    '/post/' . $post->slug
                 );
 
 
@@ -128,54 +224,56 @@ class PostController extends Controller
 
 
                 return '
-        <div class="d-flex gap-1">
+                <div class="d-flex gap-1">
 
-            <a
-                href="' . $viewUrl . '"
-                target="_blank"
-                class="btn btn-sm btn-outline-secondary"
-            >
-                View
-            </a>
+                    <a
+                        href="' . $editUrl . '"
+                        class="btn btn-sm btn-primary">
 
+                        Edit
 
-            <a
-                href="' . $editUrl . '"
-                class="btn btn-sm btn-primary"
-            >
-                Edit
-            </a>
+                    </a>
 
 
-            <form
-                action="' . $deleteUrl . '"
-                method="POST"
-                class="d-inline"
-                onsubmit="return confirm(\'Are you sure you want to delete this post?\');"
-            >
+                    <form
+                        action="' . $deleteUrl . '"
+                        method="POST"
+                        class="d-inline"
+                        onsubmit="return confirm(\'Are you sure you want to delete this post?\');">
 
-                ' . csrf_field() . '
+                        ' . csrf_field() . '
 
-                ' . method_field('DELETE') . '
+                        ' . method_field('DELETE') . '
 
-                <button
-                    type="submit"
-                    class="btn btn-sm btn-outline-danger"
-                >
-                    Delete
-                </button>
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-outline-danger">
 
-            </form>
+                            Delete
 
-        </div>
-    ';
+                        </button>
+
+                    </form>
+
+                </div>
+            ';
             })
 
 
+
+            /*
+        |--------------------------------------------------------------------------
+        | Raw HTML Columns
+        |--------------------------------------------------------------------------
+        */
+
             ->rawColumns([
                 'image',
+                'category',
                 'status_badge',
                 'published_date',
+                'featured_badge',
+                'important_badge',
                 'action',
             ])
 

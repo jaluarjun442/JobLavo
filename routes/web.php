@@ -37,6 +37,10 @@ Route::get('/category/{slug}', [FrontController::class, 'category'])
     ->where('slug', '[a-zA-Z0-9\-]+')
     ->name('category');
 
+Route::get(
+    '/latest-jobs',
+    [FrontController::class, 'latestJobs']
+)->name('latest.jobs');
 
 Route::get('/contact', [FrontController::class, 'contact'])
     ->name('contact');
@@ -83,11 +87,10 @@ Route::get('/disclaimer', function () {
 | Search
 |--------------------------------------------------------------------------
 */
-
-Route::get('/search', [FrontController::class, 'search'])
-    ->name('search');
-
-
+Route::get(
+    '/search',
+    [FrontController::class, 'search']
+)->name('search');
 /*
 |--------------------------------------------------------------------------
 | 404

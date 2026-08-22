@@ -9,26 +9,24 @@ class Category extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
 
         'parent_id',
 
         'name',
-
         'slug',
 
         'description',
-
         'content',
 
         'seo_title',
-
         'meta_description',
-
         'meta_keywords',
 
         'status',
+
+        'display_home_tiles',
+        'display_home_large',
 
         'sort_order',
 
@@ -39,8 +37,11 @@ class Category extends Model
 
         'status' => 'boolean',
 
-    ];
+        'display_home_tiles' => 'boolean',
 
+        'display_home_large' => 'boolean',
+
+    ];
 
     /*
     |--------------------------------------------------------------------------
