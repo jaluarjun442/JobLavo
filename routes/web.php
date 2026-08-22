@@ -59,6 +59,16 @@ Route::post('/admin/ai-jobs/import', [
     AiJobImportController::class,
     'preview'
 ])->name('admin.ai-jobs.import.preview');
+Route::post('/admin/ai-jobs/import/remove/{index}', [
+    \App\Http\Controllers\Admin\AiJobImportController::class,
+    'remove'
+])->name('admin.ai-jobs.import.remove');
+
+
+Route::post('/admin/ai-jobs/import/clear', [
+    \App\Http\Controllers\Admin\AiJobImportController::class,
+    'clear'
+])->name('admin.ai-jobs.import.clear');
 /*
 |--------------------------------------------------------------------------
 | Category

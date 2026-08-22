@@ -287,9 +287,45 @@ class PostController extends Controller
             ->orderBy('name')
             ->get();
 
-        $aiJob = session('ai_import_job');
-
         $post = new Post();
+
+        /*
+    |--------------------------------------------------------------------------
+    | AI Import Queue
+    |--------------------------------------------------------------------------
+    */
+
+        $aiJob = null;
+
+        if (request()->has('ai_queue')) {
+
+            $index = (int) request('ai_queue');
+
+            $jobs = session(
+                'ai_import_jobs',
+                []
+            );
+
+            if (isset($jobs[$index])) {
+
+                $aiJob = $jobs[$index];
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Old Single AI Import Support
+    |--------------------------------------------------------------------------
+    */
+
+        if (!$aiJob) {
+
+            $aiJob = session(
+                'ai_import_job'
+            );
+        }
+
 
         /*
     |--------------------------------------------------------------------------
@@ -324,6 +360,7 @@ class PostController extends Controller
                     'meta_description',
                     'meta_keywords',
                 ])) {
+
                     $post->{$field} = $value;
                 }
             }
@@ -331,12 +368,16 @@ class PostController extends Controller
 
             /*
         |--------------------------------------------------------------------------
-        | Generate Slug From Title
+        | Generate Slug
         |--------------------------------------------------------------------------
         */
 
             if (!empty($post->title)) {
-                $post->slug = \Illuminate\Support\Str::slug($post->title);
+
+                $post->slug =
+                    \Illuminate\Support\Str::slug(
+                        $post->title
+                    );
             }
 
 
@@ -353,21 +394,33 @@ class PostController extends Controller
 
             /*
         |--------------------------------------------------------------------------
-        | Match AI Category With Existing Category
+        | Match AI Category
         |--------------------------------------------------------------------------
         */
 
             if (!empty($aiJob['category'])) {
 
-                $category = Category::where('status', true)
+                $category = Category::where(
+                    'status',
+                    true
+                )
                     ->whereRaw(
                         'LOWER(name) = ?',
-                        [strtolower(trim($aiJob['category']))]
+                        [
+                            strtolower(
+                                trim(
+                                    $aiJob['category']
+                                )
+                            )
+                        ]
                     )
                     ->first();
 
+
                 if ($category) {
-                    $post->category_id = $category->id;
+
+                    $post->category_id =
+                        $category->id;
                 }
             }
         }
@@ -375,7 +428,10 @@ class PostController extends Controller
 
         return view(
             'admin.posts.create',
-            compact('categories', 'post')
+            compact(
+                'categories',
+                'post'
+            )
         );
     }
     public function store(Request $request)
@@ -591,10 +647,63 @@ class PostController extends Controller
     | Create Post
     |--------------------------------------------------------------------------
     */
+        $post = Post::create($validated);
 
-        Post::create($validated);
+
+        /*
+|--------------------------------------------------------------------------
+| AI Import Queue
+|--------------------------------------------------------------------------
+*/
+
+        if ($request->has('ai_queue')) {
+
+            $index = (int) $request->input('ai_queue');
+
+            $jobs = session(
+                'ai_import_jobs',
+                []
+            );
+
+            if (isset($jobs[$index])) {
+
+                unset($jobs[$index]);
+
+                session([
+                    'ai_import_jobs' => array_values($jobs),
+                ]);
+            }
+
+            session()->forget('ai_import_job');
+        }
+
+
+        /*
+|--------------------------------------------------------------------------
+| Sitemap Sync
+|--------------------------------------------------------------------------
+*/
 
         $this->syncPostSitemaps();
+
+
+        /*
+|--------------------------------------------------------------------------
+| Redirect
+|--------------------------------------------------------------------------
+*/
+
+        if ($request->has('ai_queue')) {
+
+            return redirect()
+                ->route('admin.ai-jobs.import')
+                ->with(
+                    'success',
+                    'Post added successfully. Next AI job is ready.'
+                );
+        }
+
+
         return redirect()
             ->route('admin.posts.index')
             ->with(

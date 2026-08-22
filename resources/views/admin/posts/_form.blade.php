@@ -7,7 +7,14 @@
     @if($formMethod === 'PUT')
         @method('PUT')
     @endif
+    @if(request()->has('ai_queue'))
 
+        <input
+            type="hidden"
+            name="ai_queue"
+            value="{{ request('ai_queue') }}">
+
+    @endif
 
     {{-- ERROR MESSAGE --}}
 
