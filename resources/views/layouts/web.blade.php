@@ -146,19 +146,7 @@
          BOOTSTRAP 5
     ========================================================== --}}
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-
-
-    {{-- =========================================================
-         CUSTOM CSS
-    ========================================================== --}}
-
-    <link
-        href="{{ asset('web_assets/css/custom.css') }}"
-        rel="stylesheet">
-
+   <link rel="stylesheet" href="{{ asset('web_assets/css/bootstrap.min.css') }}">
 
     @stack('head')
 
@@ -610,9 +598,7 @@
          BOOTSTRAP JS
     ========================================================== --}}
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-    </script>
+    <script src="{{ asset('web_assets/js/bootstrap.bundle.min.js') }}"></script>
 
 
     @stack('scripts')
