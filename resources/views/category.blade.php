@@ -209,16 +209,7 @@
                         </h2>
 
 
-                        <span
-                            class="badge bg-white text-dark">
-
-                            {{ $posts->total() }}
-
-                            {{ $posts->total() == 1
-                                ? 'Post'
-                                : 'Posts' }}
-
-                        </span>
+                      
 
                     </div>
 
@@ -433,11 +424,62 @@
                              PAGINATION
                         ================================================== --}}
 
+                    
+
+                        {{-- PAGINATION --}}
                         @if($posts->hasPages())
 
-                            <div class="pt-4">
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
 
-                                {{ $posts->links() }}
+                                {{-- PREVIOUS --}}
+
+                                <div>
+
+                                    @if($posts->onFirstPage())
+
+                                        <span class="btn btn-outline-secondary disabled">
+                                            ← Previous
+                                        </span>
+
+                                    @else
+
+                                        <a
+                                            href="{{ $posts->previousPageUrl() }}"
+                                            class="btn btn-outline-primary">
+
+                                            ← Previous
+
+                                        </a>
+
+                                    @endif
+
+                                </div>
+
+
+
+                                {{-- NEXT --}}
+
+                                <div>
+
+                                    @if($posts->hasMorePages())
+
+                                        <a
+                                            href="{{ $posts->nextPageUrl() }}"
+                                            class="btn btn-primary">
+
+                                            Next →
+
+                                        </a>
+
+                                    @else
+
+                                        <span class="btn btn-outline-secondary disabled">
+                                            Next →
+                                        </span>
+
+                                    @endif
+
+                                </div>
 
                             </div>
 

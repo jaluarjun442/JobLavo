@@ -188,8 +188,7 @@
                             @forelse($posts as $post)
 
 
-                                <article
-                                    class="category-job-item">
+                                <article class="category-job-item border-bottom py-3">
 
 
                                     {{-- =================================================
@@ -375,19 +374,66 @@
 
 
 
-                            {{-- =================================================
-                                 PAGINATION
-                            ================================================== --}}
 
-                            @if($posts->hasPages())
 
-                                <div class="pt-4">
+                        {{-- PAGINATION --}}
+                        @if($posts->hasPages())
 
-                                    {{ $posts->links() }}
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+
+                                {{-- PREVIOUS --}}
+
+                                <div>
+
+                                    @if($posts->onFirstPage())
+
+                                        <span class="btn btn-outline-secondary disabled">
+                                            ← Previous
+                                        </span>
+
+                                    @else
+
+                                        <a
+                                            href="{{ $posts->previousPageUrl() }}"
+                                            class="btn btn-outline-primary">
+
+                                            ← Previous
+
+                                        </a>
+
+                                    @endif
 
                                 </div>
 
-                            @endif
+
+
+                                {{-- NEXT --}}
+
+                                <div>
+
+                                    @if($posts->hasMorePages())
+
+                                        <a
+                                            href="{{ $posts->nextPageUrl() }}"
+                                            class="btn btn-primary">
+
+                                            Next →
+
+                                        </a>
+
+                                    @else
+
+                                        <span class="btn btn-outline-secondary disabled">
+                                            Next →
+                                        </span>
+
+                                    @endif
+
+                                </div>
+
+                            </div>
+
+                        @endif
 
 
                         @endif

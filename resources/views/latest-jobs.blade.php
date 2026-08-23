@@ -36,8 +36,7 @@
 
                 <li class="breadcrumb-item">
 
-                    <a
-                        href="{{ url('/') }}">
+                    <a href="{{ url('/') }}">
 
                         Home
 
@@ -86,203 +85,270 @@
 
 
         {{-- =====================================================
-             JOB LIST
+             MAIN CONTENT + SIDEBAR
         ====================================================== --}}
 
-        <div
-            class="bg-white border rounded-2 shadow-sm">
+        <div class="row g-4">
 
 
-            <div
-                class="px-3 py-3 text-white header-navy">
+            {{-- =================================================
+                 LEFT — JOB LIST
+            ================================================== --}}
 
-                <h2 class="h5 fw-bold mb-0">
-
-                    Latest Job Updates
-
-                </h2>
-
-            </div>
+            <div class="col-lg-8">
 
 
-            <div class="p-3">
+                <div
+                    class="bg-white border rounded-2 shadow-sm">
 
 
-                @forelse($posts as $post)
+                    <div
+                        class="px-3 py-3 text-white header-navy">
 
+                        <h2 class="h5 fw-bold mb-0">
 
-                    <article
-                        class="latest-job-item">
-
-
-                        {{-- =================================================
-                             POST TITLE
-                        ================================================== --}}
-
-                        <h2 class="h5 mb-2">
-
-                            <a
-                                href="{{ route(
-                                    'post',
-                                    $post->slug
-                                ) }}"
-                                class="text-decoration-none">
-
-                                {{ $post->title }}
-
-                            </a>
+                            Latest Job Updates
 
                         </h2>
 
+                    </div>
 
 
-                        {{-- =================================================
-                             DATE + MULTIPLE CATEGORIES
-                        ================================================== --}}
-
-                        <div
-                            class="small text-secondary mb-2">
+                    <div class="p-3">
 
 
-                            {{-- DATE --}}
-
-                            @if($post->published_at)
-
-                                {{ $post->published_at->format(
-                                    'd M Y'
-                                ) }}
-
-                            @else
-
-                                {{ $post->created_at->format(
-                                    'd M Y'
-                                ) }}
-
-                            @endif
+                        @forelse($posts as $post)
 
 
-
-                            {{-- CATEGORIES --}}
-
-                            @if(
-                                $post->categories &&
-                                $post->categories->count()
-                            )
-
-                                <span class="ms-2">
-
-                                    •
-
-                                </span>
+                            <article
+                                class="latest-job-item">
 
 
-                                @foreach(
-                                    $post->categories
-                                    as $postCategory
-                                )
+                                {{-- POST TITLE --}}
+
+                                <h2 class="h5 mb-2">
 
                                     <a
                                         href="{{ route(
-                                            'category',
-                                            $postCategory->slug
+                                            'post',
+                                            $post->slug
                                         ) }}"
-                                        class="text-decoration-none ms-1"
-                                        style="color:#064fc7;">
+                                        class="text-decoration-none">
 
-                                        {{ $postCategory->name }}
+                                        {{ $post->title }}
 
                                     </a>
 
+                                </h2>
 
-                                    @if(!$loop->last)
 
-                                        <span>
 
-                                            ,
+                                {{-- DATE + MULTIPLE CATEGORIES --}}
 
+                                <div
+                                    class="small text-secondary mb-2">
+
+
+                                    {{-- DATE --}}
+
+                                    @if($post->published_at)
+
+                                        {{ $post->published_at->format(
+                                            'd M Y'
+                                        ) }}
+
+                                    @else
+
+                                        {{ $post->created_at->format(
+                                            'd M Y'
+                                        ) }}
+
+                                    @endif
+
+
+
+                                    {{-- CATEGORIES --}}
+
+                                    @if(
+                                        $post->categories &&
+                                        $post->categories->count()
+                                    )
+
+                                        <span class="ms-2">
+
+                                            •
+
+                                        </span>
+
+
+                                        @foreach(
+                                            $post->categories
+                                            as $postCategory
+                                        )
+
+                                            <a
+                                                href="{{ route(
+                                                    'category',
+                                                    $postCategory->slug
+                                                ) }}"
+                                                class="text-decoration-none ms-1"
+                                                style="color:#064fc7;">
+
+                                                {{ $postCategory->name }}
+
+                                            </a>
+
+
+                                            @if(!$loop->last)
+
+                                                <span>
+                                                    ,
+                                                </span>
+
+                                            @endif
+
+                                        @endforeach
+
+                                    @endif
+
+
+                                </div>
+
+
+
+                                {{-- DESCRIPTION --}}
+
+                                @if(
+                                    $post->short_description
+                                    ?: $post->excerpt
+                                )
+
+                                    <p
+                                        class="text-secondary mb-0">
+
+                                        {{
+                                            $post->short_description
+                                            ?: $post->excerpt
+                                        }}
+
+                                    </p>
+
+                                @endif
+
+
+                            </article>
+
+
+                        @empty
+
+
+                            {{-- NO JOBS --}}
+
+                            <div
+                                class="text-center py-5">
+
+                                <h3 class="h5">
+
+                                    No Jobs Available
+
+                                </h3>
+
+
+                                <p
+                                    class="text-muted mb-0">
+
+                                    There are currently no
+                                    published job updates.
+
+                                </p>
+
+                            </div>
+
+
+                        @endforelse
+
+
+
+                        {{-- PAGINATION --}}
+                        @if($posts->hasPages())
+
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+
+                                {{-- PREVIOUS --}}
+
+                                <div>
+
+                                    @if($posts->onFirstPage())
+
+                                        <span class="btn btn-outline-secondary disabled">
+                                            ← Previous
+                                        </span>
+
+                                    @else
+
+                                        <a
+                                            href="{{ $posts->previousPageUrl() }}"
+                                            class="btn btn-outline-primary">
+
+                                            ← Previous
+
+                                        </a>
+
+                                    @endif
+
+                                </div>
+
+
+
+                                {{-- NEXT --}}
+
+                                <div>
+
+                                    @if($posts->hasMorePages())
+
+                                        <a
+                                            href="{{ $posts->nextPageUrl() }}"
+                                            class="btn btn-primary">
+
+                                            Next →
+
+                                        </a>
+
+                                    @else
+
+                                        <span class="btn btn-outline-secondary disabled">
+                                            Next →
                                         </span>
 
                                     @endif
 
-                                @endforeach
+                                </div>
 
-                            @endif
-
-
-                        </div>
-
-
-
-                        {{-- =================================================
-                             DESCRIPTION
-                        ================================================== --}}
-
-                        @if(
-                            $post->short_description
-                            ?: $post->excerpt
-                        )
-
-                            <p class="text-secondary mb-0">
-
-                                {{
-                                    $post->short_description
-                                    ?: $post->excerpt
-                                }}
-
-                            </p>
+                            </div>
 
                         @endif
 
 
-                    </article>
-
-
-                @empty
-
-
-                    {{-- =================================================
-                         NO JOBS
-                    ================================================== --}}
-
-                    <div class="text-center py-5">
-
-                        <h3 class="h5">
-
-                            No Jobs Available
-
-                        </h3>
-
-
-                        <p class="text-muted mb-0">
-
-                            There are currently no
-                            published job updates.
-
-                        </p>
-
                     </div>
 
-
-                @endforelse
-
-
-
-                {{-- =====================================================
-                     PAGINATION
-                ====================================================== --}}
-
-                @if($posts->hasPages())
-
-                    <div class="mt-4">
-
-                        {{ $posts->links() }}
-
-                    </div>
-
-                @endif
-
+                </div>
 
             </div>
+
+
+
+            {{-- =================================================
+                 RIGHT — SIDEBAR
+            ================================================== --}}
+
+            <div class="col-lg-4">
+
+                @include(
+                    'layouts.partials.sidebar'
+                )
+
+            </div>
+
 
         </div>
 
