@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-
-Disallow: /admin/
-
-Sitemap: https://joblavo.com/sitemap.xml
-Sitemap: https://joblavo.com/sitemap-1.xml
-Sitemap: https://joblavo.com/sitemap-2.xml
-Sitemap: https://joblavo.com/sitemap-3.xml
