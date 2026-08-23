@@ -92,6 +92,16 @@ Route::post('/admin/ai-jobs/import/remove/{index}', [
     \App\Http\Controllers\Admin\AiJobImportController::class,
     'remove'
 ])->name('admin.ai-jobs.import.remove');
+Route::post('/admin/ai-jobs/import/add', [
+    AiJobImportController::class,
+    'add'
+])->name('admin.ai-jobs.import.add');
+
+
+Route::post('/admin/ai-jobs/import/bulk-add', [
+    AiJobImportController::class,
+    'bulkAdd'
+])->name('admin.ai-jobs.import.bulk-add');
 
 
 Route::post('/admin/ai-jobs/import/clear', [
