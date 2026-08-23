@@ -1,7 +1,7 @@
 {
   "jobs": [
     {
-      "title": "SSC JE Final Answer Key 2026 – Paper-II",
+      "title": "SSC JE Final Answer Key 2026 – Paper-I",
       "category": "SSC Answer Key",
       "excerpt": "SSC has released the final answer key and response sheet for Junior Engineer Paper-II Examination 2025.",
       "short_description": "SSC JE Final Answer Key 2026 is available for Civil, Mechanical and Electrical Paper-II candidates.",
