@@ -41,6 +41,7 @@
                 Please fix the following errors:
             </strong>
 
+
             <ul class="mb-0 mt-2">
 
                 @foreach($errors->all() as $error)
@@ -98,6 +99,7 @@
 
                         </label>
 
+
                         <input
                             type="text"
                             name="name"
@@ -118,6 +120,7 @@
                             Parent Category
 
                         </label>
+
 
                         <select
                             name="parent_id"
@@ -142,6 +145,7 @@
 
                         </select>
 
+
                         <div class="form-text">
 
                             Leave as Main Category if this is
@@ -163,11 +167,13 @@
 
                         </label>
 
+
                         <input
                             type="text"
                             name="slug"
                             value="{{ old('slug') }}"
                             class="form-control">
+
 
                         <div class="form-text">
 
@@ -188,6 +194,7 @@
                             Status
 
                         </label>
+
 
                         <select
                             name="status"
@@ -225,6 +232,7 @@
 
                         </label>
 
+
                         <textarea
                             name="description"
                             rows="4"
@@ -244,10 +252,12 @@
 
                         </label>
 
+
                         <textarea
                             name="content"
                             rows="10"
                             class="form-control">{{ old('content') }}</textarea>
+
 
                         <div class="form-text">
 
@@ -268,7 +278,7 @@
 
 
         {{-- =====================================================
-             HOME DISPLAY SETTINGS
+             DISPLAY SETTINGS
         ====================================================== --}}
 
         <div class="card shadow-sm border-0 mb-4">
@@ -276,7 +286,7 @@
             <div class="card-header bg-white">
 
                 <h5 class="mb-0">
-                    Home Page Display
+                    Display Settings
                 </h5>
 
             </div>
@@ -287,9 +297,49 @@
                 <div class="row g-4">
 
 
+                    {{-- DISPLAY IN HEADER --}}
+
+                    <div class="col-md-4">
+
+                        <div class="border rounded p-3 h-100">
+
+                            <div class="form-check form-switch">
+
+                                <input
+                                    type="checkbox"
+                                    name="display_header"
+                                    value="1"
+                                    class="form-check-input"
+                                    id="display_header"
+                                    {{ old('display_header', true) ? 'checked' : '' }}>
+
+                                <label
+                                    class="form-check-label fw-semibold"
+                                    for="display_header">
+
+                                    Display in Header
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="text-muted small mt-2">
+
+                                Enable this to show this category
+                                in the main website navigation header.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
                     {{-- HOME TILES --}}
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
 
                         <div class="border rounded p-3 h-100">
 
@@ -330,7 +380,7 @@
 
                     {{-- HOME LARGE GRID --}}
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
 
                         <div class="border rounded p-3 h-100">
 
@@ -406,6 +456,7 @@
 
                         </label>
 
+
                         <input
                             type="text"
                             name="seo_title"
@@ -425,6 +476,7 @@
                             Meta Description
 
                         </label>
+
 
                         <textarea
                             name="meta_description"
@@ -446,6 +498,7 @@
 
                         </label>
 
+
                         <textarea
                             name="meta_keywords"
                             rows="3"
@@ -466,12 +519,14 @@
 
                         </label>
 
+
                         <input
                             type="number"
                             name="sort_order"
                             value="{{ old('sort_order', 0) }}"
                             min="0"
                             class="form-control">
+
 
                         <div class="form-text">
 

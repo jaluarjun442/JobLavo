@@ -294,119 +294,159 @@
         </div>
 
 
+{{-- =====================================================
+     HOME + HEADER DISPLAY SETTINGS
+====================================================== --}}
 
-        {{-- =====================================================
-             HOME DISPLAY SETTINGS
-        ====================================================== --}}
+<div class="card shadow-sm border-0 mb-4">
 
-        <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white">
 
-            <div class="card-header bg-white">
+        <h5 class="mb-0">
+            Display Settings
+        </h5>
 
-                <h5 class="mb-0">
-                    Home Page Display
-                </h5>
-
-            </div>
-
-
-            <div class="card-body">
-
-                <div class="row g-4">
+    </div>
 
 
-                    {{-- HOME TILES --}}
+    <div class="card-body">
 
-                    <div class="col-md-6">
-
-                        <div class="border rounded p-3 h-100">
-
-                            <div class="form-check form-switch">
-
-                                <input
-                                    type="checkbox"
-                                    name="display_home_tiles"
-                                    value="1"
-                                    class="form-check-input"
-                                    id="display_home_tiles"
-                                    {{ old(
-                                        'display_home_tiles',
-                                        $category->display_home_tiles
-                                    ) ? 'checked' : '' }}>
-
-                                <label
-                                    class="form-check-label fw-semibold"
-                                    for="display_home_tiles">
-
-                                    Display in Home Tiles
-
-                                </label>
-
-                            </div>
+        <div class="row g-4">
 
 
-                            <div class="text-muted small mt-2">
+            {{-- DISPLAY IN HEADER --}}
 
-                                Show this category in the
-                                small homepage tiles section.
+            <div class="col-md-4">
 
-                            </div>
+                <div class="border rounded p-3 h-100">
 
-                        </div>
+                    <div class="form-check form-switch">
+
+                        <input
+                            type="checkbox"
+                            name="display_header"
+                            value="1"
+                            class="form-check-input"
+                            id="display_header"
+                            {{ old(
+                                'display_header',
+                                $category->display_header
+                            ) ? 'checked' : '' }}>
+
+                        <label
+                            class="form-check-label fw-semibold"
+                            for="display_header">
+
+                            Display in Header
+
+                        </label>
 
                     </div>
 
 
+                    <div class="text-muted small mt-2">
 
-                    {{-- HOME LARGE --}}
-
-                    <div class="col-md-6">
-
-                        <div class="border rounded p-3 h-100">
-
-                            <div class="form-check form-switch">
-
-                                <input
-                                    type="checkbox"
-                                    name="display_home_large"
-                                    value="1"
-                                    class="form-check-input"
-                                    id="display_home_large"
-                                    {{ old(
-                                        'display_home_large',
-                                        $category->display_home_large
-                                    ) ? 'checked' : '' }}>
-
-                                <label
-                                    class="form-check-label fw-semibold"
-                                    for="display_home_large">
-
-                                    Display in Home Large Grid
-
-                                </label>
-
-                            </div>
-
-
-                            <div class="text-muted small mt-2">
-
-                                Show this category as a
-                                large job section on homepage.
-
-                            </div>
-
-                        </div>
+                        Show this category in the
+                        main website header navigation.
 
                     </div>
-
 
                 </div>
 
             </div>
 
+
+
+            {{-- HOME TILES --}}
+
+            <div class="col-md-4">
+
+                <div class="border rounded p-3 h-100">
+
+                    <div class="form-check form-switch">
+
+                        <input
+                            type="checkbox"
+                            name="display_home_tiles"
+                            value="1"
+                            class="form-check-input"
+                            id="display_home_tiles"
+                            {{ old(
+                                'display_home_tiles',
+                                $category->display_home_tiles
+                            ) ? 'checked' : '' }}>
+
+                        <label
+                            class="form-check-label fw-semibold"
+                            for="display_home_tiles">
+
+                            Display in Home Tiles
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="text-muted small mt-2">
+
+                        Show this category in the
+                        small homepage tiles section.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            {{-- HOME LARGE --}}
+
+            <div class="col-md-4">
+
+                <div class="border rounded p-3 h-100">
+
+                    <div class="form-check form-switch">
+
+                        <input
+                            type="checkbox"
+                            name="display_home_large"
+                            value="1"
+                            class="form-check-input"
+                            id="display_home_large"
+                            {{ old(
+                                'display_home_large',
+                                $category->display_home_large
+                            ) ? 'checked' : '' }}>
+
+                        <label
+                            class="form-check-label fw-semibold"
+                            for="display_home_large">
+
+                            Display in Home Large Grid
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="text-muted small mt-2">
+
+                        Show this category as a
+                        large job section on homepage.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
         </div>
 
+    </div>
 
+</div>
 
         {{-- =====================================================
              SEO

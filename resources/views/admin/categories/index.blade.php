@@ -75,6 +75,10 @@
                             </th>
 
                             <th>
+                                Header
+                            </th>
+
+                            <th>
                                 Home Tiles
                             </th>
 
@@ -110,7 +114,8 @@
 
 @push('styles')
 
-<link rel="stylesheet"
+<link
+    rel="stylesheet"
     href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 
 @endpush
@@ -120,13 +125,18 @@
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script
+    src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js">
+</script>
 
-<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+<script
+    src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js">
+</script>
 
 
 <script>
-    $(document).ready(function() {
+
+$(document).ready(function() {
 
     $('#categoriesTable').DataTable({
 
@@ -144,62 +154,147 @@
 
         columns: [
 
+            /*
+            |--------------------------------------------------------------------------
+            | #
+            |--------------------------------------------------------------------------
+            */
+
             {
                 data: 'DT_RowIndex',
+
                 name: 'DT_RowIndex',
+
                 orderable: false,
+
                 searchable: false
             },
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Category
+            |--------------------------------------------------------------------------
+            */
+
             {
                 data: 'name',
+
                 name: 'name'
             },
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Parent
+            |--------------------------------------------------------------------------
+            */
+
             {
                 data: 'parent',
+
                 name: 'parent.name',
+
                 orderable: false
             },
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Posts
+            |--------------------------------------------------------------------------
+            */
+
             {
                 data: 'posts_count',
+
                 name: 'posts_count',
+
                 searchable: false
             },
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Status
+            |--------------------------------------------------------------------------
+            */
 
             {
                 data: 'status_badge',
+
                 name: 'status',
+
                 orderable: false,
+
                 searchable: false
             },
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Header
+            |--------------------------------------------------------------------------
+            */
+
+            {
+                data: 'header',
+
+                name: 'display_header',
+
+                orderable: false,
+
+                searchable: false
+            },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Home Tiles
+            |--------------------------------------------------------------------------
+            */
 
             {
                 data: 'home_tiles',
+
                 name: 'display_home_tiles',
+
                 orderable: false,
+
                 searchable: false
             },
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Home Large
+            |--------------------------------------------------------------------------
+            */
 
             {
                 data: 'home_large',
+
                 name: 'display_home_large',
+
                 orderable: false,
+
                 searchable: false
             },
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Action
+            |--------------------------------------------------------------------------
+            */
+
             {
                 data: 'action',
+
                 name: 'action',
+
                 orderable: false,
+
                 searchable: false
             }
 

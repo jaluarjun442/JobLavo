@@ -22,6 +22,7 @@ class CategoryController extends Controller
     }
 
 
+
     /*
     |--------------------------------------------------------------------------
     | DataTable
@@ -33,6 +34,7 @@ class CategoryController extends Controller
         $query = Category::with('parent')
 
             ->select('categories.*')
+
             ->withCount('posts');
 
 
@@ -40,6 +42,12 @@ class CategoryController extends Controller
 
             ->addIndexColumn()
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Parent
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('parent', function ($category) {
 
@@ -50,11 +58,18 @@ class CategoryController extends Controller
                         '</span>';
                 }
 
+
                 return '<span class="text-secondary">
                             Main Category
                         </span>';
             })
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Status
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('status_badge', function ($category) {
 
@@ -65,11 +80,40 @@ class CategoryController extends Controller
                             </span>';
                 }
 
+
                 return '<span class="badge bg-secondary">
                             Inactive
                         </span>';
             })
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Header
+            |--------------------------------------------------------------------------
+            */
+
+            ->addColumn('header', function ($category) {
+
+                if ($category->display_header) {
+
+                    return '<span class="badge bg-primary">
+                                Yes
+                            </span>';
+                }
+
+
+                return '<span class="badge bg-light text-dark border">
+                            No
+                        </span>';
+            })
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Home Tiles
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('home_tiles', function ($category) {
 
@@ -80,11 +124,18 @@ class CategoryController extends Controller
                             </span>';
                 }
 
+
                 return '<span class="badge bg-light text-dark border">
                             No
                         </span>';
             })
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Home Large
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('home_large', function ($category) {
 
@@ -95,11 +146,18 @@ class CategoryController extends Controller
                             </span>';
                 }
 
+
                 return '<span class="badge bg-light text-dark border">
                             No
                         </span>';
             })
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Action
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('action', function ($category) {
 
@@ -152,6 +210,7 @@ class CategoryController extends Controller
             ->rawColumns([
                 'parent',
                 'status_badge',
+                'header',
                 'home_tiles',
                 'home_large',
                 'action',
@@ -160,6 +219,7 @@ class CategoryController extends Controller
 
             ->make(true);
     }
+
 
 
     /*
@@ -188,6 +248,7 @@ class CategoryController extends Controller
             compact('parentCategories')
         );
     }
+
 
 
     /*
@@ -252,6 +313,11 @@ class CategoryController extends Controller
                 'boolean',
             ],
 
+            'display_header' => [
+                'nullable',
+                'boolean',
+            ],
+
             'display_home_tiles' => [
                 'nullable',
                 'boolean',
@@ -295,9 +361,16 @@ class CategoryController extends Controller
             'status'
         );
 
+
+        $validated['display_header'] = $request->boolean(
+            'display_header'
+        );
+
+
         $validated['display_home_tiles'] = $request->boolean(
             'display_home_tiles'
         );
+
 
         $validated['display_home_large'] = $request->boolean(
             'display_home_large'
@@ -334,6 +407,7 @@ class CategoryController extends Controller
     }
 
 
+
     /*
     |--------------------------------------------------------------------------
     | Edit
@@ -368,6 +442,7 @@ class CategoryController extends Controller
             )
         );
     }
+
 
 
     /*
@@ -437,6 +512,11 @@ class CategoryController extends Controller
                 'boolean',
             ],
 
+            'display_header' => [
+                'nullable',
+                'boolean',
+            ],
+
             'display_home_tiles' => [
                 'nullable',
                 'boolean',
@@ -481,9 +561,16 @@ class CategoryController extends Controller
             'status'
         );
 
+
+        $validated['display_header'] = $request->boolean(
+            'display_header'
+        );
+
+
         $validated['display_home_tiles'] = $request->boolean(
             'display_home_tiles'
         );
+
 
         $validated['display_home_large'] = $request->boolean(
             'display_home_large'
@@ -518,6 +605,7 @@ class CategoryController extends Controller
                 'Category updated successfully.'
             );
     }
+
 
 
     /*
@@ -570,6 +658,7 @@ class CategoryController extends Controller
     }
 
 
+
     /*
     |--------------------------------------------------------------------------
     | Generate Unique Slug
@@ -592,21 +681,24 @@ class CategoryController extends Controller
 
             Category::query()
 
-            ->where('slug', $slug)
+                ->where(
+                    'slug',
+                    $slug
+                )
 
-            ->when(
-                $ignoreId,
-                function ($query) use ($ignoreId) {
+                ->when(
+                    $ignoreId,
+                    function ($query) use ($ignoreId) {
 
-                    $query->where(
-                        'id',
-                        '!=',
-                        $ignoreId
-                    );
-                }
-            )
+                        $query->where(
+                            'id',
+                            '!=',
+                            $ignoreId
+                        );
+                    }
+                )
 
-            ->exists()
+                ->exists()
 
         ) {
 

@@ -58,6 +58,8 @@ class AppServiceProvider extends ServiceProvider
 
                     ->where('status', true)
 
+                    ->where('display_header', true)
+
                     ->whereNull('parent_id')
 
                     ->orderBy('sort_order')
@@ -65,7 +67,6 @@ class AppServiceProvider extends ServiceProvider
                     ->orderBy('name')
 
                     ->get();
-
 
                 $sidebarCategories = Category::query()
 

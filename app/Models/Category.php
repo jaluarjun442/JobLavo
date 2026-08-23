@@ -29,7 +29,7 @@ class Category extends Model
         'display_home_large',
 
         'sort_order',
-
+        'display_header',
     ];
 
 
@@ -40,7 +40,7 @@ class Category extends Model
         'display_home_tiles' => 'boolean',
 
         'display_home_large' => 'boolean',
-
+        'display_header' => 'boolean',
     ];
 
     /*
