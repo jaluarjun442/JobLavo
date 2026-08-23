@@ -234,13 +234,13 @@
 
                 @if($latestPost->published_at)
 
-                    <small class="text-muted">
+                    <!-- <small class="text-muted">
 
                         {{ $latestPost->published_at->format(
                             'd M Y'
                         ) }}
 
-                    </small>
+                    </small> -->
 
                 @endif
 
