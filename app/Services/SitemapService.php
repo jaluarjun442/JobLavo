@@ -10,11 +10,22 @@ class SitemapService
 {
     /*
     |--------------------------------------------------------------------------
+    | Sitemap Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    private const POSTS_PER_SITEMAP = 100;
+
+    private const STATIC_PAGE_COUNT = 7;
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Sync All Sitemaps
     |--------------------------------------------------------------------------
     */
 
-    public function sync()
+    public function sync(): bool
     {
         /*
         |--------------------------------------------------------------------------
@@ -22,16 +33,13 @@ class SitemapService
         |--------------------------------------------------------------------------
         */
 
-        $staticPages = 7;
-
-
         $categoryCount = Category::query()
             ->where('status', true)
             ->count();
 
 
         $mainUrlCount =
-            $staticPages +
+            self::STATIC_PAGE_COUNT +
             $categoryCount;
 
 
@@ -51,7 +59,7 @@ class SitemapService
         | Published Posts Query
         |--------------------------------------------------------------------------
         |
-        | Only currently published posts are included.
+        | Only posts which are currently published are included.
         |
         */
 
@@ -79,8 +87,9 @@ class SitemapService
         |--------------------------------------------------------------------------
         */
 
-        $publishedPosts = (clone $publishedPostsQuery)
-            ->count();
+        $publishedPosts =
+            (clone $publishedPostsQuery)
+                ->count();
 
 
         /*
@@ -88,107 +97,158 @@ class SitemapService
         | Sitemap Count
         |--------------------------------------------------------------------------
         |
-        | Maximum 100 posts per sitemap.
+        | Maximum 100 published posts per sitemap.
         |
         */
 
-        $perPage = 100;
-
-
-        $sitemapCount = max(
-            1,
+        $sitemapCount =
             (int) ceil(
-                $publishedPosts / $perPage
-            )
-        );
+                $publishedPosts /
+                self::POSTS_PER_SITEMAP
+            );
 
 
         /*
         |--------------------------------------------------------------------------
-        | Create / Update Post Sitemaps
+        | No Published Posts
         |--------------------------------------------------------------------------
+        |
+        | If there are no published posts, remove all post sitemap
+        | records instead of creating an empty sitemap-1.xml.
+        |
         */
 
-        for (
-            $i = 1;
-            $i <= $sitemapCount;
-            $i++
-        ) {
+        if ($sitemapCount === 0) {
 
-            $urlCount = (clone $publishedPostsQuery)
+            Sitemap::query()
 
-                ->skip(
-                    ($i - 1) * $perPage
+                ->where(
+                    'type',
+                    'posts'
                 )
 
-                ->take(
-                    $perPage
+                ->where(
+                    'filename',
+                    'like',
+                    'sitemap-%.xml'
                 )
 
-                ->count();
+                ->delete();
+
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create / Update Post Sitemaps
+            |--------------------------------------------------------------------------
+            */
+
+            for (
+                $i = 1;
+                $i <= $sitemapCount;
+                $i++
+            ) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Calculate URLs In This Sitemap
+                |--------------------------------------------------------------------------
+                |
+                | Example:
+                |
+                | 114 posts
+                |
+                | Sitemap 1 = 100
+                | Sitemap 2 = 14
+                |
+                */
+
+                $offset =
+                    ($i - 1) *
+                    self::POSTS_PER_SITEMAP;
 
 
-            Sitemap::updateOrCreate(
-                [
-                    'filename' =>
-                        'sitemap-' .
-                        $i .
-                        '.xml',
-                ],
-                [
-                    'type' => 'posts',
+                $remaining =
+                    $publishedPosts -
+                    $offset;
 
-                    'url_count' =>
-                        $urlCount,
-                ]
-            );
+
+                $urlCount =
+                    min(
+                        self::POSTS_PER_SITEMAP,
+                        max(0, $remaining)
+                    );
+
+
+                Sitemap::updateOrCreate(
+                    [
+                        'filename' =>
+                            'sitemap-' .
+                            $i .
+                            '.xml',
+                    ],
+                    [
+                        'type' =>
+                            'posts',
+
+                        'url_count' =>
+                            $urlCount,
+                    ]
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Delete Old Post Sitemap Records
+            |--------------------------------------------------------------------------
+            */
+
+            $validFilenames = collect(
+                range(
+                    1,
+                    $sitemapCount
+                )
+            )
+                ->map(
+                    function ($number) {
+
+                        return
+                            'sitemap-' .
+                            $number .
+                            '.xml';
+                    }
+                )
+                ->toArray();
+
+
+            Sitemap::query()
+
+                ->where(
+                    'type',
+                    'posts'
+                )
+
+                ->where(
+                    'filename',
+                    'like',
+                    'sitemap-%.xml'
+                )
+
+                ->whereNotIn(
+                    'filename',
+                    $validFilenames
+                )
+
+                ->delete();
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | Delete Old Post Sitemap Records
+        | Finished
         |--------------------------------------------------------------------------
         */
-
-        $validFilenames = collect(
-            range(
-                1,
-                $sitemapCount
-            )
-        )
-            ->map(
-                function ($number) {
-
-                    return
-                        'sitemap-' .
-                        $number .
-                        '.xml';
-                }
-            )
-            ->toArray();
-
-
-        Sitemap::query()
-
-            ->where(
-                'type',
-                'posts'
-            )
-
-            ->where(
-                'filename',
-                'like',
-                'sitemap-%.xml'
-            )
-
-            ->whereNotIn(
-                'filename',
-                $validFilenames
-            )
-
-            ->delete();
-
 
         return true;
     }
