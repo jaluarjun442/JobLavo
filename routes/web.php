@@ -23,32 +23,7 @@ Route::get('/sitemap-{page}.xml', [
 ])
     ->where('page', '[1-9][0-9]*')
     ->name('sitemap.posts');
-Route::get('/robots.txt', function () {
 
-    $lines = [
-        'User-agent: *',
-        'Allow: /',
-        '',
-        'Disallow: /admin/',
-        '',
-        'Sitemap: ' . url('/sitemap.xml'),
-        'Sitemap: ' . url('/sitemap-1.xml'),
-        'Sitemap: ' . url('/sitemap-2.xml'),
-        'Sitemap: ' . url('/sitemap-3.xml'),
-    ];
-
-    return response(
-        implode("\n", $lines) . "\n",
-        200
-    )->header(
-        'Content-Type',
-        'text/plain; charset=UTF-8'
-    )
-    ->header(
-        'Cache-Control',
-        'no-store, no-cache, must-revalidate'
-    );
-})->name('robots');
 /*
 |--------------------------------------------------------------------------
 | Web Routes
