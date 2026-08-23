@@ -10,11 +10,7 @@
 
     @foreach($urls as $url)
 
-        <url>
-
-            <loc>{{ $url }}</loc>
-
-        </url>
+        <url><loc>{{ $url }}</loc></url>
 
     @endforeach
 
@@ -26,13 +22,7 @@
 
     @foreach($categories as $category)
 
-        <url>
-
-            <loc>
-                {{ url('/category/' . $category->slug) }}
-            </loc>
-
-        </url>
+        <url><loc>{{ url('/category/' . $category->slug) }}</loc></url>
 
     @endforeach
 

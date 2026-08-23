@@ -8,21 +8,15 @@
 
         <url>
 
-            <loc>
-                {{ url('/post/' . $post->slug) }}
-            </loc>
+            <loc>{{ url('/post/' . $post->slug) }}</loc>
 
             @if($post->updated_at)
 
-                <lastmod>
-                    {{ $post->updated_at->toAtomString() }}
-                </lastmod>
+                <lastmod>{{ $post->updated_at->toAtomString() }}</lastmod>
 
             @elseif($post->published_at)
 
-                <lastmod>
-                    {{ $post->published_at->toAtomString() }}
-                </lastmod>
+                <lastmod>{{ $post->published_at->toAtomString() }}</lastmod>
 
             @endif
 
