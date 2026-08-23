@@ -48,6 +48,9 @@
     <div class="container">
 
 
+        {{-- =====================================================
+             BREADCRUMB
+        ====================================================== --}}
 
         <nav
             aria-label="breadcrumb"
@@ -55,6 +58,8 @@
 
             <ol class="breadcrumb mb-0">
 
+
+                {{-- HOME --}}
 
                 <li class="breadcrumb-item">
 
@@ -68,6 +73,8 @@
 
                 </li>
 
+
+                {{-- PARENT CATEGORY --}}
 
                 @if($category->parent)
 
@@ -89,6 +96,8 @@
                 @endif
 
 
+                {{-- CURRENT CATEGORY --}}
+
                 <li
                     class="breadcrumb-item active"
                     aria-current="page">
@@ -103,6 +112,10 @@
         </nav>
 
 
+
+        {{-- =====================================================
+             CATEGORY INTRO
+        ====================================================== --}}
 
         <section
             class="bg-white border rounded-2 shadow-sm mb-4">
@@ -124,10 +137,6 @@
 
                     </p>
 
-                @else
-
-                   
-
                 @endif
 
             </div>
@@ -135,6 +144,10 @@
         </section>
 
 
+
+        {{-- =====================================================
+             SUB CATEGORIES
+        ====================================================== --}}
 
         @if($category->children->count())
 
@@ -168,6 +181,10 @@
         <div class="row g-4">
 
 
+
+            {{-- =================================================
+                 POSTS
+            ================================================== --}}
 
             <div class="col-lg-8">
 
@@ -219,7 +236,9 @@
                                 class="border-bottom py-3">
 
 
-                                {{-- POST TITLE --}}
+                                {{-- =================================================
+                                     POST TITLE
+                                ================================================== --}}
 
                                 <h3 class="h5 mb-2">
 
@@ -239,11 +258,15 @@
 
 
 
-                                {{-- DATE + CATEGORY --}}
+                                {{-- =================================================
+                                     DATE + CATEGORIES
+                                ================================================== --}}
 
                                 <div
                                     class="small text-secondary mb-2">
 
+
+                                    {{-- DATE --}}
 
                                     @if($post->published_at)
 
@@ -260,14 +283,45 @@
                                     @endif
 
 
-                                    @if($post->category)
+
+                                    {{-- MULTIPLE CATEGORIES --}}
+
+                                    @if(
+                                        $post->categories &&
+                                        $post->categories->count()
+                                    )
 
                                         <span class="ms-2">
 
                                             •
-                                            {{ $post->category->name }}
 
                                         </span>
+
+                                        @foreach(
+                                            $post->categories
+                                            as $postCategory
+                                        )
+
+                                            @if(
+                                                $postCategory->id
+                                                != $category->id
+                                            )
+
+                                                <a
+                                                    href="{{ route(
+                                                        'category',
+                                                        $postCategory->slug
+                                                    ) }}"
+                                                    class="text-decoration-none ms-1"
+                                                    style="color:#064fc7;">
+
+                                                    {{ $postCategory->name }}
+
+                                                </a>
+
+                                            @endif
+
+                                        @endforeach
 
                                     @endif
 
@@ -276,7 +330,9 @@
 
 
 
-                                {{-- EXCERPT --}}
+                                {{-- =================================================
+                                     EXCERPT
+                                ================================================== --}}
 
                                 @if(
                                     $post->short_description
@@ -296,7 +352,9 @@
 
 
 
-                                {{-- READ MORE --}}
+                                {{-- =================================================
+                                     READ MORE
+                                ================================================== --}}
 
                                 <a
                                     href="{{ route(
@@ -317,15 +375,18 @@
                         @empty
 
 
-                            {{-- NO POSTS --}}
+                            {{-- =================================================
+                                 NO POSTS
+                            ================================================== --}}
 
                             <div class="text-center py-5">
 
 
                                 <div class="mb-3">
 
-                                    <span class="fs-1"
-                                          aria-hidden="true">
+                                    <span
+                                        class="fs-1"
+                                        aria-hidden="true">
 
                                         📄
 
@@ -368,6 +429,10 @@
 
 
 
+                        {{-- =================================================
+                             PAGINATION
+                        ================================================== --}}
+
                         @if($posts->hasPages())
 
                             <div class="pt-4">
@@ -387,6 +452,10 @@
 
 
 
+            {{-- =====================================================
+                 SIDEBAR
+            ====================================================== --}}
+
             <div class="col-lg-4">
 
                 @include(
@@ -399,6 +468,10 @@
         </div>
 
 
+
+        {{-- =====================================================
+             CATEGORY CONTENT
+        ====================================================== --}}
 
         @if($category->content)
 

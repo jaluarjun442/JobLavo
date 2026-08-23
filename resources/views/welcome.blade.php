@@ -112,7 +112,6 @@
                             </h2>
 
 
-
                         </div>
 
 
@@ -226,7 +225,6 @@
                 </h2>
 
 
-
             </div>
 
 
@@ -258,17 +256,52 @@
                                 </a>
 
 
-                                @if($post->category)
+                                {{-- MULTIPLE CATEGORIES --}}
+
+                                @if(
+                                    $post->categories &&
+                                    $post->categories->count()
+                                )
 
                                     <span
                                         class="small text-muted ms-1">
 
                                         —
-                                        {{ $post->category->name }}
 
                                     </span>
 
+                                    @foreach(
+                                        $post->categories
+                                        as $postCategory
+                                    )
+
+                                        <a
+                                            href="{{ route(
+                                                'category',
+                                                $postCategory->slug
+                                            ) }}"
+                                            class="small text-muted text-decoration-none ms-1"
+                                        >
+
+                                            {{ $postCategory->name }}
+
+                                        </a>
+
+                                        @if(!$loop->last)
+
+                                            <span
+                                                class="small text-muted">
+
+                                                ,
+
+                                            </span>
+
+                                        @endif
+
+                                    @endforeach
+
                                 @endif
+
 
                             </li>
 

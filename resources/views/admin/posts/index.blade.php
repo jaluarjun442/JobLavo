@@ -31,14 +31,17 @@
 
     <div class="d-flex gap-2">
 
-        <a href="{{ route('admin.ai-jobs.import') }}"
+        <a
+            href="{{ route('admin.ai-jobs.import') }}"
             class="btn btn-dark">
 
             🤖 AI Import
 
         </a>
 
-        <a href="{{ route('admin.posts.create') }}"
+
+        <a
+            href="{{ route('admin.posts.create') }}"
             class="btn btn-primary">
 
             + Add Post
@@ -85,7 +88,7 @@
                         </th>
 
                         <th>
-                            Category
+                            Categories
                         </th>
 
                         <th>
@@ -147,25 +150,34 @@
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
+
 <script
     src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js">
 </script>
+
 
 <script
     src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js">
 </script>
 
 
+
 <script>
+
     $(document).ready(function() {
+
 
         $('#postsTable').DataTable({
 
+
             processing: true,
+
 
             serverSide: true,
 
+
             responsive: false,
+
 
 
             ajax: {
@@ -177,7 +189,9 @@
             },
 
 
+
             pageLength: 10,
+
 
 
             lengthMenu: [
@@ -189,11 +203,13 @@
             ],
 
 
+
             order: [
 
                 [0, 'desc']
 
             ],
+
 
 
             columns: [
@@ -216,6 +232,7 @@
                 },
 
 
+
                 /*
                 |--------------------------------------------------------------------------
                 | Image
@@ -233,6 +250,7 @@
                 },
 
 
+
                 /*
                 |--------------------------------------------------------------------------
                 | Title
@@ -246,19 +264,23 @@
                 },
 
 
+
                 /*
                 |--------------------------------------------------------------------------
-                | Category
+                | Multiple Categories
                 |--------------------------------------------------------------------------
                 */
 
                 {
                     data: 'category',
 
-                    name: 'category.name',
+                    name: 'category',
 
-                    orderable: false
+                    orderable: false,
+
+                    searchable: false
                 },
+
 
 
                 /*
@@ -278,6 +300,7 @@
                 },
 
 
+
                 /*
                 |--------------------------------------------------------------------------
                 | Published
@@ -289,6 +312,7 @@
 
                     name: 'published_at'
                 },
+
 
 
                 /*
@@ -308,6 +332,7 @@
                 },
 
 
+
                 /*
                 |--------------------------------------------------------------------------
                 | Important
@@ -323,6 +348,7 @@
 
                     searchable: false
                 },
+
 
 
                 /*
@@ -346,7 +372,9 @@
 
         });
 
+
     });
+
 </script>
 
 @endpush

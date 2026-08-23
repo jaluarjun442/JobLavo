@@ -7,9 +7,13 @@ use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use App\Services\SitemapService;
 
 class PostController extends Controller
 {
+    public function __construct(
+        protected SitemapService $sitemapService
+    ) {}
     /**
      * Posts Page
      */
@@ -24,39 +28,44 @@ class PostController extends Controller
      */
     public function data(Request $request)
     {
-        $query = \App\Models\Post::query()
-
-            ->with('category')
-
+        $query = Post::query()
+            ->with('categories')
             ->select('posts.*');
 
 
-        return \Yajra\DataTables\Facades\DataTables::eloquent($query)
+        return DataTables::eloquent($query)
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Index
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Index
+            |--------------------------------------------------------------------------
+            */
 
             ->addIndexColumn()
 
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Category
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Categories
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('category', function ($post) {
 
-                if ($post->category) {
+                if ($post->categories && $post->categories->count()) {
 
-                    return '<span class="badge bg-light text-dark border">'
-                        . e($post->category->name) .
-                        '</span>';
+                    $html = '';
+
+                    foreach ($post->categories as $category) {
+
+                        $html .= '<span class="badge bg-light text-dark border me-1 mb-1">'
+                            . e($category->name) .
+                            '</span>';
+                    }
+
+                    return $html;
                 }
 
 
@@ -68,18 +77,18 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Image
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Image
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('image', function ($post) {
 
                 /*
-            |--------------------------------------------------------------------------
-            | Image is currently optional
-            |--------------------------------------------------------------------------
-            */
+                |--------------------------------------------------------------------------
+                | Image is currently optional
+                |--------------------------------------------------------------------------
+                */
 
                 if (
                     empty($post->featured_image)
@@ -113,10 +122,10 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Status
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Status
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('status_badge', function ($post) {
 
@@ -136,10 +145,10 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Published Date
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Published Date
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('published_date', function ($post) {
 
@@ -158,10 +167,10 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Featured
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Featured
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('featured_badge', function ($post) {
 
@@ -181,10 +190,10 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Important
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Important
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('important_badge', function ($post) {
 
@@ -204,10 +213,10 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Action
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Action
+            |--------------------------------------------------------------------------
+            */
 
             ->addColumn('action', function ($post) {
 
@@ -262,10 +271,10 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Raw HTML Columns
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Raw HTML Columns
+            |--------------------------------------------------------------------------
+            */
 
             ->rawColumns([
                 'image',
@@ -280,6 +289,11 @@ class PostController extends Controller
 
             ->make(true);
     }
+
+
+    /**
+     * Create Post Page
+     */
     public function create()
     {
         $categories = Category::where('status', true)
@@ -289,11 +303,12 @@ class PostController extends Controller
 
         $post = new Post();
 
+
         /*
-    |--------------------------------------------------------------------------
-    | AI Import Queue
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | AI Import Queue
+        |--------------------------------------------------------------------------
+        */
 
         $aiJob = null;
 
@@ -306,6 +321,7 @@ class PostController extends Controller
                 []
             );
 
+
             if (isset($jobs[$index])) {
 
                 $aiJob = $jobs[$index];
@@ -314,10 +330,10 @@ class PostController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Old Single AI Import Support
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Old Single AI Import Support
+        |--------------------------------------------------------------------------
+        */
 
         if (!$aiJob) {
 
@@ -328,20 +344,28 @@ class PostController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | AI Imported Job
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | AI Imported Job
+        |--------------------------------------------------------------------------
+        */
 
         if (is_array($aiJob)) {
 
             foreach ($aiJob as $field => $value) {
 
+                /*
+                |--------------------------------------------------------------------------
+                | Category is handled separately
+                |--------------------------------------------------------------------------
+                */
+
                 if ($field === 'category') {
                     continue;
                 }
 
+
                 if (in_array($field, [
+
                     'title',
                     'excerpt',
                     'short_description',
@@ -359,6 +383,7 @@ class PostController extends Controller
                     'seo_title',
                     'meta_description',
                     'meta_keywords',
+
                 ])) {
 
                     $post->{$field} = $value;
@@ -367,10 +392,10 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Generate Slug
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Generate Slug
+            |--------------------------------------------------------------------------
+            */
 
             if (!empty($post->title)) {
 
@@ -382,10 +407,10 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Default Publishing Settings
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Default Publishing Settings
+            |--------------------------------------------------------------------------
+            */
 
             $post->status = 'published';
 
@@ -393,10 +418,18 @@ class PostController extends Controller
 
 
             /*
-        |--------------------------------------------------------------------------
-        | Match AI Category
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | Match AI Category
+            |--------------------------------------------------------------------------
+            |
+            | AI currently provides one category name.
+            | We convert it into category_ids so the
+            | multiple-category form can preselect it.
+            |
+            */
+
+            $post->category_ids = [];
+
 
             if (!empty($aiJob['category'])) {
 
@@ -419,8 +452,9 @@ class PostController extends Controller
 
                 if ($category) {
 
-                    $post->category_id =
-                        $category->id;
+                    $post->category_ids = [
+                        $category->id
+                    ];
                 }
             }
         }
@@ -434,9 +468,21 @@ class PostController extends Controller
             )
         );
     }
+
+
+    /**
+     * Store Post
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
+
+            /*
+            |--------------------------------------------------------------------------
+            | Categories
+            |--------------------------------------------------------------------------
+            */
+
             'category_ids' => [
                 'required',
                 'array',
@@ -447,6 +493,13 @@ class PostController extends Controller
                 'integer',
                 'exists:categories,id',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Basic
+            |--------------------------------------------------------------------------
+            */
 
             'title' => [
                 'required',
@@ -483,6 +536,13 @@ class PostController extends Controller
                 'mimes:jpg,jpeg,png,webp',
                 'max:5120',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Job Details
+            |--------------------------------------------------------------------------
+            */
 
             'important_dates' => [
                 'nullable',
@@ -531,8 +591,15 @@ class PostController extends Controller
 
             'official_website' => [
                 'nullable',
-                'string'
+                'string',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SEO
+            |--------------------------------------------------------------------------
+            */
 
             'seo_title' => [
                 'nullable',
@@ -558,6 +625,13 @@ class PostController extends Controller
                 'max:255',
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Publishing
+            |--------------------------------------------------------------------------
+            */
+
             'status' => [
                 'required',
                 'in:draft,published',
@@ -572,29 +646,38 @@ class PostController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Slug
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Slug
+        |--------------------------------------------------------------------------
+        */
 
         $validated['slug'] = $validated['slug']
-            ? \Illuminate\Support\Str::slug($validated['slug'])
-            : \Illuminate\Support\Str::slug($validated['title']);
+            ? \Illuminate\Support\Str::slug(
+                $validated['slug']
+            )
+            : \Illuminate\Support\Str::slug(
+                $validated['title']
+            );
+
+
         /*
-|--------------------------------------------------------------------------
-| Canonical URL
-|--------------------------------------------------------------------------
-*/
+        |--------------------------------------------------------------------------
+        | Canonical URL
+        |--------------------------------------------------------------------------
+        */
 
         $validated['canonical_url'] =
             $validated['canonical_url']
-            ?? url('/post/' . $validated['slug']);
+            ?? url(
+                '/post/' . $validated['slug']
+            );
+
 
         /*
-    |--------------------------------------------------------------------------
-    | Publishing
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Publishing
+        |--------------------------------------------------------------------------
+        */
 
         if ($validated['status'] === 'published') {
 
@@ -608,27 +691,34 @@ class PostController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Featured / Important
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Featured / Important
+        |--------------------------------------------------------------------------
+        */
 
         $validated['is_featured'] =
-            $request->boolean('is_featured');
+            $request->boolean(
+                'is_featured'
+            );
 
         $validated['is_important'] =
-            $request->boolean('is_important');
+            $request->boolean(
+                'is_important'
+            );
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Featured Image
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Featured Image
+        |--------------------------------------------------------------------------
+        */
 
         if ($request->hasFile('featured_image')) {
 
-            $image = $request->file('featured_image');
+            $image = $request->file(
+                'featured_image'
+            );
+
 
             $filename =
                 time() . '_' .
@@ -637,7 +727,9 @@ class PostController extends Controller
 
 
             $image->move(
-                public_path('uploads/posts'),
+                public_path(
+                    'uploads/posts'
+                ),
                 $filename
             );
 
@@ -648,63 +740,96 @@ class PostController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Create Post
-    |--------------------------------------------------------------------------
-    */
-        $categoryIds = $validated['category_ids'];
+        |--------------------------------------------------------------------------
+        | Create Post
+        |--------------------------------------------------------------------------
+        */
 
-        unset($validated['category_ids']);
-        $post = Post::create($validated);
-        $post->categories()->sync($categoryIds);
+        $categoryIds =
+            $validated['category_ids'];
+
+
+        unset(
+            $validated['category_ids']
+        );
+
+
+        $post = Post::create(
+            $validated
+        );
+
 
         /*
-|--------------------------------------------------------------------------
-| AI Import Queue
-|--------------------------------------------------------------------------
-*/
+        |--------------------------------------------------------------------------
+        | Sync Categories
+        |--------------------------------------------------------------------------
+        */
+
+        $post->categories()->sync(
+            $categoryIds
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AI Import Queue
+        |--------------------------------------------------------------------------
+        */
 
         if ($request->has('ai_queue')) {
 
-            $index = (int) $request->input('ai_queue');
+            $index = (int) $request->input(
+                'ai_queue'
+            );
+
 
             $jobs = session(
                 'ai_import_jobs',
                 []
             );
 
+
             if (isset($jobs[$index])) {
 
-                unset($jobs[$index]);
+                unset(
+                    $jobs[$index]
+                );
+
 
                 session([
-                    'ai_import_jobs' => array_values($jobs),
+                    'ai_import_jobs' =>
+                    array_values($jobs),
                 ]);
             }
 
-            session()->forget('ai_import_job');
+
+            session()->forget(
+                'ai_import_job'
+            );
         }
 
 
         /*
-|--------------------------------------------------------------------------
-| Sitemap Sync
-|--------------------------------------------------------------------------
-*/
+        |--------------------------------------------------------------------------
+        | Sitemap Sync
+        |--------------------------------------------------------------------------
+        */
 
-        $this->syncPostSitemaps();
+        $this->sitemapService->sync();
 
 
         /*
-|--------------------------------------------------------------------------
-| Redirect
-|--------------------------------------------------------------------------
-*/
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
 
         if ($request->has('ai_queue')) {
 
             return redirect()
-                ->route('admin.ai-jobs.import')
+                ->route(
+                    'admin.ai-jobs.import'
+                )
                 ->with(
                     'success',
                     'Post added successfully. Next AI job is ready.'
@@ -713,18 +838,38 @@ class PostController extends Controller
 
 
         return redirect()
-            ->route('admin.posts.index')
+            ->route(
+                'admin.posts.index'
+            )
             ->with(
                 'success',
                 'Post created successfully.'
             );
     }
+
+
+    /**
+     * Edit Post
+     */
     public function edit(Post $post)
     {
-        $categories = Category::where('status', true)
+        $categories = Category::where(
+            'status',
+            true
+        )
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Categories
+        |--------------------------------------------------------------------------
+        */
+
+        $post->load('categories');
+
 
         return view(
             'admin.posts.edit',
@@ -734,9 +879,23 @@ class PostController extends Controller
             )
         );
     }
-    public function update(Request $request, Post $post)
-    {
+
+
+    /**
+     * Update Post
+     */
+    public function update(
+        Request $request,
+        Post $post
+    ) {
+
         $validated = $request->validate([
+
+            /*
+            |--------------------------------------------------------------------------
+            | Categories
+            |--------------------------------------------------------------------------
+            */
 
             'category_ids' => [
                 'required',
@@ -748,6 +907,13 @@ class PostController extends Controller
                 'integer',
                 'exists:categories,id',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Basic
+            |--------------------------------------------------------------------------
+            */
 
             'title' => [
                 'required',
@@ -785,21 +951,70 @@ class PostController extends Controller
                 'max:5120',
             ],
 
-            'important_dates' => ['nullable', 'string'],
-            'application_fee' => ['nullable', 'string'],
-            'age_limit' => ['nullable', 'string'],
-            'vacancy_details' => ['nullable', 'string'],
-            'eligibility' => ['nullable', 'string'],
-            'selection_process' => ['nullable', 'string'],
-            'salary_details' => ['nullable', 'string'],
-            'how_to_apply' => ['nullable', 'string'],
-            'important_links' => ['nullable', 'string'],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Job Details
+            |--------------------------------------------------------------------------
+            */
+
+            'important_dates' => [
+                'nullable',
+                'string',
+            ],
+
+            'application_fee' => [
+                'nullable',
+                'string',
+            ],
+
+            'age_limit' => [
+                'nullable',
+                'string',
+            ],
+
+            'vacancy_details' => [
+                'nullable',
+                'string',
+            ],
+
+            'eligibility' => [
+                'nullable',
+                'string',
+            ],
+
+            'selection_process' => [
+                'nullable',
+                'string',
+            ],
+
+            'salary_details' => [
+                'nullable',
+                'string',
+            ],
+
+            'how_to_apply' => [
+                'nullable',
+                'string',
+            ],
+
+            'important_links' => [
+                'nullable',
+                'string',
+            ],
 
             'official_website' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SEO
+            |--------------------------------------------------------------------------
+            */
 
             'seo_title' => [
                 'nullable',
@@ -825,6 +1040,13 @@ class PostController extends Controller
                 'max:255',
             ],
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Publishing
+            |--------------------------------------------------------------------------
+            */
+
             'status' => [
                 'required',
                 'in:draft,published',
@@ -839,21 +1061,40 @@ class PostController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Slug
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Slug
+        |--------------------------------------------------------------------------
+        */
 
         $validated['slug'] = $validated['slug']
-            ? \Illuminate\Support\Str::slug($validated['slug'])
-            : \Illuminate\Support\Str::slug($validated['title']);
+            ? \Illuminate\Support\Str::slug(
+                $validated['slug']
+            )
+            : \Illuminate\Support\Str::slug(
+                $validated['title']
+            );
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Publishing
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Canonical URL
+        |--------------------------------------------------------------------------
+        */
+
+        if (empty($validated['canonical_url'])) {
+
+            $validated['canonical_url'] =
+                url(
+                    '/post/' . $validated['slug']
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Publishing
+        |--------------------------------------------------------------------------
+        */
 
         if ($validated['status'] === 'published') {
 
@@ -868,27 +1109,34 @@ class PostController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Featured / Important
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Featured / Important
+        |--------------------------------------------------------------------------
+        */
 
         $validated['is_featured'] =
-            $request->boolean('is_featured');
+            $request->boolean(
+                'is_featured'
+            );
 
         $validated['is_important'] =
-            $request->boolean('is_important');
+            $request->boolean(
+                'is_important'
+            );
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Image
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Featured Image
+        |--------------------------------------------------------------------------
+        */
 
         if ($request->hasFile('featured_image')) {
 
-            $image = $request->file('featured_image');
+            $image = $request->file(
+                'featured_image'
+            );
+
 
             $filename =
                 time() . '_' .
@@ -897,7 +1145,9 @@ class PostController extends Controller
 
 
             $image->move(
-                public_path('uploads/posts'),
+                public_path(
+                    'uploads/posts'
+                ),
                 $filename
             );
 
@@ -908,124 +1158,120 @@ class PostController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Update
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Update Post
+        |--------------------------------------------------------------------------
+        */
 
-        $categoryIds = $validated['category_ids'];
+        $categoryIds =
+            $validated['category_ids'];
 
-        unset($validated['category_ids']);
 
-        $post->update($validated);
+        unset(
+            $validated['category_ids']
+        );
 
-        $post->categories()->sync($categoryIds);
-        $this->syncPostSitemaps();
+
+        $post->update(
+            $validated
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sync Categories
+        |--------------------------------------------------------------------------
+        */
+
+        $post->categories()->sync(
+            $categoryIds
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sitemap Sync
+        |--------------------------------------------------------------------------
+        */
+
+        $this->sitemapService->sync();
+
 
         return redirect()
-            ->route('admin.posts.index')
+            ->route(
+                'admin.posts.index'
+            )
             ->with(
                 'success',
                 'Post updated successfully.'
             );
     }
+
+
+    /**
+     * Delete Post
+     */
     public function destroy(Post $post)
     {
         /*
-    |--------------------------------------------------------------------------
-    | Delete Featured Image
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Delete Featured Image
+        |--------------------------------------------------------------------------
+        */
 
         if (
             $post->featured_image &&
-            file_exists(public_path($post->featured_image))
+            file_exists(
+                public_path(
+                    $post->featured_image
+                )
+            )
         ) {
-            unlink(public_path($post->featured_image));
+
+            unlink(
+                public_path(
+                    $post->featured_image
+                )
+            );
         }
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Delete Post
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Delete Category Relations
+        |--------------------------------------------------------------------------
+        */
+
+        $post->categories()->detach();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete Post
+        |--------------------------------------------------------------------------
+        */
 
         $post->delete();
-        $this->syncPostSitemaps();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sitemap Sync
+        |--------------------------------------------------------------------------
+        */
+
+        $this->sitemapService->sync();
+
 
         return redirect()
-            ->route('admin.posts.index')
+            ->route(
+                'admin.posts.index'
+            )
             ->with(
                 'success',
                 'Post deleted successfully.'
             );
     }
-    private function syncPostSitemaps()
-    {
-        $publishedPosts = Post::where(
-            'status',
-            'published'
-        )->count();
-
-        $sitemapCount = max(
-            1,
-            (int) ceil($publishedPosts / 100)
-        );
 
 
-        /*
-    |--------------------------------------------------------------------------
-    | Update / Create Post Sitemaps
-    |--------------------------------------------------------------------------
-    */
-
-        for ($i = 1; $i <= $sitemapCount; $i++) {
-
-            $count = Post::where(
-                'status',
-                'published'
-            )
-                ->skip(($i - 1) * 100)
-                ->take(100)
-                ->count();
-
-
-            \App\Models\Sitemap::updateOrCreate(
-                [
-                    'filename' => 'sitemap-' . $i . '.xml',
-                ],
-                [
-                    'type' => 'posts',
-                    'url_count' => $count,
-                ]
-            );
-        }
-
-
-        /*
-    |--------------------------------------------------------------------------
-    | Remove Empty / Old Post Sitemaps
-    |--------------------------------------------------------------------------
-    */
-
-        \App\Models\Sitemap::where(
-            'type',
-            'posts'
-        )
-            ->where(
-                'filename',
-                'like',
-                'sitemap-%.xml'
-            )
-            ->whereNotIn(
-                'filename',
-                collect(range(1, $sitemapCount))
-                    ->map(function ($number) {
-                        return 'sitemap-' . $number . '.xml';
-                    })
-                    ->toArray()
-            )
-            ->delete();
-    }
 }

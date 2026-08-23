@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Post;
-use Illuminate\Http\Response;
 
 class SitemapController extends Controller
 {
@@ -12,10 +11,26 @@ class SitemapController extends Controller
     |--------------------------------------------------------------------------
     | Main Sitemap
     |--------------------------------------------------------------------------
+    |
+    | /sitemap.xml
+    |
+    | Contains:
+    | - Homepage
+    | - Static pages
+    | - Latest jobs
+    | - Contact
+    | - All active category URLs
+    |
     */
 
     public function index()
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Main / Static URLs
+        |--------------------------------------------------------------------------
+        */
+
         $urls = [
 
             url('/'),
@@ -36,10 +51,16 @@ class SitemapController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Categories
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Active Categories
+        |--------------------------------------------------------------------------
+        |
+        | Multiple categories per post do NOT affect this.
+        |
+        | Category URLs are unique URLs, so each active category
+        | is added only once.
+        |
+        */
 
         $categories = Category::query()
 
@@ -55,10 +76,15 @@ class SitemapController extends Controller
 
 
         return response()
+
             ->view(
                 'sitemap.index',
-                compact('urls', 'categories')
+                compact(
+                    'urls',
+                    'categories'
+                )
             )
+
             ->header(
                 'Content-Type',
                 'application/xml'
@@ -66,25 +92,74 @@ class SitemapController extends Controller
     }
 
 
+
     /*
     |--------------------------------------------------------------------------
     | Post Sitemap
     |--------------------------------------------------------------------------
+    |
+    | /sitemap-1.xml
+    | /sitemap-2.xml
+    | /sitemap-3.xml
+    |
+    | Maximum 100 posts per sitemap.
+    |
     */
 
     public function posts($page = 1)
     {
-        $page = max(1, (int) $page);
+        $page = max(
+            1,
+            (int) $page
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Posts Per Sitemap
+        |--------------------------------------------------------------------------
+        */
+
+        $perPage = 100;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Published Posts
+        |--------------------------------------------------------------------------
+        |
+        | Only currently published posts are included.
+        |
+        */
 
         $posts = Post::query()
 
-            ->where('status', 'published')
+            ->where(
+                'status',
+                'published'
+            )
 
-            ->orderBy('id')
+            ->whereNotNull(
+                'published_at'
+            )
 
-            ->skip(($page - 1) * 100)
+            ->where(
+                'published_at',
+                '<=',
+                now()
+            )
 
-            ->take(100)
+            ->orderBy(
+                'id'
+            )
+
+            ->skip(
+                ($page - 1) * $perPage
+            )
+
+            ->take(
+                $perPage
+            )
 
             ->get([
                 'slug',
@@ -93,8 +168,22 @@ class SitemapController extends Controller
             ]);
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Return XML
+        |--------------------------------------------------------------------------
+        */
+
         return response()
-            ->view('sitemap.posts', compact('posts'))
-            ->header('Content-Type', 'application/xml');
+
+            ->view(
+                'sitemap.posts',
+                compact('posts')
+            )
+
+            ->header(
+                'Content-Type',
+                'application/xml'
+            );
     }
 }

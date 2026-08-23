@@ -1,7 +1,6 @@
 @extends('layouts.web')
 
 
-
 @section(
     'title',
     $post->seo_title ?: $post->title
@@ -85,7 +84,6 @@
 @endif
 
 
-
 @push('structured_data')
 
 <script type="application/ld+json">
@@ -163,37 +161,53 @@
             "item": @json(url('/'))
         }
 
-        @if($post->category)
+        @if($post->categories && $post->categories->count())
 
-        ,
-        {
-            "@type": "ListItem",
-            "position": 2,
-            "name": @json($post->category->name),
-            "item": @json(
-                url('/category/' . $post->category->slug)
-            )
-        }
+            @foreach($post->categories as $category)
+
+            ,
+            {
+                "@type": "ListItem",
+                "position": {{ $loop->iteration + 1 }},
+                "name": @json($category->name),
+                "item": @json(
+                    url('/category/' . $category->slug)
+                )
+            }
+
+            @endforeach
+
+            ,
+            {
+                "@type": "ListItem",
+                "position": {{ $post->categories->count() + 2 }},
+                "name": @json($post->title),
+                "item": @json(
+                    $post->canonical_url
+                        ?: url('/post/' . $post->slug)
+                )
+            }
+
+        @else
+
+            ,
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": @json($post->title),
+                "item": @json(
+                    $post->canonical_url
+                        ?: url('/post/' . $post->slug)
+                )
+            }
 
         @endif
-
-        ,
-        {
-            "@type": "ListItem",
-            "position": {{ $post->category ? 3 : 2 }},
-            "name": @json($post->title),
-            "item": @json(
-                $post->canonical_url
-                    ?: url('/post/' . $post->slug)
-            )
-        }
 
     ]
 }
 </script>
 
 @endpush
-
 
 
 
@@ -219,28 +233,11 @@
     |--------------------------------------------------------------------------
     | Related Posts
     |--------------------------------------------------------------------------
-    | Same category as current post
+    | Related posts are already prepared by FrontController.
+    |
+    | They are matched using ANY category assigned to current post.
+    |--------------------------------------------------------------------------
     */
-
-    $relatedPosts = collect();
-
-    if ($post->category_id) {
-
-        $relatedPosts = \App\Models\Post::query()
-            ->where('category_id', $post->category_id)
-            ->where('id', '!=', $post->id)
-            ->where('status', 'published')
-            ->whereNotNull('published_at')
-            ->where(
-                'published_at',
-                '<=',
-                now()
-            )
-            ->latest('published_at')
-            ->take(6)
-            ->get();
-
-    }
 
 @endphp
 
@@ -251,7 +248,6 @@
 <div class="bg-light py-4">
 
     <div class="container">
-
 
 
         <nav
@@ -277,24 +273,28 @@
 
 
 
-                {{-- CATEGORY --}}
+                {{-- CATEGORIES --}}
 
-                @if($post->category)
+                @if($post->categories && $post->categories->count())
 
-                    <li class="breadcrumb-item">
+                    @foreach($post->categories as $category)
 
-                        <a
-                            href="{{ route(
-                                'category',
-                                $post->category->slug
-                            ) }}"
-                            class="text-decoration-none">
+                        <li class="breadcrumb-item">
 
-                            {{ $post->category->name }}
+                            <a
+                                href="{{ route(
+                                    'category',
+                                    $category->slug
+                                ) }}"
+                                class="text-decoration-none">
 
-                        </a>
+                                {{ $category->name }}
 
-                    </li>
+                            </a>
+
+                        </li>
+
+                    @endforeach
 
                 @endif
 
@@ -332,23 +332,27 @@
                     <div class="p-3 p-md-4 border-bottom">
 
 
-                        {{-- CATEGORY BADGE --}}
+                        {{-- CATEGORY BADGES --}}
 
-                        @if($post->category)
+                        @if($post->categories && $post->categories->count())
 
-                            <div class="mb-2">
+                            <div class="mb-3 d-flex flex-wrap gap-2">
 
-                                <a
-                                    href="{{ route(
-                                        'category',
-                                        $post->category->slug
-                                    ) }}"
-                                    class="badge text-decoration-none"
-                                    style="background:#06245f;">
+                                @foreach($post->categories as $category)
 
-                                    {{ $post->category->name }}
+                                    <a
+                                        href="{{ route(
+                                            'category',
+                                            $category->slug
+                                        ) }}"
+                                        class="badge text-decoration-none"
+                                        style="background:#06245f;">
 
-                                </a>
+                                        {{ $category->name }}
+
+                                    </a>
+
+                                @endforeach
 
                             </div>
 
@@ -635,164 +639,215 @@
 
 
 
-                        @if($post->important_links)
+                    @if($post->important_links)
 
-                            <section class="job-detail-box">
+                        <section class="job-detail-box">
 
-                                <div class="job-detail-title">
-                                    Important Links
-                                </div>
+                            <div class="job-detail-title">
 
-                                <div class="job-detail-content important-links-content">
-
-                                    {!! $post->important_links !!}
-
-                                </div>
-
-                            </section>
-
-                        @endif
-
-
-
-                        @if($post->official_website)
-
-                            <div class="p-3 p-md-4">
-
-                                @php
-                                    $officialWebsite = $post->official_website;
-
-                                    // If AI returned an <a> tag, extract its href.
-                                    if (preg_match('/href=["\']([^"\']+)["\']/i', $officialWebsite, $matches)) {
-                                        $officialWebsite = $matches[1];
-                                    }
-                                @endphp
-
-                                <a
-                                    href="{{ $officialWebsite }}"
-                                    target="_blank"
-                                    rel="nofollow noopener noreferrer"
-                                    class="job-official-btn">
-
-                                    Visit Official Website
-
-                                </a>
+                                Important Links
 
                             </div>
 
-                        @endif
+                            <div class="job-detail-content important-links-content">
+
+                                {!! $post->important_links !!}
+
+                            </div>
+
+                        </section>
+
+                    @endif
+
+
+
+                    @if($post->official_website)
+
+                        <div class="p-3 p-md-4">
+
+                            @php
+
+                                $officialWebsite = $post->official_website;
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | If AI returned an <a> tag,
+                                | extract its href.
+                                |--------------------------------------------------------------------------
+                                */
+
+                                if (
+                                    preg_match(
+                                        '/href=["\']([^"\']+)["\']/i',
+                                        $officialWebsite,
+                                        $matches
+                                    )
+                                ) {
+                                    $officialWebsite = $matches[1];
+                                }
+
+                            @endphp
+
+                            <a
+                                href="{{ $officialWebsite }}"
+                                target="_blank"
+                                rel="nofollow noopener noreferrer"
+                                class="job-official-btn">
+
+                                Visit Official Website
+
+                            </a>
+
+                        </div>
+
+                    @endif
 
 
                 </article>
 
 
 
-        @if($relatedPosts->count())
+                {{-- =====================================================
+                     RELATED POSTS
+                ====================================================== --}}
 
-            <section class="mt-4">
+                @if($relatedPosts->count())
 
-
-                <div
-                    class="bg-white border rounded-2 shadow-sm">
-
-
-                    {{-- HEADER --}}
-
-                    <div
-                        class="px-3 py-3 text-white"
-                        style="background:#06245f;">
-
-                        <h2 class="h5 fw-bold mb-0">
-
-                            Related
-                            {{ $post->category
-                                ? $post->category->name
-                                : 'Jobs' }}
-
-                        </h2>
-
-                    </div>
+                    <section class="mt-4">
 
 
-
-                    {{-- POSTS --}}
-
-                    <div class="p-3">
-
-                        <div class="row g-3">
+                        <div
+                            class="bg-white border rounded-2 shadow-sm">
 
 
-                            @foreach(
-                                $relatedPosts
-                                as $related
-                            )
+                            {{-- HEADER --}}
 
-                                <div
-                                    class="col-md-6 col-lg-6">
+                            <div
+                                class="px-3 py-3 text-white"
+                                style="background:#06245f;">
 
+                                <h2 class="h5 fw-bold mb-0">
 
-                                    <article
-                                        class="border rounded-2
-                                               h-100 p-3">
+                                    Related Jobs
 
+                                </h2>
 
-                                        <h3
-                                            class="h6 fw-bold mb-2">
+                            </div>
 
 
-                                            <a
-                                                href="{{ route(
-                                                    'post',
-                                                    $related->slug
-                                                ) }}"
-                                                class="text-decoration-none"
-                                                style="color:#064fc7;">
 
-                                                {{ $related->title }}
+                            {{-- POSTS --}}
 
-                                            </a>
+                            <div class="p-3">
+
+                                <div class="row g-3">
 
 
-                                        </h3>
-
+                                    @foreach(
+                                        $relatedPosts
+                                        as $related
+                                    )
 
                                         <div
-                                            class="small text-secondary">
+                                            class="col-md-6 col-lg-6">
 
 
-                                            {{ $related->published_at
-                                                ? $related->published_at->format('d M Y')
-                                                : $related->created_at->format('d M Y') }}
+                                            <article
+                                                class="border rounded-2
+                                                       h-100 p-3">
+
+
+                                                {{-- RELATED CATEGORIES --}}
+
+                                                @if(
+                                                    $related->categories &&
+                                                    $related->categories->count()
+                                                )
+
+                                                    <div class="mb-2 d-flex flex-wrap gap-1">
+
+                                                        @foreach(
+                                                            $related->categories->take(2)
+                                                            as $relatedCategory
+                                                        )
+
+                                                            <a
+                                                                href="{{ route(
+                                                                    'category',
+                                                                    $relatedCategory->slug
+                                                                ) }}"
+                                                                class="badge text-decoration-none"
+                                                                style="background:#06245f;">
+
+                                                                {{ $relatedCategory->name }}
+
+                                                            </a>
+
+                                                        @endforeach
+
+                                                    </div>
+
+                                                @endif
+
+
+                                                <h3
+                                                    class="h6 fw-bold mb-2">
+
+
+                                                    <a
+                                                        href="{{ route(
+                                                            'post',
+                                                            $related->slug
+                                                        ) }}"
+                                                        class="text-decoration-none"
+                                                        style="color:#064fc7;">
+
+                                                        {{ $related->title }}
+
+                                                    </a>
+
+
+                                                </h3>
+
+
+                                                <div
+                                                    class="small text-secondary">
+
+
+                                                    {{ $related->published_at
+                                                        ? $related->published_at->format('d M Y')
+                                                        : $related->created_at->format('d M Y') }}
+
+
+                                                </div>
+
+
+                                            </article>
 
 
                                         </div>
 
-
-                                    </article>
+                                    @endforeach
 
 
                                 </div>
 
-                            @endforeach
+                            </div>
 
 
                         </div>
 
-                    </div>
 
+                    </section>
 
-                </div>
+                @endif
 
-
-            </section>
-
-        @endif
 
             </div>
 
 
 
-           <div class="col-lg-4">
+            <div class="col-lg-4">
 
                 @include(
                     'layouts.partials.sidebar'

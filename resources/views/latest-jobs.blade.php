@@ -24,6 +24,10 @@
     <div class="container">
 
 
+        {{-- =====================================================
+             BREADCRUMB
+        ====================================================== --}}
+
         <nav
             aria-label="breadcrumb"
             class="mb-3">
@@ -32,7 +36,8 @@
 
                 <li class="breadcrumb-item">
 
-                    <a href="{{ url('/') }}">
+                    <a
+                        href="{{ url('/') }}">
 
                         Home
 
@@ -55,6 +60,10 @@
 
 
 
+        {{-- =====================================================
+             PAGE INTRO
+        ====================================================== --}}
+
         <div
             class="bg-white border rounded-2 shadow-sm p-4 mb-4">
 
@@ -75,6 +84,10 @@
         </div>
 
 
+
+        {{-- =====================================================
+             JOB LIST
+        ====================================================== --}}
 
         <div
             class="bg-white border rounded-2 shadow-sm">
@@ -102,6 +115,10 @@
                         class="latest-job-item">
 
 
+                        {{-- =================================================
+                             POST TITLE
+                        ================================================== --}}
+
                         <h2 class="h5 mb-2">
 
                             <a
@@ -119,9 +136,15 @@
 
 
 
+                        {{-- =================================================
+                             DATE + MULTIPLE CATEGORIES
+                        ================================================== --}}
+
                         <div
                             class="small text-secondary mb-2">
 
+
+                            {{-- DATE --}}
 
                             @if($post->published_at)
 
@@ -139,14 +162,49 @@
 
 
 
-                            @if($post->category)
+                            {{-- CATEGORIES --}}
+
+                            @if(
+                                $post->categories &&
+                                $post->categories->count()
+                            )
 
                                 <span class="ms-2">
 
                                     •
-                                    {{ $post->category->name }}
 
                                 </span>
+
+
+                                @foreach(
+                                    $post->categories
+                                    as $postCategory
+                                )
+
+                                    <a
+                                        href="{{ route(
+                                            'category',
+                                            $postCategory->slug
+                                        ) }}"
+                                        class="text-decoration-none ms-1"
+                                        style="color:#064fc7;">
+
+                                        {{ $postCategory->name }}
+
+                                    </a>
+
+
+                                    @if(!$loop->last)
+
+                                        <span>
+
+                                            ,
+
+                                        </span>
+
+                                    @endif
+
+                                @endforeach
 
                             @endif
 
@@ -154,6 +212,10 @@
                         </div>
 
 
+
+                        {{-- =================================================
+                             DESCRIPTION
+                        ================================================== --}}
 
                         @if(
                             $post->short_description
@@ -178,6 +240,10 @@
                 @empty
 
 
+                    {{-- =================================================
+                         NO JOBS
+                    ================================================== --}}
+
                     <div class="text-center py-5">
 
                         <h3 class="h5">
@@ -200,6 +266,10 @@
                 @endforelse
 
 
+
+                {{-- =====================================================
+                     PAGINATION
+                ====================================================== --}}
 
                 @if($posts->hasPages())
 

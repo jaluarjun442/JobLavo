@@ -18,8 +18,6 @@ class Post extends Model
         |--------------------------------------------------------------------------
         */
 
-        'category_id',
-
         'title',
 
         'slug',
@@ -105,16 +103,12 @@ class Post extends Model
 
     /*
     |--------------------------------------------------------------------------
-    | Category Relationship
+    | Categories
     |--------------------------------------------------------------------------
+    |
+    | A post can belong to multiple categories.
+    |
     */
-
-    public function category()
-    {
-        return $this->belongsTo(
-            Category::class
-        );
-    }
 
     public function categories()
     {

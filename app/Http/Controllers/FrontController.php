@@ -14,12 +14,12 @@ class FrontController extends Controller
     public function home()
     {
         /*
-    |--------------------------------------------------------------------------
-    | Home Small Tiles
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Home Small Tiles
+        |--------------------------------------------------------------------------
+        */
 
-        $homeTileCategories = \App\Models\Category::query()
+        $homeTileCategories = Category::query()
 
             ->where('status', true)
 
@@ -34,14 +34,13 @@ class FrontController extends Controller
             ->get();
 
 
-
         /*
-    |--------------------------------------------------------------------------
-    | Home Large Categories
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Home Large Categories
+        |--------------------------------------------------------------------------
+        */
 
-        $homeLargeCategories = \App\Models\Category::query()
+        $homeLargeCategories = Category::query()
 
             ->where('status', true)
 
@@ -53,6 +52,7 @@ class FrontController extends Controller
                 'posts' => function ($query) {
 
                     $query
+                        ->with('categories')
                         ->where('status', 'published')
                         ->whereNotNull('published_at')
                         ->where(
@@ -72,10 +72,10 @@ class FrontController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Limit Large Section Posts
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Limit Large Section Posts
+        |--------------------------------------------------------------------------
+        */
 
         $homeLargeCategories->each(function ($category) {
 
@@ -86,16 +86,15 @@ class FrontController extends Controller
         });
 
 
-
         /*
-    |--------------------------------------------------------------------------
-    | Latest Updates
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Latest Updates
+        |--------------------------------------------------------------------------
+        */
 
-        $latestPosts = \App\Models\Post::query()
+        $latestPosts = Post::query()
 
-            ->with('category')
+            ->with('categories')
 
             ->where('status', 'published')
 
@@ -114,12 +113,11 @@ class FrontController extends Controller
             ->get();
 
 
-
         /*
-    |--------------------------------------------------------------------------
-    | Home View
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Home View
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'welcome',
@@ -130,11 +128,16 @@ class FrontController extends Controller
             )
         );
     }
+
+
+    /**
+     * Latest Jobs
+     */
     public function latestJobs()
     {
-        $posts = \App\Models\Post::query()
+        $posts = Post::query()
 
-            ->with('category')
+            ->with('categories')
 
             ->where('status', 'published')
 
@@ -158,9 +161,14 @@ class FrontController extends Controller
             compact('posts')
         );
     }
+
+
+    /**
+     * Category Page
+     */
     public function category($slug)
     {
-        $category = \App\Models\Category::query()
+        $category = Category::query()
 
             ->with([
                 'children' => function ($query) {
@@ -180,17 +188,17 @@ class FrontController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Category IDs
-    |--------------------------------------------------------------------------
-    |
-    | Parent category:
-    | current category + all direct sub-categories
-    |
-    | Sub-category:
-    | only itself
-    |
-    */
+        |--------------------------------------------------------------------------
+        | Category IDs
+        |--------------------------------------------------------------------------
+        |
+        | Parent category:
+        | current category + all direct sub-categories
+        |
+        | Sub-category:
+        | only itself
+        |
+        */
 
         $categoryIds = collect([
             $category->id
@@ -206,18 +214,33 @@ class FrontController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Posts
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Posts
+        |--------------------------------------------------------------------------
+        |
+        | A post can belong to multiple categories.
+        |
+        | Therefore we use whereHas('categories')
+        | instead of category_id.
+        |
+        */
 
-        $posts = \App\Models\Post::query()
+        $posts = Post::query()
 
-            ->with('category')
+            ->with('categories')
 
-            ->whereIn(
-                'category_id',
-                $categoryIds->unique()->values()->all()
+            ->whereHas(
+                'categories',
+                function ($query) use ($categoryIds) {
+
+                    $query->whereIn(
+                        'categories.id',
+                        $categoryIds
+                            ->unique()
+                            ->values()
+                            ->all()
+                    );
+                }
             )
 
             ->where('status', 'published')
@@ -238,10 +261,10 @@ class FrontController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | SEO
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | SEO
+        |--------------------------------------------------------------------------
+        */
 
         $seoTitle = $category->seo_title
             ?: $category->name . ' - Latest Government Jobs';
@@ -264,26 +287,90 @@ class FrontController extends Controller
             )
         );
     }
+
+
     /**
      * Single Post
      */
     public function post($slug)
     {
-        $post = Post::with('category')
+        $post = Post::with('categories')
+
             ->where('slug', $slug)
+
             ->where('status', 'published')
+
             ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+
+            ->where(
+                'published_at',
+                '<=',
+                now()
+            )
+
             ->firstOrFail();
 
 
-        $relatedPosts = Post::where('category_id', $post->category_id)
+        /*
+        |--------------------------------------------------------------------------
+        | Related Posts
+        |--------------------------------------------------------------------------
+        |
+        | A post can have multiple categories.
+        |
+        | Example:
+        |
+        | Current Post:
+        | Gujarat + Latest Jobs + Police
+        |
+        | Related posts can match ANY of these categories.
+        |
+        */
+
+        $categoryIds = $post->categories
+            ->pluck('id')
+            ->unique()
+            ->values()
+            ->all();
+
+
+        $relatedPosts = Post::query()
+
+            ->with('categories')
+
             ->where('id', '!=', $post->id)
+
             ->where('status', 'published')
+
             ->whereNotNull('published_at')
-            ->where('published_at', '<=', now())
+
+            ->where(
+                'published_at',
+                '<=',
+                now()
+            )
+
+            ->when(
+                !empty($categoryIds),
+                function ($query) use ($categoryIds) {
+
+                    $query->whereHas(
+                        'categories',
+                        function ($categoryQuery) use ($categoryIds) {
+
+                            $categoryQuery->whereIn(
+                                'categories.id',
+                                $categoryIds
+                            );
+                        }
+                    );
+                }
+            )
+
             ->latest('published_at')
+
             ->take(5)
+
             ->get();
 
 
@@ -297,13 +384,19 @@ class FrontController extends Controller
     }
 
 
+    /**
+     * Search
+     */
     public function search(Request $request)
     {
-        $query = trim($request->get('q', ''));
+        $query = trim(
+            $request->get('q', '')
+        );
 
-        $posts = \App\Models\Post::query()
 
-            ->with('category')
+        $posts = Post::query()
+
+            ->with('categories')
 
             ->where('status', 'published')
 
@@ -315,27 +408,40 @@ class FrontController extends Controller
                 now()
             )
 
-            ->when($query, function ($builder) use ($query) {
+            ->when(
+                $query,
+                function ($builder) use ($query) {
 
-                $builder->where(function ($q) use ($query) {
+                    $builder->where(
+                        function ($q) use ($query) {
 
-                    $q->where('title', 'LIKE', '%' . $query . '%')
+                            $q->where(
+                                'title',
+                                'LIKE',
+                                '%' . $query . '%'
+                            )
 
-                        ->orWhere('excerpt', 'LIKE', '%' . $query . '%')
+                            ->orWhere(
+                                'excerpt',
+                                'LIKE',
+                                '%' . $query . '%'
+                            )
 
-                        ->orWhere(
-                            'short_description',
-                            'LIKE',
-                            '%' . $query . '%'
-                        )
+                            ->orWhere(
+                                'short_description',
+                                'LIKE',
+                                '%' . $query . '%'
+                            )
 
-                        ->orWhere(
-                            'content',
-                            'LIKE',
-                            '%' . $query . '%'
-                        );
-                });
-            })
+                            ->orWhere(
+                                'content',
+                                'LIKE',
+                                '%' . $query . '%'
+                            );
+                        }
+                    );
+                }
+            )
 
             ->latest('published_at')
 
@@ -352,6 +458,7 @@ class FrontController extends Controller
             )
         );
     }
+
 
     /**
      * Static Pages
@@ -420,10 +527,10 @@ class FrontController extends Controller
         $contents = [
 
             /*
-        |--------------------------------------------------------------------------
-        | ABOUT US
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | ABOUT US
+            |--------------------------------------------------------------------------
+            */
 
             'about-us' => <<<'HTML'
 
@@ -542,10 +649,10 @@ HTML,
 
 
             /*
-        |--------------------------------------------------------------------------
-        | PRIVACY POLICY
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | PRIVACY POLICY
+            |--------------------------------------------------------------------------
+            */
 
             'privacy-policy' => <<<'HTML'
 
@@ -669,10 +776,10 @@ HTML,
 
 
             /*
-        |--------------------------------------------------------------------------
-        | TERMS
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | TERMS
+            |--------------------------------------------------------------------------
+            */
 
             'terms-and-conditions' => <<<'HTML'
 
@@ -793,10 +900,10 @@ HTML,
 
 
             /*
-        |--------------------------------------------------------------------------
-        | DISCLAIMER
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | DISCLAIMER
+            |--------------------------------------------------------------------------
+            */
 
             'disclaimer' => <<<'HTML'
 
@@ -883,8 +990,8 @@ deadline.
 
 <p>
 Government recruitment information can change because of revised vacancies,
-corrigenda, court orders, examination schedules, deadline extensions or
-other official announcements. JobLavo may update published pages when such
+corrigenda, court orders, examination schedules, deadline extensions or other
+official announcements. JobLavo may update published pages when such
 information becomes available.
 </p>
 
@@ -903,6 +1010,7 @@ HTML,
 
         return $contents[$page] ?? '';
     }
+
 
     /**
      * Contact Page
@@ -948,14 +1056,14 @@ HTML,
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Email / Database Integration
-    |--------------------------------------------------------------------------
-    |
-    | Later we will save the contact request in database
-    | and/or send notification email.
-    |
-    */
+        |--------------------------------------------------------------------------
+        | Email / Database Integration
+        |--------------------------------------------------------------------------
+        |
+        | Later we will save the contact request in database
+        | and/or send notification email.
+        |
+        */
 
 
         return redirect()
@@ -965,6 +1073,8 @@ HTML,
                 'Thank you for contacting us. Your message has been received.'
             );
     }
+
+
     /**
      * 404 Page
      */
