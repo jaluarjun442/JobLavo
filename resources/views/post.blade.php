@@ -372,7 +372,7 @@
 
                         {{-- PUBLISHED DATE --}}
 
-                        <div class="small text-secondary">
+                        <!-- <div class="small text-secondary">
 
                             Published:
 
@@ -384,7 +384,7 @@
 
                             </strong>
 
-                        </div>
+                        </div> -->
 
 
                     </div>
@@ -810,7 +810,7 @@
                                                 </h3>
 
 
-                                                <div
+                                                <!-- <div
                                                     class="small text-secondary">
 
 
@@ -819,7 +819,7 @@
                                                         : $related->created_at->format('d M Y') }}
 
 
-                                                </div>
+                                                </div> -->
 
 
                                             </article>

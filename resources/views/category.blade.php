@@ -257,7 +257,7 @@
                                     class="small text-secondary mb-2">
 
 
-                                    {{-- DATE --}}
+                                    <!-- {{-- DATE --}}
 
                                     @if($post->published_at)
 
@@ -271,7 +271,7 @@
                                             'd M Y'
                                         ) }}
 
-                                    @endif
+                                    @endif -->
 
 
 
