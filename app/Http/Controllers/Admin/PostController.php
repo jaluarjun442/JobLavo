@@ -437,9 +437,14 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-
-            'category_id' => [
+            'category_ids' => [
                 'required',
+                'array',
+                'min:1',
+            ],
+
+            'category_ids.*' => [
+                'integer',
                 'exists:categories,id',
             ],
 
@@ -647,8 +652,11 @@ class PostController extends Controller
     | Create Post
     |--------------------------------------------------------------------------
     */
-        $post = Post::create($validated);
+        $categoryIds = $validated['category_ids'];
 
+        unset($validated['category_ids']);
+        $post = Post::create($validated);
+        $post->categories()->sync($categoryIds);
 
         /*
 |--------------------------------------------------------------------------
@@ -730,8 +738,14 @@ class PostController extends Controller
     {
         $validated = $request->validate([
 
-            'category_id' => [
+            'category_ids' => [
                 'required',
+                'array',
+                'min:1',
+            ],
+
+            'category_ids.*' => [
+                'integer',
                 'exists:categories,id',
             ],
 
@@ -783,7 +797,7 @@ class PostController extends Controller
 
             'official_website' => [
                 'nullable',
-                'url',
+                'string',
                 'max:255',
             ],
 
@@ -899,7 +913,13 @@ class PostController extends Controller
     |--------------------------------------------------------------------------
     */
 
+        $categoryIds = $validated['category_ids'];
+
+        unset($validated['category_ids']);
+
         $post->update($validated);
+
+        $post->categories()->sync($categoryIds);
         $this->syncPostSitemaps();
 
         return redirect()

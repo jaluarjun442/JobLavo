@@ -115,4 +115,12 @@ class Post extends Model
             Category::class
         );
     }
+
+    public function categories()
+    {
+        return $this->belongsToMany(
+            Category::class,
+            'category_post'
+        );
+    }
 }

@@ -283,7 +283,7 @@
 
                         {{-- HOME --}}
 
-                        <li class="nav-item">
+                        <li class="nav-item nav-item-des">
 
                             <a href="{{ url('/') }}"
                                 class="nav-link">
@@ -299,7 +299,7 @@
 
                         @foreach($headerCategories as $category)
 
-                        <li class="nav-item">
+                        <li class="nav-item nav-item-des">
 
                             <a
                                 href="{{ route('category', $category->slug) }}"
@@ -315,7 +315,7 @@
 
                         {{-- ABOUT --}}
 
-                        <li class="nav-item">
+                        <li class="nav-item nav-item-des">
 
                             <a href="{{ url('/about-us') }}"
                                 class="nav-link">
@@ -330,7 +330,7 @@
 
                         {{-- CONTACT --}}
 
-                        <li class="nav-item">
+                        <li class="nav-item nav-item-des">
 
                             <a href="{{ url('/contact') }}"
                                 class="nav-link">
@@ -345,7 +345,7 @@
 
                         {{-- SEARCH --}}
 
-                        <li class="nav-item
+                        <li class="nav-item nav-item-des
                                    ms-lg-2
                                    mt-2
                                    mt-lg-0">
