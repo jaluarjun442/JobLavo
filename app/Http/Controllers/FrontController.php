@@ -8,16 +8,13 @@ use Illuminate\Http\Request;
 
 class FrontController extends Controller
 {
-    /**
-     * Home Page
-     */
     public function home()
     {
         /*
-        |--------------------------------------------------------------------------
-        | Home Small Tiles
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Home Small Tiles
+    |--------------------------------------------------------------------------
+    */
 
         $homeTileCategories = Category::query()
 
@@ -35,10 +32,10 @@ class FrontController extends Controller
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Home Large Categories
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Home Large Categories
+    |--------------------------------------------------------------------------
+    */
 
         $homeLargeCategories = Category::query()
 
@@ -48,22 +45,6 @@ class FrontController extends Controller
 
             ->whereNull('parent_id')
 
-            ->with([
-                'posts' => function ($query) {
-
-                    $query
-                        ->with('categories')
-                        ->where('status', 'published')
-                        ->whereNotNull('published_at')
-                        ->where(
-                            'published_at',
-                            '<=',
-                            now()
-                        )
-                        ->latest('published_at');
-                }
-            ])
-
             ->orderBy('sort_order')
 
             ->orderBy('name')
@@ -72,25 +53,95 @@ class FrontController extends Controller
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Limit Large Section Posts
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Load Latest Posts For Each Category
+    |--------------------------------------------------------------------------
+    |
+    | Use category_post pivot through whereHas('categories').
+    | This supports posts assigned to multiple categories.
+    |
+    */
 
         $homeLargeCategories->each(function ($category) {
 
+            /*
+    |--------------------------------------------------------------------------
+    | Parent + Child Category IDs
+    |--------------------------------------------------------------------------
+    */
+
+            $categoryIds = collect([
+                $category->id
+            ]);
+
+            $childCategoryIds = Category::query()
+                ->where('parent_id', $category->id)
+                ->where('status', true)
+                ->pluck('id');
+
+            $categoryIds = $categoryIds
+                ->merge($childCategoryIds)
+                ->unique()
+                ->values()
+                ->all();
+
+
+            /*
+    |--------------------------------------------------------------------------
+    | Posts From Parent + Child Categories
+    |--------------------------------------------------------------------------
+    */
+
+            $posts = Post::query()
+
+                ->with('categories')
+
+                ->whereHas(
+                    'categories',
+                    function ($query) use ($categoryIds) {
+
+                        $query->whereIn(
+                            'categories.id',
+                            $categoryIds
+                        );
+                    }
+                )
+
+                ->where('status', 'published')
+
+                ->whereNotNull('published_at')
+
+                ->where(
+                    'published_at',
+                    '<=',
+                    now()
+                )
+
+                ->latest('published_at')
+
+                ->take(5)
+
+                ->get();
+
+
+            /*
+    |--------------------------------------------------------------------------
+    | Attach Posts To Home Category
+    |--------------------------------------------------------------------------
+    */
+
             $category->setRelation(
                 'posts',
-                $category->posts->take(5)
+                $posts
             );
         });
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Latest Updates
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Latest Updates
+    |--------------------------------------------------------------------------
+    */
 
         $latestPosts = Post::query()
 
@@ -114,10 +165,10 @@ class FrontController extends Controller
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Home View
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Home View
+    |--------------------------------------------------------------------------
+    */
 
         return view(
             'welcome',
@@ -128,8 +179,6 @@ class FrontController extends Controller
             )
         );
     }
-
-
     /**
      * Latest Jobs
      */
@@ -421,23 +470,23 @@ class FrontController extends Controller
                                 '%' . $query . '%'
                             )
 
-                            ->orWhere(
-                                'excerpt',
-                                'LIKE',
-                                '%' . $query . '%'
-                            )
+                                ->orWhere(
+                                    'excerpt',
+                                    'LIKE',
+                                    '%' . $query . '%'
+                                )
 
-                            ->orWhere(
-                                'short_description',
-                                'LIKE',
-                                '%' . $query . '%'
-                            )
+                                ->orWhere(
+                                    'short_description',
+                                    'LIKE',
+                                    '%' . $query . '%'
+                                )
 
-                            ->orWhere(
-                                'content',
-                                'LIKE',
-                                '%' . $query . '%'
-                            );
+                                ->orWhere(
+                                    'content',
+                                    'LIKE',
+                                    '%' . $query . '%'
+                                );
                         }
                     );
                 }
