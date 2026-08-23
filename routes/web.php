@@ -250,6 +250,31 @@ Route::middleware(['auth', 'admin'])
             \App\Http\Controllers\Admin\SitemapController::class,
             'refresh'
         ])->name('sitemaps.refresh');
+
+        /*
+|--------------------------------------------------------------------------
+| Logs
+|--------------------------------------------------------------------------
+*/
+
+        Route::get('/logs', [
+            \App\Http\Controllers\Admin\LogController::class,
+            'index'
+        ])->name('logs.index');
+
+
+        Route::get('/logs/download', [
+            \App\Http\Controllers\Admin\LogController::class,
+            'download'
+        ])->name('logs.download');
+
+
+        Route::post('/logs/clear', [
+            \App\Http\Controllers\Admin\LogController::class,
+            'clear'
+        ])->name('logs.clear');
+
+
         Route::post('/logout', [
             AdminController::class,
             'logout'

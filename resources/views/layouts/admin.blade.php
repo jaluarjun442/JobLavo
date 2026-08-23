@@ -96,6 +96,18 @@
                     </li>
                     <li class="nav-item">
 
+                        <a
+                            href="{{ route('admin.logs.index') }}"
+                            class="nav-link">
+
+                            Logs
+
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item">
+
                         <a href="{{ url('/') }}"
                             target="_blank"
                             class="nav-link">
