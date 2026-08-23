@@ -227,7 +227,7 @@
 
                     <div class="site-logo">
 
-                        GL
+                        JL
 
                     </div>
 
