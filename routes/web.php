@@ -223,7 +223,16 @@ Route::middleware(['auth', 'admin'])
             PostController::class,
             'data'
         ])->name('posts.data');
+        Route::post('/posts/add', [
+            PostController::class,
+            'add'
+        ])->name('posts.add');
 
+
+        Route::post('/posts/bulk-add', [
+            PostController::class,
+            'bulkAdd'
+        ])->name('posts.bulk-add');
         /*
 |--------------------------------------------------------------------------
 | Sitemaps

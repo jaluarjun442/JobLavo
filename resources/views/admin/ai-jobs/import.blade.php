@@ -1,5 +1,64 @@
 @extends('layouts.admin')
+@push('styles')
 
+<link
+    href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+    rel="stylesheet">
+
+<style>
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--default
+    .select2-selection--multiple {
+
+        min-height: 38px;
+
+        border: 1px solid #dee2e6;
+
+        border-radius: 6px;
+
+        padding: 2px 5px;
+    }
+
+    .select2-container--default
+    .select2-selection--multiple
+    .select2-selection__choice {
+
+        background: #0d6efd;
+
+        border: 0;
+
+        color: #fff;
+
+        padding: 3px 8px;
+
+        margin-top: 4px;
+    }
+
+    .select2-container--default
+    .select2-selection--multiple
+    .select2-selection__choice__remove {
+
+        color: #fff;
+
+        border-right: 0;
+
+        margin-right: 5px;
+    }
+
+    .select2-container--default
+    .select2-search--inline
+    .select2-search__field {
+
+        margin-top: 5px;
+    }
+
+</style>
+
+@endpush
 @section('title', 'AI Job Import | Admin')
 
 @section('content')
@@ -13,17 +72,17 @@
         </h1>
 
         <p class="text-secondary mb-0">
-            Paste AI generated job JSON and quickly add jobs without opening the Add Post page.
+            Import AI generated jobs and publish them quickly.
         </p>
 
     </div>
 
 
     <a
-        href="{{ route('admin.posts.index') }}"
+        href="{{ route('admin.posts.create') }}"
         class="btn btn-outline-secondary">
 
-        ← Back to Posts
+        ← Add Post
 
     </a>
 
@@ -101,10 +160,11 @@
      IMPORT QUEUE
 ========================================================= --}}
 
-@if(count($jobs))
+@if($jobs->count())
 
 
 <div class="card border-0 shadow-sm">
+
 
     {{-- =====================================================
          QUEUE HEADER
@@ -112,140 +172,177 @@
 
     <div class="card-header bg-white border-0 py-3">
 
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+
+        <div class="d-flex flex-column gap-3">
 
 
-            <div>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
 
-                <h2 class="h5 fw-bold mb-1">
-                    Import Queue
-                </h2>
+                <div>
 
-                <div class="text-secondary small">
+                    <h2 class="h5 fw-bold mb-1">
+                        Import Queue
+                    </h2>
 
-                    {{ count($jobs) }} job(s) waiting to be added
+                    <div class="text-secondary small">
+
+                        {{ $jobs->count() }} job(s) waiting to be added
+
+                    </div>
 
                 </div>
+
+
+                <form
+                    method="POST"
+                    action="{{ route('admin.ai-jobs.import.clear') }}"
+                    onsubmit="return confirm('Clear all imported jobs?');">
+
+                    @csrf
+
+                    <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-danger">
+
+                        Clear All
+
+                    </button>
+
+                </form>
 
             </div>
 
 
 
-            {{-- CLEAR ALL --}}
+            {{-- =================================================
+                 BULK ACTION BAR
+            ================================================== --}}
 
-            <form
-                method="POST"
-                action="{{ route('admin.ai-jobs.import.clear') }}"
-                onsubmit="return confirm('Clear all imported jobs?');">
-
-                @csrf
-
-                <button
-                    type="submit"
-                    class="btn btn-sm btn-outline-danger">
-
-                    Clear All
-
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
+            <div class="border rounded p-3 bg-light">
 
 
-
-    {{-- =====================================================
-         BULK CATEGORY SELECTION
-    ====================================================== --}}
-
-    <div class="card-body border-top border-bottom bg-light">
-
-        <div class="row g-3 align-items-end">
+                <div class="row g-2 align-items-end">
 
 
-            {{-- CATEGORY SELECT --}}
+                    {{-- SELECT ALL --}}
 
-            <div class="col-lg-8">
+                    <div class="col-auto">
 
-                <label
-                    for="bulk_categories"
-                    class="form-label fw-semibold">
+                        <div class="form-check">
 
-                    Select Categories
+                            <input
+                                type="checkbox"
+                                class="form-check-input"
+                                id="selectAllJobs">
 
-                </label>
+                            <label
+                                for="selectAllJobs"
+                                class="form-check-label fw-semibold">
 
+                                Select All
 
-                <select
-                    id="bulk_categories"
-                    name="category_ids[]"
-                    class="form-select js-category-select"
-                    multiple
-                    data-placeholder="Select one or multiple categories">
+                            </label>
 
-                    @foreach($categories as $category)
+                        </div>
 
-                        <option
-                            value="{{ $category->id }}">
-
-                            {{ $category->name }}
-
-                        </option>
-
-                    @endforeach
-
-                </select>
+                    </div>
 
 
-                <div class="form-text">
 
-                    Select one or more categories. These categories
-                    will be assigned to the selected jobs.
+                    {{-- CATEGORY --}}
+
+                    <div class="col-md">
+
+                        <label
+                            for="bulkCategoryIds"
+                            class="form-label small fw-semibold mb-1">
+
+                            Categories
+
+                        </label>
+
+
+                        <select
+                            name="category_ids[]"
+                            id="bulkCategoryIds"
+                            class="form-select"
+                            multiple
+                            required>
+
+                            @foreach($categories as $category)
+
+                                <option
+                                    value="{{ $category->id }}">
+
+                                    {{ $category->name }}
+
+                                </option>
+
+
+                                @foreach($category->children as $child)
+
+                                    <option
+                                        value="{{ $child->id }}">
+
+                                        — {{ $child->name }}
+
+                                    </option>
+
+                                @endforeach
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+
+                    {{-- ADD SELECTED --}}
+
+                    <div class="col-auto">
+
+
+                        <form
+                            method="POST"
+                            action="{{ route('admin.posts.bulk-add') }}"
+                            id="bulkAddForm">
+
+                            @csrf
+
+
+                            <div id="selectedJobInputs"></div>
+
+
+                            <div id="selectedCategoryInputs"></div>
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                                id="addSelectedBtn"
+                                disabled>
+
+                                Add Selected
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
 
                 </div>
 
-            </div>
 
+                <div
+                    class="small text-secondary mt-2"
+                    id="selectionInfo">
 
-
-            {{-- SELECT ALL --}}
-
-            <div class="col-lg-4">
-
-                <div class="d-flex flex-wrap gap-2">
-
-                    <button
-                        type="button"
-                        id="selectAllJobs"
-                        class="btn btn-outline-primary">
-
-                        Select All
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        id="clearSelectedJobs"
-                        class="btn btn-outline-secondary">
-
-                        Clear Selection
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        id="addSelectedJobs"
-                        class="btn btn-primary">
-
-                        Add Selected
-
-                    </button>
+                    0 jobs selected
 
                 </div>
+
 
             </div>
 
@@ -266,131 +363,161 @@
         @foreach($jobs as $index => $job)
 
 
+            @php
+
+                $content = $job->content;
+
+                $title =
+                    $content['title']
+                    ?? 'Untitled Job';
+
+                $category =
+                    $content['category']
+                    ?? '';
+
+                $excerpt =
+                    $content['excerpt']
+                    ?? '';
+
+            @endphp
+
+
             <div class="list-group-item py-3">
 
 
-                <div
-                    class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                <div class="d-flex align-items-start gap-3">
 
 
-                    {{-- =================================================
-                         JOB INFO
-                    ================================================== --}}
+                    {{-- CHECKBOX --}}
 
-                    <div class="d-flex gap-3 flex-grow-1">
+                    <div class="pt-1">
 
-
-                        {{-- CHECKBOX --}}
-
-                        <div class="pt-1">
-
-                            <input
-                                type="checkbox"
-                                class="form-check-input job-checkbox"
-                                value="{{ $index }}"
-                                aria-label="Select {{ $job['title'] ?? 'job' }}">
-
-                        </div>
-
-
-
-                        {{-- CONTENT --}}
-
-                        <div class="flex-grow-1">
-
-
-                            <div class="d-flex align-items-center gap-2 mb-1">
-
-                                <span class="badge bg-primary">
-
-                                    #{{ $index + 1 }}
-
-                                </span>
-
-
-                                <span class="badge bg-light text-dark border">
-
-                                    Ready
-
-                                </span>
-
-                            </div>
-
-
-
-                            <h3 class="h6 fw-bold mb-1">
-
-                                {{ $job['title'] ?? 'Untitled Job' }}
-
-                            </h3>
-
-
-
-                            @if(!empty($job['category']))
-
-                                <div class="small text-secondary">
-
-                                    Original Category:
-                                    {{ $job['category'] }}
-
-                                </div>
-
-                            @endif
-
-
-
-                            @if(!empty($job['excerpt']))
-
-                                <div class="small text-secondary mt-2">
-
-                                    {{ \Illuminate\Support\Str::limit(
-                                        strip_tags($job['excerpt']),
-                                        220
-                                    ) }}
-
-                                </div>
-
-                            @endif
-
-
-                        </div>
+                        <input
+                            type="checkbox"
+                            class="form-check-input job-checkbox"
+                            value="{{ $job->id }}"
+                            aria-label="Select {{ $title }}">
 
                     </div>
 
 
 
-                    {{-- =================================================
-                         ACTIONS
-                    ================================================== --}}
+                    {{-- JOB INFO --}}
 
-                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                    <div class="flex-grow-1">
+
+
+                        <div class="d-flex align-items-center gap-2 mb-1">
+
+                            <span class="badge bg-primary">
+
+                                #{{ $index + 1 }}
+
+                            </span>
+
+
+                            <span class="badge bg-light text-dark border">
+
+                                Pending
+
+                            </span>
+
+                        </div>
+
+
+                        <h3 class="h6 fw-bold mb-1">
+
+                            {{ $title }}
+
+                        </h3>
+
+
+                        @if($category)
+
+                            <div class="small text-secondary">
+
+                                @if(is_array($category))
+
+                                    {{ json_encode($category) }}
+
+                                @else
+
+                                    {{ $category }}
+
+                                @endif
+
+                            </div>
+
+                        @endif
+
+
+                        @if($excerpt)
+
+                            <div class="small text-secondary mt-2">
+
+                                {{ \Illuminate\Support\Str::limit(
+                                    is_array($excerpt)
+                                        ? json_encode($excerpt)
+                                        : $excerpt,
+                                    180
+                                ) }}
+
+                            </div>
+
+                        @endif
+
+
+                    </div>
+
+
+
+                    {{-- ACTIONS --}}
+
+                    <div class="d-flex align-items-center gap-2">
 
 
                         {{-- PREVIEW --}}
 
                         <button
                             type="button"
-                            class="btn btn-sm btn-outline-primary preview-job"
+                            class="btn btn-sm btn-outline-primary preview-job-btn"
                             data-bs-toggle="modal"
-                            data-bs-target="#jobPreviewModal{{ $index }}">
+                            data-bs-target="#jobPreviewModal"
+                            data-job='@json($content)'>
 
                             Preview
 
                         </button>
 
 
+                        {{-- DIRECT ADD --}}
 
-                        {{-- ADD THIS POST --}}
+                        <form
+                            method="POST"
+                            action="{{ route('admin.posts.add') }}"
+                            class="direct-add-form">
 
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-primary add-single-job"
-                            data-job-index="{{ $index }}">
+                            @csrf
 
-                            Add This Post
 
-                        </button>
+                            <input
+                                type="hidden"
+                                name="job_id"
+                                value="{{ $job->id }}">
 
+
+                            <div class="direct-category-inputs"></div>
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-sm btn-primary direct-add-btn">
+
+                                Add
+
+                            </button>
+
+                        </form>
 
 
                         {{-- REMOVE --}}
@@ -399,7 +526,7 @@
                             method="POST"
                             action="{{ route(
                                 'admin.ai-jobs.import.remove',
-                                $index
+                                $job
                             ) }}"
                             onsubmit="return confirm('Remove this job from queue?');">
 
@@ -421,6 +548,7 @@
 
                 </div>
 
+
             </div>
 
 
@@ -433,505 +561,8 @@
 </div>
 
 
-
-{{-- =========================================================
-     PREVIEW MODALS
-========================================================= --}}
-
-@foreach($jobs as $index => $job)
-
-
-<div
-    class="modal fade"
-    id="jobPreviewModal{{ $index }}"
-    tabindex="-1"
-    aria-labelledby="jobPreviewLabel{{ $index }}"
-    aria-hidden="true">
-
-
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-
-
-        <div class="modal-content">
-
-
-            {{-- MODAL HEADER --}}
-
-            <div class="modal-header">
-
-                <div>
-
-                    <h5
-                        class="modal-title fw-bold"
-                        id="jobPreviewLabel{{ $index }}">
-
-                        {{ $job['title'] ?? 'Untitled Job' }}
-
-                    </h5>
-
-                    <div class="small text-secondary mt-1">
-
-                        Job #{{ $index + 1 }}
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close">
-
-                </button>
-
-            </div>
-
-
-
-            {{-- MODAL BODY --}}
-
-            <div class="modal-body">
-
-
-                {{-- BASIC INFORMATION --}}
-
-                <div class="mb-4">
-
-                    <h6 class="fw-bold border-bottom pb-2">
-                        Basic Information
-                    </h6>
-
-
-                    <div class="row g-3">
-
-
-                        @if(!empty($job['title']))
-
-                            <div class="col-md-12">
-
-                                <div class="small text-muted">
-                                    Title
-                                </div>
-
-                                <div class="fw-semibold">
-                                    {{ $job['title'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['category']))
-
-                            <div class="col-md-6">
-
-                                <div class="small text-muted">
-                                    Original Category
-                                </div>
-
-                                <div>
-                                    {{ $job['category'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['slug']))
-
-                            <div class="col-md-6">
-
-                                <div class="small text-muted">
-                                    Slug
-                                </div>
-
-                                <div>
-                                    {{ $job['slug'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['seo_title']))
-
-                            <div class="col-md-12">
-
-                                <div class="small text-muted">
-                                    SEO Title
-                                </div>
-
-                                <div>
-                                    {{ $job['seo_title'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['meta_description']))
-
-                            <div class="col-md-12">
-
-                                <div class="small text-muted">
-                                    Meta Description
-                                </div>
-
-                                <div>
-                                    {{ $job['meta_description'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-                    </div>
-
-                </div>
-
-
-
-                {{-- DESCRIPTION --}}
-
-                @if(
-                    !empty($job['excerpt']) ||
-                    !empty($job['short_description'])
-                )
-
-                    <div class="mb-4">
-
-                        <h6 class="fw-bold border-bottom pb-2">
-                            Description
-                        </h6>
-
-
-                        @if(!empty($job['short_description']))
-
-                            <div class="mb-3">
-
-                                <div class="small text-muted mb-1">
-                                    Short Description
-                                </div>
-
-                                <div>
-                                    {{ $job['short_description'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-                        @if(!empty($job['excerpt']))
-
-                            <div>
-
-                                <div class="small text-muted mb-1">
-                                    Excerpt
-                                </div>
-
-                                <div>
-                                    {{ $job['excerpt'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-                    </div>
-
-                @endif
-
-
-
-                {{-- CONTENT --}}
-
-                @if(!empty($job['content']))
-
-                    <div class="mb-4">
-
-                        <h6 class="fw-bold border-bottom pb-2">
-                            Full Content
-                        </h6>
-
-                        <div
-                            class="border rounded p-3 bg-light"
-                            style="white-space:pre-wrap;">
-
-                            {{ strip_tags($job['content']) }}
-
-                        </div>
-
-                    </div>
-
-                @endif
-
-
-
-                {{-- JOB DETAILS --}}
-
-                <div class="mb-4">
-
-                    <h6 class="fw-bold border-bottom pb-2">
-                        Job Details
-                    </h6>
-
-
-                    <div class="row g-3">
-
-
-                        @if(!empty($job['important_dates']))
-
-                            <div class="col-md-6">
-
-                                <div class="small text-muted">
-                                    Important Dates
-                                </div>
-
-                                <div>
-                                    {{ $job['important_dates'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['application_fee']))
-
-                            <div class="col-md-6">
-
-                                <div class="small text-muted">
-                                    Application Fee
-                                </div>
-
-                                <div>
-                                    {{ $job['application_fee'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['age_limit']))
-
-                            <div class="col-md-6">
-
-                                <div class="small text-muted">
-                                    Age Limit
-                                </div>
-
-                                <div>
-                                    {{ $job['age_limit'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['vacancy_details']))
-
-                            <div class="col-md-6">
-
-                                <div class="small text-muted">
-                                    Vacancy Details
-                                </div>
-
-                                <div>
-                                    {{ $job['vacancy_details'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['eligibility']))
-
-                            <div class="col-md-12">
-
-                                <div class="small text-muted">
-                                    Eligibility
-                                </div>
-
-                                <div>
-                                    {{ $job['eligibility'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['selection_process']))
-
-                            <div class="col-md-12">
-
-                                <div class="small text-muted">
-                                    Selection Process
-                                </div>
-
-                                <div>
-                                    {{ $job['selection_process'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-
-                        @if(!empty($job['salary_details']))
-
-                            <div class="col-md-6">
-
-                                <div class="small text-muted">
-                                    Salary Details
-                                </div>
-
-                                <div>
-                                    {{ $job['salary_details'] }}
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-                    </div>
-
-                </div>
-
-
-
-                {{-- HOW TO APPLY --}}
-
-                @if(!empty($job['how_to_apply']))
-
-                    <div class="mb-4">
-
-                        <h6 class="fw-bold border-bottom pb-2">
-                            How to Apply
-                        </h6>
-
-                        <div>
-                            {{ $job['how_to_apply'] }}
-                        </div>
-
-                    </div>
-
-                @endif
-
-
-
-                {{-- IMPORTANT LINKS --}}
-
-                @if(!empty($job['important_links']))
-
-                    <div class="mb-4">
-
-                        <h6 class="fw-bold border-bottom pb-2">
-                            Important Links
-                        </h6>
-
-                        <div
-                            class="border rounded p-3 bg-light"
-                            style="white-space:pre-wrap;">
-
-                            {{ strip_tags($job['important_links']) }}
-
-                        </div>
-
-                    </div>
-
-                @endif
-
-
-
-                @if(!empty($job['official_website']))
-
-                    <div class="mb-3">
-
-                        <div class="small text-muted">
-                            Official Website
-                        </div>
-
-                        <div>
-                            {{ $job['official_website'] }}
-                        </div>
-
-                    </div>
-
-                @endif
-
-
-            </div>
-
-
-
-            {{-- MODAL FOOTER --}}
-
-            <div class="modal-footer">
-
-
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    data-bs-dismiss="modal">
-
-                    Close
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-primary add-single-job"
-                    data-job-index="{{ $index }}">
-
-                    Add This Post
-
-                </button>
-
-
-            </div>
-
-
-        </div>
-
-    </div>
-
-</div>
-
-
-@endforeach
-
-
-
 @else
 
-
-{{-- =========================================================
-     EMPTY QUEUE
-========================================================= --}}
 
 <div class="card border-0 shadow-sm">
 
@@ -952,297 +583,646 @@
 
 
 {{-- =========================================================
-     ADD JOB FORM
+     PREVIEW MODAL
 ========================================================= --}}
 
-<form
-    method="POST"
-    action="{{ route('admin.ai-jobs.import.add') }}"
-    id="quickAddForm"
-    class="d-none">
-
-    @csrf
-
-    <input
-        type="hidden"
-        name="job_index"
-        id="quickAddJobIndex">
-
-    <div id="quickAddCategories"></div>
-
-</form>
+<div
+    class="modal fade"
+    id="jobPreviewModal"
+    tabindex="-1"
+    aria-labelledby="jobPreviewModalLabel"
+    aria-hidden="true">
 
 
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
 
-{{-- =========================================================
-     SCRIPTS
-========================================================= --}}
+
+        <div class="modal-content">
+
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title fw-bold"
+                    id="jobPreviewModalLabel">
+
+                    Job Preview
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+
+                </button>
+
+            </div>
+
+
+            <div
+                class="modal-body"
+                id="jobPreviewContent">
+
+                {{-- JavaScript will insert content --}}
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+@endsection
+
+
 
 @push('scripts')
 
+<script
+    src="https://code.jquery.com/jquery-3.7.1.min.js">
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js">
+</script>
+
 <script>
 
-$(document).ready(function () {
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Select2 Category Dropdown
+        |--------------------------------------------------------------------------
+        */
+
+        $('#bulkCategoryIds').select2({
+            placeholder: 'Select categories...',
+            allowClear: true,
+            width: '100%',
+            closeOnSelect: false
+        });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Select2
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | Elements
+        |--------------------------------------------------------------------------
+        */
 
-    $('#bulk_categories').select2({
-
-        width: '100%',
-
-        placeholder:
-            'Select one or multiple categories',
-
-        allowClear: true
-
-    });
+        const selectAll =
+            document.getElementById(
+                'selectAllJobs'
+            );
 
 
+        const checkboxes =
+            document.querySelectorAll(
+                '.job-checkbox'
+            );
 
-    /*
-    |--------------------------------------------------------------------------
-    | Select All
-    |--------------------------------------------------------------------------
-    */
 
-    $('#selectAllJobs').on('click', function () {
+        const addSelectedBtn =
+            document.getElementById(
+                'addSelectedBtn'
+            );
 
-        $('.job-checkbox').prop(
-            'checked',
-            true
+
+        const selectionInfo =
+            document.getElementById(
+                'selectionInfo'
+            );
+
+
+        const categorySelect =
+            document.getElementById(
+                'bulkCategoryIds'
+            );
+
+
+        const selectedJobInputs =
+            document.getElementById(
+                'selectedJobInputs'
+            );
+
+
+        const selectedCategoryInputs =
+            document.getElementById(
+                'selectedCategoryInputs'
+            );
+
+
+        const bulkForm =
+            document.getElementById(
+                'bulkAddForm'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Bulk Selection
+        |--------------------------------------------------------------------------
+        */
+
+        function updateSelection()
+        {
+
+            const selected =
+                Array.from(
+                    checkboxes
+                ).filter(
+                    checkbox =>
+                        checkbox.checked
+                );
+
+
+            const count =
+                selected.length;
+
+
+            selectionInfo.textContent =
+                count +
+                ' job(s) selected';
+
+
+            addSelectedBtn.disabled =
+                count === 0;
+
+
+            if (
+                checkboxes.length
+            ) {
+
+                selectAll.checked =
+                    count ===
+                    checkboxes.length;
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Job IDs
+            |--------------------------------------------------------------------------
+            */
+
+            selectedJobInputs.innerHTML =
+                '';
+
+
+            selected.forEach(
+                function (checkbox) {
+
+                    const input =
+                        document.createElement(
+                            'input'
+                        );
+
+
+                    input.type =
+                        'hidden';
+
+                    input.name =
+                        'job_ids[]';
+
+                    input.value =
+                        checkbox.value;
+
+
+                    selectedJobInputs.appendChild(
+                        input
+                    );
+
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Categories
+            |--------------------------------------------------------------------------
+            */
+
+            selectedCategoryInputs.innerHTML =
+                '';
+
+
+            Array.from(
+                categorySelect.selectedOptions
+            ).forEach(
+                function (option) {
+
+                    const input =
+                        document.createElement(
+                            'input'
+                        );
+
+
+                    input.type =
+                        'hidden';
+
+                    input.name =
+                        'category_ids[]';
+
+                    input.value =
+                        option.value;
+
+
+                    selectedCategoryInputs.appendChild(
+                        input
+                    );
+
+                }
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Select All
+        |--------------------------------------------------------------------------
+        */
+
+        selectAll.addEventListener(
+            'change',
+            function () {
+
+                checkboxes.forEach(
+                    function (checkbox) {
+
+                        checkbox.checked =
+                            selectAll.checked;
+
+                    }
+                );
+
+
+                updateSelection();
+
+            }
         );
 
-    });
 
+        /*
+        |--------------------------------------------------------------------------
+        | Individual Checkbox
+        |--------------------------------------------------------------------------
+        */
 
+        checkboxes.forEach(
+            function (checkbox) {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Clear Selection
-    |--------------------------------------------------------------------------
-    */
+                checkbox.addEventListener(
+                    'change',
+                    updateSelection
+                );
 
-    $('#clearSelectedJobs').on('click', function () {
-
-        $('.job-checkbox').prop(
-            'checked',
-            false
+            }
         );
 
-    });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Category Change
+        |--------------------------------------------------------------------------
+        */
+
+        $('#bulkCategoryIds').on(
+            'change',
+            updateSelection
+        );
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Bulk Submit Validation
+        |--------------------------------------------------------------------------
+        */
 
-    /*
-    |--------------------------------------------------------------------------
-    | Get Selected Categories
-    |--------------------------------------------------------------------------
-    */
+        bulkForm.addEventListener(
+            'submit',
+            function (event) {
 
-    function getSelectedCategories() {
+                const selected =
+                    Array.from(
+                        categorySelect.selectedOptions
+                    );
 
-        return $('#bulk_categories')
-            .val() || [];
+
+                if (
+                    selected.length === 0
+                ) {
+
+                    event.preventDefault();
+
+
+                    alert(
+                        'Please select at least one category.'
+                    );
+
+
+                    return;
+                }
+
+
+                const jobs =
+                    Array.from(
+                        checkboxes
+                    ).filter(
+                        checkbox =>
+                            checkbox.checked
+                    );
+
+
+                if (
+                    jobs.length === 0
+                ) {
+
+                    event.preventDefault();
+
+
+                    alert(
+                        'Please select at least one job.'
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Direct Add Forms
+        |--------------------------------------------------------------------------
+        */
+
+        document
+            .querySelectorAll(
+                '.direct-add-form'
+            )
+            .forEach(
+                function (form) {
+
+                    form.addEventListener(
+                        'submit',
+                        function (event) {
+
+                            const selected =
+                                Array.from(
+                                    categorySelect.selectedOptions
+                                );
+
+
+                            if (
+                                selected.length === 0
+                            ) {
+
+                                event.preventDefault();
+
+
+                                alert(
+                                    'Please select at least one category.'
+                                );
+
+
+                                return;
+                            }
+
+
+                            const container =
+                                form.querySelector(
+                                    '.direct-category-inputs'
+                                );
+
+
+                            container.innerHTML =
+                                '';
+
+
+                            selected.forEach(
+                                function (option) {
+
+                                    const input =
+                                        document.createElement(
+                                            'input'
+                                        );
+
+
+                                    input.type =
+                                        'hidden';
+
+                                    input.name =
+                                        'category_ids[]';
+
+                                    input.value =
+                                        option.value;
+
+
+                                    container.appendChild(
+                                        input
+                                    );
+
+                                }
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Preview
+        |--------------------------------------------------------------------------
+        */
+
+        document
+            .querySelectorAll(
+                '.preview-job-btn'
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        'click',
+                        function () {
+
+                            const data =
+                                JSON.parse(
+                                    this.dataset.job
+                                );
+
+
+                            const container =
+                                document.getElementById(
+                                    'jobPreviewContent'
+                                );
+
+
+                            let html =
+                                '';
+
+
+                            Object.entries(
+                                data
+                            ).forEach(
+                                function (
+                                    [key, value]
+                                ) {
+
+                                    if (
+                                        value ===
+                                        null ||
+                                        value ===
+                                        ''
+                                    ) {
+
+                                        return;
+                                    }
+
+
+                                    let displayValue;
+
+
+                                    if (
+                                        typeof value ===
+                                        'object'
+                                    ) {
+
+                                        displayValue =
+                                            '<pre class="mb-0 p-3 bg-light border rounded">'
+                                            +
+                                            escapeHtml(
+                                                JSON.stringify(
+                                                    value,
+                                                    null,
+                                                    2
+                                                )
+                                            )
+                                            +
+                                            '</pre>';
+
+                                    } else {
+
+                                        displayValue =
+                                            escapeHtml(
+                                                String(
+                                                    value
+                                                )
+                                            );
+
+                                    }
+
+
+                                    html +=
+                                        '<div class="mb-4">' +
+
+                                            '<div class="fw-bold text-capitalize mb-1">' +
+
+                                                escapeHtml(
+                                                    key.replace(
+                                                        /_/g,
+                                                        ' '
+                                                    )
+                                                ) +
+
+                                            '</div>' +
+
+                                            '<div class="text-secondary">' +
+
+                                                displayValue +
+
+                                            '</div>' +
+
+                                        '</div>';
+                                }
+                            );
+
+
+                            container.innerHTML =
+                                html ||
+                                '<div class="text-muted">No information available.</div>';
+
+                        }
+                    );
+
+                }
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Escape HTML
+        |--------------------------------------------------------------------------
+        */
+
+        function escapeHtml(
+            value
+        ) {
+
+            return value
+                .replace(
+                    /&/g,
+                    '&amp;'
+                )
+                .replace(
+                    /</g,
+                    '&lt;'
+                )
+                .replace(
+                    />/g,
+                    '&gt;'
+                )
+                .replace(
+                    /"/g,
+                    '&quot;'
+                )
+                .replace(
+                    /'/g,
+                    '&#039;'
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Initial State
+        |--------------------------------------------------------------------------
+        */
+
+        updateSelection();
 
     }
 
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Check Categories
-    |--------------------------------------------------------------------------
-    */
-
-    function validateCategories() {
-
-        const categories =
-            getSelectedCategories();
-
-
-        if (!categories.length) {
-
-            alert(
-                'Please select at least one category.'
-            );
-
-            return false;
-        }
-
-
-        return true;
-    }
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Single Job Add
-    |--------------------------------------------------------------------------
-    */
-
-    $('.add-single-job').on('click', function () {
-
-        const jobIndex =
-            $(this).data('job-index');
-
-
-        if (!validateCategories()) {
-
-            return;
-
-        }
-
-
-        const categories =
-            getSelectedCategories();
-
-
-        $('#quickAddJobIndex').val(
-            jobIndex
-        );
-
-
-        $('#quickAddCategories').html('');
-
-
-
-        categories.forEach(function (categoryId) {
-
-            $('#quickAddCategories').append(
-
-                $('<input>', {
-
-                    type: 'hidden',
-
-                    name: 'category_ids[]',
-
-                    value: categoryId
-
-                })
-
-            );
-
-        });
-
-
-        $('#quickAddForm').submit();
-
-    });
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Add Selected Jobs
-    |--------------------------------------------------------------------------
-    */
-
-    $('#addSelectedJobs').on('click', function () {
-
-
-        if (!validateCategories()) {
-
-            return;
-
-        }
-
-
-        const selectedJobs =
-            $('.job-checkbox:checked')
-                .map(function () {
-
-                    return $(this).val();
-
-                })
-                .get();
-
-
-        if (!selectedJobs.length) {
-
-            alert(
-                'Please select at least one job.'
-            );
-
-            return;
-
-        }
-
-
-        const categories =
-            getSelectedCategories();
-
-
-        $('#quickAddForm').attr(
-            'action',
-            "{{ route('admin.ai-jobs.import.bulk-add') }}"
-        );
-
-
-        $('#quickAddJobIndex').remove();
-
-
-        $('#quickAddForm')
-            .find('input[name="job_indices[]"]')
-            .remove();
-
-
-        selectedJobs.forEach(function (jobIndex) {
-
-            $('#quickAddForm').append(
-
-                $('<input>', {
-
-                    type: 'hidden',
-
-                    name: 'job_indices[]',
-
-                    value: jobIndex
-
-                })
-
-            );
-
-        });
-
-
-        $('#quickAddCategories').html('');
-
-
-        categories.forEach(function (categoryId) {
-
-            $('#quickAddCategories').append(
-
-                $('<input>', {
-
-                    type: 'hidden',
-
-                    name: 'category_ids[]',
-
-                    value: categoryId
-
-                })
-
-            );
-
-        });
-
-
-        $('#quickAddForm').submit();
-
-    });
-
-
-});
+);
 
 </script>
 
 @endpush
-
-
-@endsection

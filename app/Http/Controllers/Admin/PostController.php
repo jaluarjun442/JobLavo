@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AiImportJob;
 use App\Models\Category;
 use App\Models\Post;
 use App\Services\SitemapService;
@@ -21,8 +22,7 @@ class PostController extends Controller
 
     public function __construct(
         protected SitemapService $sitemapService
-    ) {
-    }
+    ) {}
 
 
     /*
@@ -58,9 +58,6 @@ class PostController extends Controller
             |--------------------------------------------------------------------------
             | Default Ordering
             |--------------------------------------------------------------------------
-            |
-            | Newest posts first.
-            |
             */
 
             ->order(function ($query) {
@@ -69,7 +66,6 @@ class PostController extends Controller
                     'posts.id',
                     'desc'
                 );
-
             })
 
 
@@ -335,11 +331,77 @@ class PostController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function create()
+    public function create(Request $request)
     {
+        $aiJob = null;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load AI Import Queue Job
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('ai_queue')) {
+
+            $aiJob = AiImportJob::query()
+
+                ->where(
+                    'id',
+                    $request->integer('ai_queue')
+                )
+
+                ->where(
+                    'status',
+                    'pending'
+                )
+
+                ->first();
+
+
+            if (!$aiJob) {
+
+                return redirect()
+                    ->route(
+                        'admin.posts.create'
+                    )
+                    ->with(
+                        'error',
+                        'AI import job was not found or has already been processed.'
+                    );
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Categories
+        |--------------------------------------------------------------------------
+        */
+
         $categories = Category::query()
 
-            ->where('status', true)
+            ->where(
+                'status',
+                true
+            )
+
+            ->with([
+                'children' => function ($query) {
+
+                    $query
+                        ->where(
+                            'status',
+                            true
+                        )
+                        ->orderBy('sort_order')
+                        ->orderBy('name');
+                }
+            ])
+
+            ->whereNull(
+                'parent_id'
+            )
 
             ->orderBy('sort_order')
 
@@ -348,190 +410,11 @@ class PostController extends Controller
             ->get();
 
 
-        $post = new Post();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | AI Import Queue - Old Support
-        |--------------------------------------------------------------------------
-        */
-
-        $aiJob = null;
-
-
-        if (
-            request()->has('ai_queue')
-        ) {
-
-            $index = (int) request(
-                'ai_queue'
-            );
-
-
-            $jobs = session(
-                'ai_import_jobs',
-                []
-            );
-
-
-            if (
-                isset($jobs[$index])
-            ) {
-
-                $aiJob = $jobs[$index];
-            }
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Old Single AI Import Support
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$aiJob) {
-
-            $aiJob = session(
-                'ai_import_job'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Load AI Job Into Form
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            is_array($aiJob)
-        ) {
-
-            foreach (
-                $aiJob as $field => $value
-            ) {
-
-                if (
-                    $field === 'category'
-                ) {
-
-                    continue;
-                }
-
-
-                if (
-                    in_array(
-                        $field,
-                        [
-                            'title',
-                            'excerpt',
-                            'short_description',
-                            'content',
-                            'important_dates',
-                            'application_fee',
-                            'age_limit',
-                            'vacancy_details',
-                            'eligibility',
-                            'selection_process',
-                            'salary_details',
-                            'how_to_apply',
-                            'important_links',
-                            'official_website',
-                            'seo_title',
-                            'meta_description',
-                            'meta_keywords',
-                        ],
-                        true
-                    )
-                ) {
-
-                    $post->{$field} =
-                        $value;
-                }
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Generate Slug
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                !empty($post->title)
-            ) {
-
-                $post->slug =
-                    Str::slug(
-                        $post->title
-                    );
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Default Publishing
-            |--------------------------------------------------------------------------
-            */
-
-            $post->status =
-                'published';
-
-            $post->published_at =
-                now();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Match AI Category
-            |--------------------------------------------------------------------------
-            */
-
-            $post->category_ids = [];
-
-
-            if (
-                !empty($aiJob['category'])
-            ) {
-
-                $category =
-                    Category::query()
-
-                        ->where(
-                            'status',
-                            true
-                        )
-
-                        ->whereRaw(
-                            'LOWER(name) = ?',
-                            [
-                                strtolower(
-                                    trim(
-                                        $aiJob['category']
-                                    )
-                                )
-                            ]
-                        )
-
-                        ->first();
-
-
-                if ($category) {
-
-                    $post->category_ids = [
-                        $category->id
-                    ];
-                }
-            }
-        }
-
-
         return view(
             'admin.posts.create',
             compact(
                 'categories',
-                'post'
+                'aiJob'
             )
         );
     }
@@ -574,9 +457,7 @@ class PostController extends Controller
         */
 
         if (
-            empty(
-                $validated['canonical_url']
-            )
+            empty($validated['canonical_url'])
         ) {
 
             $validated['canonical_url'] =
@@ -695,7 +576,7 @@ class PostController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Create
+        | Create Post
         |--------------------------------------------------------------------------
         */
 
@@ -722,45 +603,9 @@ class PostController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $request->has(
-                'ai_queue'
-            )
-        ) {
-
-            $index =
-                (int) $request->input(
-                    'ai_queue'
-                );
-
-
-            $jobs =
-                session(
-                    'ai_import_jobs',
-                    []
-                );
-
-
-            if (
-                isset($jobs[$index])
-            ) {
-
-                unset(
-                    $jobs[$index]
-                );
-
-
-                session([
-                    'ai_import_jobs' =>
-                        array_values($jobs),
-                ]);
-            }
-
-
-            session()->forget(
-                'ai_import_job'
-            );
-        }
+        $this->removeAiQueueJob(
+            $request
+        );
 
 
         /*
@@ -779,7 +624,7 @@ class PostController extends Controller
         */
 
         if (
-            $request->has(
+            $request->filled(
                 'ai_queue'
             )
         ) {
@@ -817,10 +662,10 @@ class PostController extends Controller
         $validated =
             $request->validate([
 
-                'job_index' => [
+                'job_id' => [
                     'required',
                     'integer',
-                    'min:0',
+                    'exists:ai_import_jobs,id',
                 ],
 
                 'category_ids' => [
@@ -837,22 +682,29 @@ class PostController extends Controller
             ]);
 
 
-        $jobs =
-            session(
-                'ai_import_jobs',
-                []
-            );
+        /*
+        |--------------------------------------------------------------------------
+        | Get Queue Job
+        |--------------------------------------------------------------------------
+        */
+
+        $job =
+            AiImportJob::query()
+
+                ->where(
+                    'id',
+                    $validated['job_id']
+                )
+
+                ->where(
+                    'status',
+                    'pending'
+                )
+
+                ->first();
 
 
-        $index =
-            (int) $validated[
-                'job_index'
-            ];
-
-
-        if (
-            !isset($jobs[$index])
-        ) {
+        if (!$job) {
 
             return redirect()
                 ->route(
@@ -865,20 +717,9 @@ class PostController extends Controller
         }
 
 
-        $job =
-            $jobs[$index];
-
-
         $categoryIds =
-            array_values(
-                array_unique(
-                    array_map(
-                        'intval',
-                        $validated[
-                            'category_ids'
-                        ]
-                    )
-                )
+            $this->normalizeCategoryIds(
+                $validated['category_ids']
             );
 
 
@@ -903,9 +744,13 @@ class PostController extends Controller
                 $categoryIds
             ) {
 
+                $content =
+                    $job->content;
+
+
                 $post =
                     $this->createPublishedPost(
-                        $job,
+                        $content,
                         $categoryIds
                     );
 
@@ -913,20 +758,24 @@ class PostController extends Controller
                 $post->categories()->sync(
                     $categoryIds
                 );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Remove Queue Row
+                |--------------------------------------------------------------------------
+                */
+
+                $job->delete();
             }
         );
 
 
-        unset(
-            $jobs[$index]
-        );
-
-
-        session([
-            'ai_import_jobs' =>
-                array_values($jobs),
-        ]);
-
+        /*
+        |--------------------------------------------------------------------------
+        | Sitemap
+        |--------------------------------------------------------------------------
+        */
 
         $this->sitemapService->sync();
 
@@ -953,15 +802,16 @@ class PostController extends Controller
         $validated =
             $request->validate([
 
-                'job_indices' => [
+                'job_ids' => [
                     'required',
                     'array',
                     'min:1',
                 ],
 
-                'job_indices.*' => [
+                'job_ids.*' => [
                     'integer',
-                    'min:0',
+                    'distinct',
+                    'exists:ai_import_jobs,id',
                 ],
 
                 'category_ids' => [
@@ -978,15 +828,30 @@ class PostController extends Controller
             ]);
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Get Queue Jobs
+        |--------------------------------------------------------------------------
+        */
+
         $jobs =
-            session(
-                'ai_import_jobs',
-                []
-            );
+            AiImportJob::query()
+
+                ->where(
+                    'status',
+                    'pending'
+                )
+
+                ->whereIn(
+                    'id',
+                    $validated['job_ids']
+                )
+
+                ->get();
 
 
         if (
-            empty($jobs)
+            $jobs->isEmpty()
         ) {
 
             return redirect()
@@ -1000,75 +865,64 @@ class PostController extends Controller
         }
 
 
-        $indices =
-            collect(
-                $validated['job_indices']
-            )
-                ->map(
-                    fn ($index) =>
-                        (int) $index
-                )
-                ->unique()
-                ->sort()
-                ->values();
-
+        /*
+        |--------------------------------------------------------------------------
+        | Categories
+        |--------------------------------------------------------------------------
+        */
 
         $categoryIds =
-            array_values(
-                array_unique(
-                    array_map(
-                        'intval',
-                        $validated[
-                            'category_ids'
-                        ]
-                    )
-                )
+            $this->normalizeCategoryIds(
+                $validated['category_ids']
             );
 
 
-        foreach (
-            $indices as $index
+        if (
+            empty($categoryIds)
         ) {
 
-            if (
-                !isset($jobs[$index])
-            ) {
-
-                return redirect()
-                    ->route(
-                        'admin.ai-jobs.import'
-                    )
-                    ->withErrors([
-                        'jobs' =>
-                            'One or more selected jobs are no longer available.',
-                    ]);
-            }
+            return redirect()
+                ->route(
+                    'admin.ai-jobs.import'
+                )
+                ->withErrors([
+                    'category_ids' =>
+                        'Please select at least one category.',
+                ]);
         }
 
 
         $addedCount = 0;
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Create Posts
+        |--------------------------------------------------------------------------
+        */
+
         DB::transaction(
             function () use (
-                $indices,
                 $jobs,
                 $categoryIds,
                 &$addedCount
             ) {
 
                 foreach (
-                    $indices as $index
+                    $jobs as $job
                 ) {
 
-                    $job =
-                        $jobs[$index];
+                    $content =
+                        $job->content;
 
 
                     if (
                         empty(
                             trim(
-                                $job['title'] ?? ''
+                                (string) (
+                                    $content['title']
+                                    ?? ''
+                                )
                             )
                         )
                     ) {
@@ -1079,7 +933,7 @@ class PostController extends Controller
 
                     $post =
                         $this->createPublishedPost(
-                            $job,
+                            $content,
                             $categoryIds
                         );
 
@@ -1087,6 +941,15 @@ class PostController extends Controller
                     $post->categories()->sync(
                         $categoryIds
                     );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Remove Queue Row
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $job->delete();
 
 
                     $addedCount++;
@@ -1097,29 +960,9 @@ class PostController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Remove From Queue
+        | Sitemap
         |--------------------------------------------------------------------------
-        |
-        | Remove highest indexes first.
-        |
         */
-
-        foreach (
-            $indices->sortDesc()
-            as $index
-        ) {
-
-            unset(
-                $jobs[$index]
-            );
-        }
-
-
-        session([
-            'ai_import_jobs' =>
-                array_values($jobs),
-        ]);
-
 
         $this->sitemapService->sync();
 
@@ -1149,7 +992,10 @@ class PostController extends Controller
 
         $title =
             trim(
-                $job['title'] ?? ''
+                (string) (
+                    $job['title']
+                    ?? ''
+                )
             );
 
 
@@ -1193,6 +1039,10 @@ class PostController extends Controller
         |--------------------------------------------------------------------------
         | Create Published Post
         |--------------------------------------------------------------------------
+        |
+        | AI Quick Add always publishes immediately.
+        | Published date is always now().
+        |
         */
 
         return Post::create([
@@ -1201,9 +1051,6 @@ class PostController extends Controller
             |--------------------------------------------------------------------------
             | Legacy Category
             |--------------------------------------------------------------------------
-            |
-            | Keep first selected category here for compatibility.
-            |
             */
 
             'category_id' =>
@@ -1318,6 +1165,64 @@ class PostController extends Controller
 
     /*
     |--------------------------------------------------------------------------
+    | Remove AI Queue Job
+    |--------------------------------------------------------------------------
+    */
+
+    private function removeAiQueueJob(
+        Request $request
+    ): void {
+
+        if (
+            !$request->filled(
+                'ai_queue'
+            )
+        ) {
+            return;
+        }
+
+
+        AiImportJob::query()
+
+            ->where(
+                'id',
+                $request->integer(
+                    'ai_queue'
+                )
+            )
+
+            ->where(
+                'status',
+                'pending'
+            )
+
+            ->delete();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Normalize Category IDs
+    |--------------------------------------------------------------------------
+    */
+
+    private function normalizeCategoryIds(
+        array $categoryIds
+    ): array {
+
+        return array_values(
+            array_unique(
+                array_map(
+                    'intval',
+                    $categoryIds
+                )
+            )
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Edit Post
     |--------------------------------------------------------------------------
     */
@@ -1399,9 +1304,7 @@ class PostController extends Controller
         */
 
         if (
-            empty(
-                $validated['canonical_url']
-            )
+            empty($validated['canonical_url'])
         ) {
 
             $validated['canonical_url'] =
@@ -1643,12 +1546,11 @@ class PostController extends Controller
         ?Post $post = null
     ): array {
 
-        $slugRule =
-            [
-                'nullable',
-                'string',
-                'max:255',
-            ];
+        $slugRule = [
+            'nullable',
+            'string',
+            'max:255',
+        ];
 
 
         if ($post) {
