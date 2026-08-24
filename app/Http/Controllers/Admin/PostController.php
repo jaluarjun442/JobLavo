@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
+use App\Services\GoogleIndexingService;
 
 class PostController extends Controller
 {
@@ -21,7 +22,8 @@ class PostController extends Controller
     */
 
     public function __construct(
-        protected SitemapService $sitemapService
+        protected SitemapService $sitemapService,
+        protected GoogleIndexingService $googleIndexingService
     ) {}
 
 
@@ -463,7 +465,7 @@ class PostController extends Controller
             $validated['canonical_url'] =
                 url(
                     '/post/' .
-                    $validated['slug']
+                        $validated['slug']
                 );
         }
 
@@ -482,12 +484,24 @@ class PostController extends Controller
             $validated['published_at'] =
                 $validated['published_at']
                 ?? now();
-
         } else {
 
             $validated['published_at'] =
                 null;
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Google Indexing
+        |--------------------------------------------------------------------------
+        |
+        | New posts wait for the public indexing cron.
+        |
+        */
+
+        $validated['is_indexed'] =
+            false;
 
 
         /*
@@ -532,7 +546,7 @@ class PostController extends Controller
                 uniqid() .
                 '.' .
                 $image
-                    ->getClientOriginalExtension();
+                ->getClientOriginalExtension();
 
 
             $image->move(
@@ -691,17 +705,17 @@ class PostController extends Controller
         $job =
             AiImportJob::query()
 
-                ->where(
-                    'id',
-                    $validated['job_id']
-                )
+            ->where(
+                'id',
+                $validated['job_id']
+            )
 
-                ->where(
-                    'status',
-                    'pending'
-                )
+            ->where(
+                'status',
+                'pending'
+            )
 
-                ->first();
+            ->first();
 
 
         if (!$job) {
@@ -712,7 +726,7 @@ class PostController extends Controller
                 )
                 ->withErrors([
                     'job' =>
-                        'Selected job was not found in the import queue.',
+                    'Selected job was not found in the import queue.',
                 ]);
         }
 
@@ -733,7 +747,7 @@ class PostController extends Controller
                 )
                 ->withErrors([
                     'category_ids' =>
-                        'Please select at least one category.',
+                    'Please select at least one category.',
                 ]);
         }
 
@@ -837,17 +851,17 @@ class PostController extends Controller
         $jobs =
             AiImportJob::query()
 
-                ->where(
-                    'status',
-                    'pending'
-                )
+            ->where(
+                'status',
+                'pending'
+            )
 
-                ->whereIn(
-                    'id',
-                    $validated['job_ids']
-                )
+            ->whereIn(
+                'id',
+                $validated['job_ids']
+            )
 
-                ->get();
+            ->get();
 
 
         if (
@@ -860,7 +874,7 @@ class PostController extends Controller
                 )
                 ->withErrors([
                     'jobs' =>
-                        'No jobs available in the import queue.',
+                    'No jobs available in the import queue.',
                 ]);
         }
 
@@ -887,7 +901,7 @@ class PostController extends Controller
                 )
                 ->withErrors([
                     'category_ids' =>
-                        'Please select at least one category.',
+                    'Please select at least one category.',
                 ]);
         }
 
@@ -917,14 +931,12 @@ class PostController extends Controller
 
 
                     if (
-                        empty(
-                            trim(
-                                (string) (
-                                    $content['title']
-                                    ?? ''
-                                )
+                        empty(trim(
+                            (string) (
+                                $content['title']
+                                ?? ''
                             )
-                        )
+                        ))
                     ) {
 
                         continue;
@@ -974,7 +986,7 @@ class PostController extends Controller
             ->with(
                 'success',
                 $addedCount .
-                ' post(s) added and published successfully.'
+                    ' post(s) added and published successfully.'
             );
     }
 
@@ -1054,7 +1066,7 @@ class PostController extends Controller
             */
 
             'category_id' =>
-                $categoryIds[0] ?? null,
+            $categoryIds[0] ?? null,
 
 
             /*
@@ -1064,22 +1076,22 @@ class PostController extends Controller
             */
 
             'title' =>
-                $title,
+            $title,
 
             'slug' =>
-                $slug,
+            $slug,
 
             'excerpt' =>
-                $job['excerpt'] ?? '',
+            $job['excerpt'] ?? '',
 
             'short_description' =>
-                $job['short_description'] ?? '',
+            $job['short_description'] ?? '',
 
             'content' =>
-                $job['content'] ?? '',
+            $job['content'] ?? '',
 
             'featured_image' =>
-                null,
+            null,
 
 
             /*
@@ -1089,34 +1101,34 @@ class PostController extends Controller
             */
 
             'important_dates' =>
-                $job['important_dates'] ?? '',
+            $job['important_dates'] ?? '',
 
             'application_fee' =>
-                $job['application_fee'] ?? '',
+            $job['application_fee'] ?? '',
 
             'age_limit' =>
-                $job['age_limit'] ?? '',
+            $job['age_limit'] ?? '',
 
             'vacancy_details' =>
-                $job['vacancy_details'] ?? '',
+            $job['vacancy_details'] ?? '',
 
             'eligibility' =>
-                $job['eligibility'] ?? '',
+            $job['eligibility'] ?? '',
 
             'selection_process' =>
-                $job['selection_process'] ?? '',
+            $job['selection_process'] ?? '',
 
             'salary_details' =>
-                $job['salary_details'] ?? '',
+            $job['salary_details'] ?? '',
 
             'how_to_apply' =>
-                $job['how_to_apply'] ?? '',
+            $job['how_to_apply'] ?? '',
 
             'important_links' =>
-                $job['important_links'] ?? '',
+            $job['important_links'] ?? '',
 
             'official_website' =>
-                $job['official_website'] ?? '',
+            $job['official_website'] ?? '',
 
 
             /*
@@ -1126,19 +1138,19 @@ class PostController extends Controller
             */
 
             'seo_title' =>
-                $job['seo_title']
+            $job['seo_title']
                 ?: $title,
 
             'meta_description' =>
-                $job['meta_description'] ?? '',
+            $job['meta_description'] ?? '',
 
             'meta_keywords' =>
-                $job['meta_keywords'] ?? '',
+            $job['meta_keywords'] ?? '',
 
             'canonical_url' =>
-                url(
-                    '/post/' . $slug
-                ),
+            url(
+                '/post/' . $slug
+            ),
 
 
             /*
@@ -1148,16 +1160,28 @@ class PostController extends Controller
             */
 
             'status' =>
-                'published',
+            'published',
 
             'published_at' =>
-                now(),
+            now(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Google Indexing
+            |--------------------------------------------------------------------------
+            |
+            | Public cron will submit this post later.
+            |
+            */
+
+            'is_indexed' =>
+            false,
 
             'is_featured' =>
-                false,
+            false,
 
             'is_important' =>
-                false,
+            false,
 
         ]);
     }
@@ -1232,20 +1256,20 @@ class PostController extends Controller
         $categories =
             Category::query()
 
-                ->where(
-                    'status',
-                    true
-                )
+            ->where(
+                'status',
+                true
+            )
 
-                ->orderBy(
-                    'sort_order'
-                )
+            ->orderBy(
+                'sort_order'
+            )
 
-                ->orderBy(
-                    'name'
-                )
+            ->orderBy(
+                'name'
+            )
 
-                ->get();
+            ->get();
 
 
         $post->load(
@@ -1310,7 +1334,7 @@ class PostController extends Controller
             $validated['canonical_url'] =
                 url(
                     '/post/' .
-                    $validated['slug']
+                        $validated['slug']
                 );
         }
 
@@ -1330,7 +1354,6 @@ class PostController extends Controller
                 $validated['published_at']
                 ?? $post->published_at
                 ?? now();
-
         } else {
 
             $validated['published_at'] =
@@ -1380,7 +1403,7 @@ class PostController extends Controller
                 uniqid() .
                 '.' .
                 $image
-                    ->getClientOriginalExtension();
+                ->getClientOriginalExtension();
 
 
             $image->move(
@@ -1534,7 +1557,38 @@ class PostController extends Controller
             );
     }
 
+    /*
+|--------------------------------------------------------------------------
+| Google Indexing
+|--------------------------------------------------------------------------
+*/
 
+    private function submitGoogleIndexing(Post $post): bool
+    {
+        if (
+            !app()->environment('production')
+        ) {
+            return false;
+        }
+
+
+        if (
+            $post->status !== 'published'
+        ) {
+            return false;
+        }
+
+
+        $url = route(
+            'post',
+            $post->slug
+        );
+
+
+        return $this->googleIndexingService->update(
+            $url
+        );
+    }
     /*
     |--------------------------------------------------------------------------
     | Common Post Validation
@@ -1558,7 +1612,6 @@ class PostController extends Controller
             $slugRule[] =
                 'unique:posts,slug,' .
                 $post->id;
-
         } else {
 
             $slugRule[] =
@@ -1729,6 +1782,42 @@ class PostController extends Controller
                 'date',
             ],
 
+        ]);
+    }
+    public function googleIndexingCron()
+    {
+        $posts = Post::query()
+            ->where('status', 'published')
+            ->where('is_indexed', false)
+            ->orderBy('id')
+            ->limit(10)
+            ->get();
+
+        $success = 0;
+        $failed = 0;
+
+        foreach ($posts as $post) {
+
+            $result = $this->submitGoogleIndexing($post);
+
+            if ($result) {
+
+                $post->update([
+                    'is_indexed' => true,
+                ]);
+
+                $success++;
+            } else {
+
+                $failed++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'processed' => $posts->count(),
+            'indexed' => $success,
+            'failed' => $failed,
         ]);
     }
 }

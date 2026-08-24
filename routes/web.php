@@ -24,6 +24,10 @@ Route::get('/sitemap-{page}.xml', [
     ->where('page', '[1-9][0-9]*')
     ->name('sitemap.posts');
 
+Route::get('/cron/google-indexing', [
+    PostController::class,
+    'googleIndexingCron'
+]);
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -244,6 +248,20 @@ Route::middleware(['auth', 'admin'])
             'clear'
         ])->name('logs.clear');
 
+        Route::get('/test-google-indexing/{post}', function (
+            \App\Models\Post $post,
+            \App\Services\GoogleIndexingService $indexing
+        ) {
+
+            $url = route('post', $post->slug);
+            // $url = 'https://joblavo.com/post/' . $post->slug;
+            $success = $indexing->update($url);
+
+            return response()->json([
+                'success' => $success,
+                'url' => $url,
+            ]);
+        });
 
         Route::post('/logout', [
             AdminController::class,

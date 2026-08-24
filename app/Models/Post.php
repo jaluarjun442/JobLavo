@@ -86,7 +86,7 @@ class Post extends Model
         'is_featured',
 
         'is_important',
-
+        'is_indexed',
     ];
 
 
@@ -97,6 +97,7 @@ class Post extends Model
         'is_featured' => 'boolean',
 
         'is_important' => 'boolean',
+        'is_indexed' => 'boolean',
 
     ];
 
