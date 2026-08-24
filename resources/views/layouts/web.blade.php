@@ -158,7 +158,7 @@
                 "@type": "WebSite",
                 "@id": "{{ url('/') }}/#website",
                 "url": "{{ url('/') }}",
-                "name": JobLavo",
+                "name": "JobLavo",
                 "inLanguage": "en-IN"
             },
 
