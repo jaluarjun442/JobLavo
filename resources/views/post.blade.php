@@ -167,7 +167,20 @@
     "url": @json(
         $post->canonical_url
             ?: url('/post/' . $post->slug)
-    )
+    ),
+
+    "hiringOrganization": {
+        "@type": "Organization",
+        "name": "Government"
+    },
+
+    "jobLocation": {
+        "@type": "Place",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "IN"
+        }
+    }
 
     @if($post->eligibility)
     ,
@@ -196,10 +209,8 @@
         asset($post->featured_image)
     )
     @endif
-
 }
 </script>
-
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
