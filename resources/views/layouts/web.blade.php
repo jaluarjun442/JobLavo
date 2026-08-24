@@ -9,7 +9,15 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1">
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-64LK51PQVX"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
+    gtag('config', 'G-64LK51PQVX');
+    </script>
     {{-- =========================================================
          BASIC SEO
     ========================================================== --}}
