@@ -146,7 +146,59 @@
     @endif
 }
 </script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
 
+    "title": @json($post->title),
+
+    "description": @json(
+        $post->short_description
+            ?: ($post->excerpt ?: $post->title)
+    ),
+
+    "datePosted": @json(
+        $post->published_at
+            ? $post->published_at->toIso8601String()
+            : $post->created_at->toIso8601String()
+    ),
+
+    "url": @json(
+        $post->canonical_url
+            ?: url('/post/' . $post->slug)
+    )
+
+    @if($post->eligibility)
+    ,
+    "qualifications": @json(
+        strip_tags($post->eligibility)
+    )
+    @endif
+
+    @if($post->how_to_apply)
+    ,
+    "applicationInstructions": @json(
+        strip_tags($post->how_to_apply)
+    )
+    @endif
+
+    @if($post->official_website)
+    ,
+    "sameAs": @json(
+        $post->official_website
+    )
+    @endif
+
+    @if($post->featured_image)
+    ,
+    "image": @json(
+        asset($post->featured_image)
+    )
+    @endif
+
+}
+</script>
 
 <script type="application/ld+json">
 {
