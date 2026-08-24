@@ -28,13 +28,11 @@ class CategoryController extends Controller
     | DataTable
     |--------------------------------------------------------------------------
     */
-
     public function data(Request $request)
     {
-        $query = Category::with('parent')
-
+        $query = Category::query()
             ->select('categories.*')
-
+            ->with('parent')
             ->withCount('posts');
 
 
@@ -44,10 +42,10 @@ class CategoryController extends Controller
 
 
             /*
-            |--------------------------------------------------------------------------
-            | Parent
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Parent
+        |--------------------------------------------------------------------------
+        */
 
             ->addColumn('parent', function ($category) {
 
@@ -58,106 +56,101 @@ class CategoryController extends Controller
                         '</span>';
                 }
 
-
                 return '<span class="text-secondary">
-                            Main Category
-                        </span>';
+                        Main Category
+                    </span>';
             })
 
 
             /*
-            |--------------------------------------------------------------------------
-            | Status
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Status
+        |--------------------------------------------------------------------------
+        */
 
             ->addColumn('status_badge', function ($category) {
 
                 if ($category->status) {
 
                     return '<span class="badge bg-success">
-                                Active
-                            </span>';
+                            Active
+                        </span>';
                 }
 
-
                 return '<span class="badge bg-secondary">
-                            Inactive
-                        </span>';
+                        Inactive
+                    </span>';
             })
 
 
             /*
-            |--------------------------------------------------------------------------
-            | Header
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Header
+        |--------------------------------------------------------------------------
+        */
 
             ->addColumn('header', function ($category) {
 
                 if ($category->display_header) {
 
                     return '<span class="badge bg-primary">
-                                Yes
-                            </span>';
+                            Yes
+                        </span>';
                 }
 
-
                 return '<span class="badge bg-light text-dark border">
-                            No
-                        </span>';
+                        No
+                    </span>';
             })
 
 
             /*
-            |--------------------------------------------------------------------------
-            | Home Tiles
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Home Tiles
+        |--------------------------------------------------------------------------
+        */
 
             ->addColumn('home_tiles', function ($category) {
 
                 if ($category->display_home_tiles) {
 
                     return '<span class="badge bg-primary">
-                                Yes
-                            </span>';
+                            Yes
+                        </span>';
                 }
 
-
                 return '<span class="badge bg-light text-dark border">
-                            No
-                        </span>';
+                        No
+                    </span>';
             })
 
 
             /*
-            |--------------------------------------------------------------------------
-            | Home Large
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Home Large
+        |--------------------------------------------------------------------------
+        */
 
             ->addColumn('home_large', function ($category) {
 
                 if ($category->display_home_large) {
 
                     return '<span class="badge bg-success">
-                                Yes
-                            </span>';
+                            Yes
+                        </span>';
                 }
 
-
                 return '<span class="badge bg-light text-dark border">
-                            No
-                        </span>';
+                        No
+                    </span>';
             })
 
 
             /*
-            |--------------------------------------------------------------------------
-            | Action
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Action
+        |--------------------------------------------------------------------------
+        */
 
             ->addColumn('action', function ($category) {
 
@@ -166,46 +159,69 @@ class CategoryController extends Controller
                     $category->id
                 );
 
-
                 $deleteUrl = route(
                     'admin.categories.destroy',
                     $category->id
                 );
 
-
                 return '
-                <div class="d-flex gap-1">
+            <div class="d-flex gap-1">
 
-                    <a href="' . $editUrl . '"
-                       class="btn btn-sm btn-primary">
+                <a href="' . $editUrl . '"
+                   class="btn btn-sm btn-primary">
 
-                        Edit
+                    Edit
 
-                    </a>
+                </a>
 
 
-                    <form action="' . $deleteUrl . '"
-                          method="POST"
-                          class="d-inline"
-                          onsubmit="return confirm(\'Are you sure you want to delete this category?\');">
+                <form action="' . $deleteUrl . '"
+                      method="POST"
+                      class="d-inline"
+                      onsubmit="return confirm(\'Are you sure you want to delete this category?\');">
 
-                        ' . csrf_field() . '
+                    ' . csrf_field() . '
 
-                        ' . method_field('DELETE') . '
+                    ' . method_field('DELETE') . '
 
-                        <button type="submit"
-                                class="btn btn-sm btn-outline-danger">
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger">
 
-                            Delete
+                        Delete
 
-                        </button>
+                    </button>
 
-                    </form>
+                </form>
 
-                </div>
-                ';
+            </div>
+            ';
             })
 
+
+            /*
+        |--------------------------------------------------------------------------
+        | Manual Parent Search
+        |--------------------------------------------------------------------------
+        */
+
+            ->filterColumn('parent', function ($query, $keyword) {
+
+                $query->whereHas('parent', function ($parentQuery) use ($keyword) {
+
+                    $parentQuery->where(
+                        'name',
+                        'LIKE',
+                        '%' . $keyword . '%'
+                    );
+                });
+            })
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Raw HTML Columns
+        |--------------------------------------------------------------------------
+        */
 
             ->rawColumns([
                 'parent',
@@ -219,8 +235,6 @@ class CategoryController extends Controller
 
             ->make(true);
     }
-
-
 
     /*
     |--------------------------------------------------------------------------
@@ -681,24 +695,24 @@ class CategoryController extends Controller
 
             Category::query()
 
-                ->where(
-                    'slug',
-                    $slug
-                )
+            ->where(
+                'slug',
+                $slug
+            )
 
-                ->when(
-                    $ignoreId,
-                    function ($query) use ($ignoreId) {
+            ->when(
+                $ignoreId,
+                function ($query) use ($ignoreId) {
 
-                        $query->where(
-                            'id',
-                            '!=',
-                            $ignoreId
-                        );
-                    }
-                )
+                    $query->where(
+                        'id',
+                        '!=',
+                        $ignoreId
+                    );
+                }
+            )
 
-                ->exists()
+            ->exists()
 
         ) {
 

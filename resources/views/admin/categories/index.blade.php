@@ -193,7 +193,7 @@ $(document).ready(function() {
             {
                 data: 'parent',
 
-                name: 'parent.name',
+                name: 'parent',
 
                 orderable: false
             },
