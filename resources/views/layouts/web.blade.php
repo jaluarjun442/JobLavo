@@ -149,7 +149,31 @@
     ========================================================== --}}
 
     @stack('structured_data')
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
 
+            {
+                "@type": "WebSite",
+                "@id": "{{ url('/') }}/#website",
+                "url": "{{ url('/') }}",
+                "name": JobLavo",
+                "inLanguage": "en-IN"
+            },
+
+            {
+                "@type": "Organization",
+                "@id": "{{ url('/') }}/#organization",
+                "name": "JobLavo",
+                "url": "{{ url('/') }}",
+                "description": "Government jobs, recruitment notifications, admit cards, answer keys, exam results and important career updates.",
+                "areaServed": "IN"
+            }
+
+        ]
+    }
+    </script>
 
     {{-- =========================================================
          BOOTSTRAP 5
