@@ -389,7 +389,7 @@
 
 
                 <article
-                    class="bg-white border rounded-2 shadow-sm">
+                    class="bg-white border shadow-sm">
 
 
                     <div class="p-3 p-md-4 border-bottom">
@@ -780,7 +780,7 @@
 
 
                         <div
-                            class="bg-white border rounded-2 shadow-sm">
+                            class="bg-white border shadow-sm">
 
 
                             {{-- HEADER --}}

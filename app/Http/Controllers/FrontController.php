@@ -119,7 +119,7 @@ class FrontController extends Controller
 
                 ->latest('published_at')
 
-                ->take(5)
+                ->take(10)
 
                 ->get();
 
@@ -159,7 +159,7 @@ class FrontController extends Controller
 
             ->latest('published_at')
 
-            ->take(10)
+            ->take(20)
 
             ->get();
 
