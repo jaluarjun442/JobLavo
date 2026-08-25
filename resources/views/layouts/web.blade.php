@@ -180,14 +180,7 @@
          BOOTSTRAP 5
     ========================================================== --}}
 
-    <link rel="preload"
-        href="{{ asset('web_assets/css/bootstrap.min.css') }}"
-        as="style"
-        onload="this.onload=null;this.rel='stylesheet'">
-
-    <noscript>
-        <link rel="stylesheet" href="{{ asset('web_assets/css/bootstrap.min.css') }}">
-    </noscript>
+   <link rel="stylesheet" href="{{ asset('web_assets/css/bootstrap.min.css') }}">
     @stack('head')
 
 </head>
