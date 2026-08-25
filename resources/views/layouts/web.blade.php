@@ -433,7 +433,7 @@
 
                 {{-- ABOUT --}}
 
-                <div class="col-lg-5">
+                <div class="col-lg-8">
 
                     <h2 class="footer-title">
 
@@ -447,11 +447,7 @@
 
                     <p class="footer-text">
 
-                        Get the latest government jobs,
-                        recruitment notifications,
-                        admit cards, answer keys,
-                        exam results and important
-                        career updates.
+                    We are a Non-Government Entity provide jobs information gathered from various trusted sources. We also provide official source pdf link or website URL at the end of each job. All the content provided here is only for the summarized information purpose to the job aspirants. JobLavo team does not call any person for job offers or job assistance. JobLavo.com never charge any candidate or person for any job. Please beware of fake calls or emails. For any assistance, please contact us on email at info@joblavo.com While all efforts have been made to make the Information available on this App/website as Authentic as possible. We are not responsible for any loss to anybody or anything caused by any Shortcoming, Defect or Inaccuracy of the Information on this Website. Please check Official Government Website twice before applying for any job.
 
                     </p>
 
@@ -461,7 +457,7 @@
 
                 {{-- QUICK LINKS --}}
 
-                <div class="col-6 col-lg-3">
+                <div class="col-6 col-lg-2">
 
                     <h2 class="footer-title">
 
@@ -520,7 +516,7 @@
 
                 {{-- LEGAL --}}
 
-                <div class="col-6 col-lg-4">
+                <div class="col-6 col-lg-2">
 
                     <h2 class="footer-title">
 
