@@ -180,8 +180,14 @@
          BOOTSTRAP 5
     ========================================================== --}}
 
-   <link rel="stylesheet" href="{{ asset('web_assets/css/bootstrap.min.css') }}">
+    <link rel="preload"
+        href="{{ asset('web_assets/css/bootstrap.min.css') }}"
+        as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
 
+    <noscript>
+        <link rel="stylesheet" href="{{ asset('web_assets/css/bootstrap.min.css') }}">
+    </noscript>
     @stack('head')
 
 </head>
@@ -632,8 +638,7 @@
          BOOTSTRAP JS
     ========================================================== --}}
 
-    <script src="{{ asset('web_assets/js/bootstrap.bundle.min.js') }}"></script>
-
+    <script src="{{ asset('web_assets/js/bootstrap.bundle.min.js') }}" defer></script>
 
     @stack('scripts')
 
