@@ -15,7 +15,7 @@ class FetchSourcePosts extends Command
     |--------------------------------------------------------------------------
     */
 
-    protected $signature = 'sources:fetch';
+    protected $signature = 'sources_fetch';
 
 
     /*
