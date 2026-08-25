@@ -334,20 +334,109 @@
 
                 </div>
 
+{{-- MESSAGE --}}
+
+@php
+
+    $logMessage = $log['message'];
+
+    $prettyJson = null;
+
+    $logTitle = $logMessage;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Find JSON Object
+    |--------------------------------------------------------------------------
+    */
+
+    $jsonStart = strpos($logMessage, '{');
+
+    if ($jsonStart !== false) {
+
+        $jsonText = trim(
+            substr(
+                $logMessage,
+                $jsonStart
+            )
+        );
 
 
-                {{-- MESSAGE --}}
-
-                <div class="log-message">
-
-                    {{ \Illuminate\Support\Str::limit(
-                                $log['message'],
-                                1000
-                            ) }}
-
-                </div>
+        $decodedJson = json_decode(
+            $jsonText,
+            true
+        );
 
 
+        if (
+            json_last_error() === JSON_ERROR_NONE
+            && is_array($decodedJson)
+        ) {
+
+            $prettyJson = json_encode(
+                $decodedJson,
+                JSON_PRETTY_PRINT |
+                JSON_UNESCAPED_SLASHES |
+                JSON_UNESCAPED_UNICODE
+            );
+
+
+            $logTitle = trim(
+                substr(
+                    $logMessage,
+                    0,
+                    $jsonStart
+                )
+            );
+
+        }
+
+    }
+
+@endphp
+
+
+<div class="log-message">
+
+    @if($prettyJson)
+
+        <div class="fw-semibold mb-2">
+            {{ $logTitle }}
+        </div>
+
+
+        <pre
+            class="mb-0 p-3"
+            style="
+                background:#f8f9fa;
+                border:1px solid #dee2e6;
+                border-radius:6px;
+                font-size:13px;
+                line-height:1.6;
+                white-space:pre-wrap;
+                word-break:break-word;
+                overflow:auto;
+                max-height:400px;
+            ">{{ $prettyJson }}</pre>
+
+    @else
+
+        <div
+            style="
+                white-space:pre-wrap;
+                word-break:break-word;
+            ">
+
+            {{ \Illuminate\Support\Str::limit(
+                $logMessage,
+                1000
+            ) }}
+
+        </div>
+
+    @endif
+
+</div>
 
                 {{-- RAW DETAILS --}}
 

@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AiJobImportController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\SourceController;
+use App\Http\Controllers\Admin\SourcePostController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\FrontController;
@@ -28,6 +30,10 @@ Route::get('/cron/google-indexing', [
     PostController::class,
     'googleIndexingCron'
 ]);
+Route::get(
+    '/cron/source-fetch',
+    [SourceController::class, 'fetchAll']
+)->name('cron.source-fetch');
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -207,6 +213,39 @@ Route::middleware(['auth', 'admin'])
             '/posts/{post}/index',
             [PostController::class, 'indexPost']
         )->name('posts.index-post');
+
+        // source route
+        Route::get(
+            '/sources',
+            [SourceController::class, 'index']
+        )->name('sources.index');
+        Route::post(
+            '/sources',
+            [SourceController::class, 'store']
+        )->name('sources.store');
+        Route::put(
+            '/sources/{source}',
+            [SourceController::class, 'update']
+        )->name('sources.update');
+        Route::delete(
+            '/sources/{source}',
+            [SourceController::class, 'destroy']
+        )->name('sources.destroy');
+        Route::post(
+            '/sources/{source}/fetch',
+            [SourceController::class, 'fetchNow']
+        )->name('sources.fetch');
+        Route::get(
+            '/sources/{source}/posts/{status}',
+            [SourcePostController::class, 'index']
+        )->where(
+            'status',
+            'read|unread'
+        )->name('sources.posts');
+        Route::post(
+            '/source-posts/mark-read',
+            [SourcePostController::class, 'markRead']
+        )->name('source-posts.mark-read');
         /*
 |--------------------------------------------------------------------------
 | Sitemaps
