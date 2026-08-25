@@ -16,7 +16,17 @@ class SourceController extends Controller
 
     public function index()
     {
-        $sources = Source::latest()->get();
+        $sources = Source::query()
+            ->withCount([
+                'posts as unread_posts_count' => function ($query) {
+                    $query->where('is_read', false);
+                },
+
+                'posts as read_posts_count' => function ($query) {
+                    $query->where('is_read', true);
+                },
+            ])
+            ->get();
 
         return view(
             'admin.sources.index',

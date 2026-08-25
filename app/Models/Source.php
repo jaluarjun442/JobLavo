@@ -24,7 +24,8 @@ class Source extends Model
     public function posts()
     {
         return $this->hasMany(
-            SourcePost::class
+            SourcePost::class,
+            'source_id'
         );
     }
 }

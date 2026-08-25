@@ -106,7 +106,8 @@
                         <th>
                             Latest Limit
                         </th>
-
+                        <th>Unread</th>
+                        <th>Read</th>
                         <th>
                             Status
                         </th>
@@ -172,8 +173,17 @@
                             </span>
 
                         </td>
+                        <td>
+                            <span class="badge bg-warning text-dark">
+                                {{ $source->unread_posts_count }}
+                            </span>
+                        </td>
 
-
+                        <td>
+                            <span class="badge bg-success">
+                                {{ $source->read_posts_count }}
+                            </span>
+                        </td>
                         <td>
 
                             @if($source->status)
