@@ -15,164 +15,11 @@ class GoogleIndexingService
 
     public function update(string $url): bool
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Local / Non-Production Protection
-        |--------------------------------------------------------------------------
-        */
-
-        if (!app()->environment('production')) {
-
-            Log::info(
-                'Google Indexing skipped - non-production environment.',
-                [
-                    'url' => $url,
-                    'environment' => app()->environment(),
-                ]
-            );
-
-            return false;
-        }
-
-
-        try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Credentials
-            |--------------------------------------------------------------------------
-            */
-
-            $credentialsPath = storage_path(
-                'app/' . env(
-                    'GOOGLE_INDEXING_CREDENTIALS',
-                    'google/joblavo-indexing.json'
-                )
-            );
-
-
-            if (!file_exists($credentialsPath)) {
-
-                Log::error(
-                    'Google Indexing failed - credentials file not found.',
-                    [
-                        'url' => $url,
-                        'credentials_path' => $credentialsPath,
-                    ]
-                );
-
-                return false;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Google Client
-            |--------------------------------------------------------------------------
-            */
-
-            $client = new Client();
-
-            $client->setAuthConfig(
-                $credentialsPath
-            );
-
-            $client->addScope(
-                'https://www.googleapis.com/auth/indexing'
-            );
-
-
-            $httpClient = $client->authorize();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Google Indexing API
-            |--------------------------------------------------------------------------
-            */
-
-            $response = $httpClient->post(
-                'https://indexing.googleapis.com/v3/urlNotifications:publish',
-                [
-                    'json' => [
-                        'url' => $url,
-                        'type' => 'URL_UPDATED',
-                    ],
-                ]
-            );
-
-
-            $statusCode =
-                $response->getStatusCode();
-
-
-            $responseBody =
-                (string) $response->getBody();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Success
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                $statusCode >= 200 &&
-                $statusCode < 300
-            ) {
-
-                Log::info(
-                    'Google Indexing Request SUCCESS',
-                    [
-                        'url' => $url,
-                        'type' => 'URL_UPDATED',
-                        'http_status' => $statusCode,
-                        'response' => $responseBody,
-                    ]
-                );
-
-                return true;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Unexpected Response
-            |--------------------------------------------------------------------------
-            */
-
-            Log::error(
-                'Google Indexing Request FAILED',
-                [
-                    'url' => $url,
-                    'type' => 'URL_UPDATED',
-                    'http_status' => $statusCode,
-                    'response' => $responseBody,
-                ]
-            );
-
-            return false;
-        } catch (\Throwable $e) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Exception
-            |--------------------------------------------------------------------------
-            */
-
-            Log::error(
-                'Google Indexing Request EXCEPTION',
-                [
-                    'url' => $url,
-                    'type' => 'URL_UPDATED',
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                ]
-            );
-
-            return false;
-        }
+        return $this->sendRequest(
+            $url,
+            'URL_UPDATED',
+            'update'
+        );
     }
 
 
@@ -184,6 +31,45 @@ class GoogleIndexingService
 
     public function delete(string $url): bool
     {
+        return $this->sendRequest(
+            $url,
+            'URL_DELETED',
+            'delete'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Common Google Indexing Request
+    |--------------------------------------------------------------------------
+    */
+
+    private function sendRequest(
+        string $url,
+        string $type,
+        string $action
+    ): bool {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Default Log Data
+        |--------------------------------------------------------------------------
+        */
+
+        $logData = [
+
+            'action' => $action,
+
+            'type' => $type,
+
+            'url' => $url,
+
+            'success' => false,
+
+        ];
+
+
         /*
         |--------------------------------------------------------------------------
         | Local / Non-Production Protection
@@ -192,13 +78,25 @@ class GoogleIndexingService
 
         if (!app()->environment('production')) {
 
+            $logData['skipped'] = true;
+
+            $logData['reason'] =
+                'non-production environment';
+
+            $logData['environment'] =
+                app()->environment();
+
+
             Log::info(
-                'Google Indexing delete skipped - non-production environment.',
-                [
-                    'url' => $url,
-                    'environment' => app()->environment(),
-                ]
+                "Google Indexing Request\n" .
+                json_encode(
+                    $logData,
+                    JSON_PRETTY_PRINT |
+                    JSON_UNESCAPED_SLASHES |
+                    JSON_UNESCAPED_UNICODE
+                )
             );
+
 
             return false;
         }
@@ -222,13 +120,23 @@ class GoogleIndexingService
 
             if (!file_exists($credentialsPath)) {
 
+                $logData['error'] =
+                    'Credentials file not found.';
+
+                $logData['credentials_path'] =
+                    $credentialsPath;
+
+
                 Log::error(
-                    'Google Indexing delete failed - credentials file not found.',
-                    [
-                        'url' => $url,
-                        'credentials_path' => $credentialsPath,
-                    ]
+                    "Google Indexing Request\n" .
+                    json_encode(
+                        $logData,
+                        JSON_PRETTY_PRINT |
+                        JSON_UNESCAPED_SLASHES |
+                        JSON_UNESCAPED_UNICODE
+                    )
                 );
+
 
                 return false;
             }
@@ -266,7 +174,7 @@ class GoogleIndexingService
                 [
                     'json' => [
                         'url' => $url,
-                        'type' => 'URL_DELETED',
+                        'type' => $type,
                     ],
                 ]
             );
@@ -282,6 +190,19 @@ class GoogleIndexingService
 
             /*
             |--------------------------------------------------------------------------
+            | Response Data
+            |--------------------------------------------------------------------------
+            */
+
+            $logData['http_status'] =
+                $statusCode;
+
+            $logData['response'] =
+                $responseBody;
+
+
+            /*
+            |--------------------------------------------------------------------------
             | Success
             |--------------------------------------------------------------------------
             */
@@ -291,15 +212,19 @@ class GoogleIndexingService
                 $statusCode < 300
             ) {
 
+                $logData['success'] = true;
+
+
                 Log::info(
-                    'Google Indexing Delete SUCCESS',
-                    [
-                        'url' => $url,
-                        'type' => 'URL_DELETED',
-                        'http_status' => $statusCode,
-                        'response' => $responseBody,
-                    ]
+                    "Google Indexing Request\n" .
+                    json_encode(
+                        $logData,
+                        JSON_PRETTY_PRINT |
+                        JSON_UNESCAPED_SLASHES |
+                        JSON_UNESCAPED_UNICODE
+                    )
                 );
+
 
                 return true;
             }
@@ -307,33 +232,52 @@ class GoogleIndexingService
 
             /*
             |--------------------------------------------------------------------------
-            | Failed
+            | Failed Response
             |--------------------------------------------------------------------------
             */
 
             Log::error(
-                'Google Indexing Delete FAILED',
-                [
-                    'url' => $url,
-                    'type' => 'URL_DELETED',
-                    'http_status' => $statusCode,
-                    'response' => $responseBody,
-                ]
+                "Google Indexing Request\n" .
+                json_encode(
+                    $logData,
+                    JSON_PRETTY_PRINT |
+                    JSON_UNESCAPED_SLASHES |
+                    JSON_UNESCAPED_UNICODE
+                )
             );
+
 
             return false;
+
+
         } catch (\Throwable $e) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | Exception
+            |--------------------------------------------------------------------------
+            */
+
+            $logData['error'] =
+                $e->getMessage();
+
+            $logData['file'] =
+                $e->getFile();
+
+            $logData['line'] =
+                $e->getLine();
+
+
             Log::error(
-                'Google Indexing Delete EXCEPTION',
-                [
-                    'url' => $url,
-                    'type' => 'URL_DELETED',
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                ]
+                "Google Indexing Request\n" .
+                json_encode(
+                    $logData,
+                    JSON_PRETTY_PRINT |
+                    JSON_UNESCAPED_SLASHES |
+                    JSON_UNESCAPED_UNICODE
+                )
             );
+
 
             return false;
         }
