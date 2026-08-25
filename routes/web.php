@@ -198,6 +198,15 @@ Route::middleware(['auth', 'admin'])
             PostController::class,
             'bulkAdd'
         ])->name('posts.bulk-add');
+
+        Route::post(
+            '/posts/index-pending',
+            [PostController::class, 'indexPendingPosts']
+        )->name('posts.index-pending');
+        Route::post(
+            '/posts/{post}/index',
+            [PostController::class, 'indexPost']
+        )->name('posts.index-post');
         /*
 |--------------------------------------------------------------------------
 | Sitemaps

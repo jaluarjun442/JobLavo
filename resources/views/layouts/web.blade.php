@@ -8,16 +8,17 @@
 
     <meta name="viewport"
         content="width=device-width, initial-scale=1">
+    @if(app()->environment('production'))
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-64LK51PQVX"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-64LK51PQVX"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-64LK51PQVX');
-    </script>
+        gtag('config', 'G-64LK51PQVX');
+        </script>
+    @endif
     {{-- =========================================================
          BASIC SEO
     ========================================================== --}}

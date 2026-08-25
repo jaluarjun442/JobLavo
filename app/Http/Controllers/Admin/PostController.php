@@ -54,8 +54,50 @@ class PostController extends Controller
             ->select('posts.*');
 
 
-        return DataTables::eloquent($query)
+        /*
+        |--------------------------------------------------------------------------
+        | Indexing Filter
+        |--------------------------------------------------------------------------
+        */
 
+        if (
+            $request->filled('index_status')
+        ) {
+
+            if (
+                $request->index_status === 'indexed'
+            ) {
+
+                $query->where(
+                    'posts.is_indexed',
+                    true
+                );
+            } elseif (
+                $request->index_status === 'not_indexed'
+            ) {
+
+                $query->where(
+                    'posts.is_indexed',
+                    false
+                );
+            }
+        }
+
+        $indexedCount = Post::query()
+            ->where('is_indexed', true)
+            ->count();
+
+        $notIndexedCount = Post::query()
+            ->where(function ($query) {
+                $query->where('is_indexed', false)
+                    ->orWhereNull('is_indexed');
+            })
+        ->count();
+        return DataTables::eloquent($query)
+            ->with([
+                'indexed_count' => $indexedCount,
+                'not_indexed_count' => $notIndexedCount,
+            ])
             /*
             |--------------------------------------------------------------------------
             | Default Ordering
@@ -248,7 +290,33 @@ class PostController extends Controller
                         </span>';
             })
 
+            /*
+            |--------------------------------------------------------------------------
+            | Google Indexing
+            |--------------------------------------------------------------------------
+            */
 
+            ->addColumn('indexing', function ($post) {
+
+                if ($post->is_indexed) {
+
+                    return '
+                        <span class="badge bg-success">
+                            Indexed
+                        </span>
+                    ';
+                }
+
+                return '
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary index-post-btn"
+                        data-id="' . $post->id . '">
+
+                        Index
+                    </button>
+                ';
+            })
             /*
             |--------------------------------------------------------------------------
             | Action
@@ -319,6 +387,7 @@ class PostController extends Controller
                 'published_date',
                 'featured_badge',
                 'important_badge',
+                'indexing',
                 'action',
             ])
 
@@ -1092,7 +1161,8 @@ class PostController extends Controller
 
             'featured_image' =>
             null,
-
+            'is_indexed' =>
+            false,
 
             /*
             |--------------------------------------------------------------------------
@@ -1562,32 +1632,40 @@ class PostController extends Controller
 | Google Indexing
 |--------------------------------------------------------------------------
 */
+    /*
+|--------------------------------------------------------------------------
+| Google Indexing
+|--------------------------------------------------------------------------
+*/
 
-    private function submitGoogleIndexing(Post $post): bool
+    private function submitGoogleIndexing(Post $post): void
     {
-        if (
-            !app()->environment('production')
-        ) {
-            return false;
+        if (!app()->environment('production')) {
+            return;
         }
 
-
-        if (
-            $post->status !== 'published'
-        ) {
-            return false;
+        if ($post->status !== 'published') {
+            return;
         }
-
 
         $url = route(
             'post',
             $post->slug
         );
 
-
-        return $this->googleIndexingService->update(
+        $this->googleIndexingService->update(
             $url
         );
+
+        /*
+    |--------------------------------------------------------------------------
+    | Mark As Indexed Request Submitted
+    |--------------------------------------------------------------------------
+    */
+
+        $post->update([
+            'is_indexed' => true
+        ]);
     }
     /*
     |--------------------------------------------------------------------------
@@ -1819,5 +1897,93 @@ class PostController extends Controller
             'indexed' => $success,
             'failed' => $failed,
         ]);
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Index Single Post
+    |--------------------------------------------------------------------------
+    */
+
+    public function indexPost(Post $post)
+    {
+        if ($post->status !== 'published') {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Only published posts can be indexed.'
+            ], 422);
+        }
+
+        try {
+
+            $this->submitGoogleIndexing($post);
+
+            $post->update([
+                'is_indexed' => true
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Post submitted to Google Indexing successfully.'
+            ]);
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Google Indexing failed.'
+            ], 500);
+        }
+    }
+    /*
+|--------------------------------------------------------------------------
+| Index All Pending Posts
+|--------------------------------------------------------------------------
+*/
+
+    public function indexPendingPosts()
+    {
+        if (!app()->environment('production')) {
+            return redirect()
+                ->route('admin.posts.index')
+                ->withErrors([
+                    'indexing' =>
+                    'Google indexing is available only in production.'
+                ]);
+        }
+
+        $posts = Post::query()
+            ->where('status', 'published')
+            ->where(function ($query) {
+                $query->where('is_indexed', false)
+                    ->orWhereNull('is_indexed');
+            })
+            ->orderBy('id')
+            ->limit(50)
+            ->get();
+
+        $indexedCount = 0;
+
+        foreach ($posts as $post) {
+
+            try {
+
+                $this->submitGoogleIndexing($post);
+
+                $indexedCount++;
+            } catch (\Throwable $e) {
+
+                report($e);
+
+                continue;
+            }
+        }
+
+        return redirect()
+            ->route('admin.posts.index')
+            ->with(
+                'success',
+                $indexedCount .
+                    ' post(s) submitted for Google indexing.'
+            );
     }
 }

@@ -6,16 +6,6 @@
 
 @section('content')
 
-
-<div class="d-flex
-            flex-column
-            flex-md-row
-            justify-content-between
-            align-items-md-center
-            gap-3
-            mb-4">
-
-
     <div>
 
         <h1 class="h3 fw-bold mb-1">
@@ -28,9 +18,118 @@
 
     </div>
 
+<div class="d-flex
+            flex-column
+            flex-md-row
+            justify-content-between
+            align-items-md-center
+            gap-3
+            mb-4">
 
-    <div class="d-flex gap-2">
 
+
+
+    <div class="d-flex
+                flex-wrap
+                gap-2
+                align-items-center">
+
+
+        {{-- INDEXING FILTER --}}
+        <div class="d-flex
+                    align-items-center
+                    gap-2">
+
+            <label
+                for="indexStatus"
+                class="mb-0
+                       fw-semibold
+                       text-nowrap">
+
+                Indexing:
+
+            </label>
+
+
+            <select
+                id="indexStatus"
+                class="form-select form-select-sm"
+                style="width: 150px;">
+
+                <option value="">
+                    All
+                </option>
+
+                <option value="indexed">
+                    Indexed
+                </option>
+
+                <option value="not_indexed">
+                    Not Indexed
+                </option>
+
+            </select>
+
+        </div>
+
+
+        {{-- INDEXED COUNT --}}
+        <span
+            class="badge
+                   bg-success-subtle
+                   text-success
+                   border
+                   px-3
+                   py-2">
+
+            Indexed:
+            <span id="indexedCount">
+                0
+            </span>
+
+        </span>
+
+
+        {{-- NOT INDEXED COUNT --}}
+        <span
+            class="badge
+                   bg-warning-subtle
+                   text-warning-emphasis
+                   border
+                   px-3
+                   py-2">
+
+            Not Indexed:
+            <span id="notIndexedCount">
+                0
+            </span>
+
+        </span>
+
+
+        {{-- INDEX PENDING --}}
+        <form
+            action="{{ route('admin.posts.index-pending') }}"
+            method="POST"
+            class="d-inline"
+            onsubmit="return confirm('Index all pending published posts?');">
+
+            @csrf
+
+            <button
+                type="submit"
+                class="btn btn-outline-primary">
+
+                <i class="bi bi-google me-1"></i>
+
+                Index Pending
+
+            </button>
+
+        </form>
+
+
+        {{-- AI IMPORT --}}
         <a
             href="{{ route('admin.ai-jobs.import') }}"
             class="btn btn-dark">
@@ -40,6 +139,7 @@
         </a>
 
 
+        {{-- ADD POST --}}
         <a
             href="{{ route('admin.posts.create') }}"
             class="btn btn-primary">
@@ -108,6 +208,10 @@
                         </th>
 
                         <th>
+                            Indexing
+                        </th>
+
+                        <th>
                             Action
                         </th>
 
@@ -148,7 +252,8 @@
 
 @push('scripts')
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js">
+</script>
 
 
 <script
@@ -164,213 +269,344 @@
 
 <script>
 
-    $(document).ready(function() {
+    $(document).ready(function () {
 
 
-        $('#postsTable').DataTable({
+        /*
+        |--------------------------------------------------------------------------
+        | DataTable
+        |--------------------------------------------------------------------------
+        */
+
+        const postsTable =
+            $('#postsTable').DataTable({
+
+                processing: true,
+
+                serverSide: true,
+
+                responsive: false,
 
 
-            processing: true,
+                ajax: {
+
+                    url:
+                        "{{ route('admin.posts.data') }}",
+
+                    type: "GET",
 
 
-            serverSide: true,
+                    data: function (d) {
+
+                        d.index_status =
+                            $('#indexStatus').val();
+
+                    },
 
 
-            responsive: false,
+                    dataSrc: function (json) {
 
 
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Update Index Counts
+                        |--------------------------------------------------------------------------
+                        */
 
-            ajax: {
+                        if (
+                            typeof json.indexed_count !==
+                            'undefined'
+                        ) {
 
-                url: "{{ route('admin.posts.data') }}",
+                            $('#indexedCount')
+                                .text(
+                                    json.indexed_count
+                                );
 
-                type: "GET"
-
-            },
-
-
-
-            pageLength: 10,
-
-
-
-            lengthMenu: [
-
-                [10, 25, 50, 100],
-
-                [10, 25, 50, 100]
-
-            ],
+                        }
 
 
+                        if (
+                            typeof json.not_indexed_count !==
+                            'undefined'
+                        ) {
 
-            order: [
+                            $('#notIndexedCount')
+                                .text(
+                                    json.not_indexed_count
+                                );
 
-                [0, 'desc']
-
-            ],
-
-
-
-            columns: [
+                        }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | No
-                |--------------------------------------------------------------------------
-                */
+                        return json.data;
 
-                {
-                    data: 'DT_RowIndex',
+                    }
 
-                    name: 'DT_RowIndex',
-
-                    orderable: false,
-
-                    searchable: false
                 },
 
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Image
-                |--------------------------------------------------------------------------
-                */
-
-                {
-                    data: 'image',
-
-                    name: 'image',
-
-                    orderable: false,
-
-                    searchable: false
-                },
+                pageLength: 10,
 
 
+                lengthMenu: [
 
-                /*
-                |--------------------------------------------------------------------------
-                | Title
-                |--------------------------------------------------------------------------
-                */
+                    [10, 25, 50, 100],
 
-                {
-                    data: 'title',
+                    [10, 25, 50, 100]
 
-                    name: 'title'
-                },
+                ],
 
 
+                order: [
 
-                /*
-                |--------------------------------------------------------------------------
-                | Multiple Categories
-                |--------------------------------------------------------------------------
-                */
+                    [0, 'desc']
 
-                {
-                    data: 'category',
-
-                    name: 'category',
-
-                    orderable: false,
-
-                    searchable: false
-                },
+                ],
 
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Status
-                |--------------------------------------------------------------------------
-                */
-
-                {
-                    data: 'status_badge',
-
-                    name: 'status',
-
-                    orderable: true,
-
-                    searchable: true
-                },
+                columns: [
 
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | No
+                    |--------------------------------------------------------------------------
+                    */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Published
-                |--------------------------------------------------------------------------
-                */
+                    {
 
-                {
-                    data: 'published_date',
+                        data:
+                            'DT_RowIndex',
 
-                    name: 'published_at'
-                },
+                        name:
+                            'DT_RowIndex',
 
+                        orderable:
+                            false,
 
+                        searchable:
+                            false
 
-                /*
-                |--------------------------------------------------------------------------
-                | Featured
-                |--------------------------------------------------------------------------
-                */
-
-                {
-                    data: 'featured_badge',
-
-                    name: 'is_featured',
-
-                    orderable: true,
-
-                    searchable: false
-                },
+                    },
 
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Image
+                    |--------------------------------------------------------------------------
+                    */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Important
-                |--------------------------------------------------------------------------
-                */
+                    {
 
-                {
-                    data: 'important_badge',
+                        data:
+                            'image',
 
-                    name: 'is_important',
+                        name:
+                            'image',
 
-                    orderable: true,
+                        orderable:
+                            false,
 
-                    searchable: false
-                },
+                        searchable:
+                            false
 
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Action
-                |--------------------------------------------------------------------------
-                */
-
-                {
-                    data: 'action',
-
-                    name: 'action',
-
-                    orderable: false,
-
-                    searchable: false
-                }
+                    },
 
 
-            ]
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Title
+                    |--------------------------------------------------------------------------
+                    */
 
-        });
+                    {
+
+                        data:
+                            'title',
+
+                        name:
+                            'title'
+
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Multiple Categories
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+
+                        data:
+                            'category',
+
+                        name:
+                            'category',
+
+                        orderable:
+                            false,
+
+                        searchable:
+                            false
+
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Status
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+
+                        data:
+                            'status_badge',
+
+                        name:
+                            'status',
+
+                        orderable:
+                            true,
+
+                        searchable:
+                            true
+
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Published
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+
+                        data:
+                            'published_date',
+
+                        name:
+                            'published_at'
+
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Featured
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+
+                        data:
+                            'featured_badge',
+
+                        name:
+                            'is_featured',
+
+                        orderable:
+                            true,
+
+                        searchable:
+                            false
+
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Important
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+
+                        data:
+                            'important_badge',
+
+                        name:
+                            'is_important',
+
+                        orderable:
+                            true,
+
+                        searchable:
+                            false
+
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Indexing
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+
+                        data:
+                            'indexing',
+
+                        name:
+                            'indexing',
+
+                        orderable:
+                            false,
+
+                        searchable:
+                            false
+
+                    },
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Action
+                    |--------------------------------------------------------------------------
+                    */
+
+                    {
+
+                        data:
+                            'action',
+
+                        name:
+                            'action',
+
+                        orderable:
+                            false,
+
+                        searchable:
+                            false
+
+                    }
+
+                ]
+
+            });
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Indexing Filter
+        |--------------------------------------------------------------------------
+        */
+
+        $('#indexStatus').on(
+            'change',
+            function () {
+
+                postsTable
+                    .ajax
+                    .reload();
+
+            }
+        );
 
 
     });
