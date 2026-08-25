@@ -207,8 +207,6 @@ class SourceController extends Controller
 
     public function fetchAll()
     {
-        dd('exit');
-        exit();
         $sources = Source::query()
             ->where('status', true)
             ->get();
