@@ -619,7 +619,7 @@ class PostController extends Controller
 
 
             $image->move(
-                public_path(
+                base_path(
                     'uploads/posts'
                 ),
                 $filename
@@ -1477,7 +1477,7 @@ class PostController extends Controller
 
 
             $image->move(
-                public_path(
+                base_path(
                     'uploads/posts'
                 ),
                 $filename
