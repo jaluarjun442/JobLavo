@@ -465,8 +465,6 @@
                                 ) }}"
                                 alt="{{ $post->title }}"
                                 class="img-fluid rounded"
-                                width="100%"
-                                height="auto"
                                 loading="eager">
 
                         </div>
