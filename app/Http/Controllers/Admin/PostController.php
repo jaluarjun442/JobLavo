@@ -609,13 +609,7 @@ class PostController extends Controller
                 );
 
 
-            $filename =
-                time() .
-                '_' .
-                uniqid() .
-                '.' .
-                $image
-                ->getClientOriginalExtension();
+            $filename = $image->getClientOriginalName();
 
 
             $image->move(
@@ -1467,13 +1461,7 @@ class PostController extends Controller
                 );
 
 
-            $filename =
-                time() .
-                '_' .
-                uniqid() .
-                '.' .
-                $image
-                ->getClientOriginalExtension();
+        $filename = $image->getClientOriginalName();
 
 
             $image->move(
