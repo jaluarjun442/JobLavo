@@ -44,12 +44,7 @@
               'government jobs, govt jobs, latest government jobs, recruitment, admit card, answer key, results'
           )">
 
-
-    <meta name="robots"
-        content="@yield(
-              'meta_robots',
-              'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
-          )">
+    <meta name="robots" content="max-image-preview:large">
 
 
     <meta name="author"
