@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    
+    <meta name="google-adsense-account" content="ca-pub-7418008356921994">
     <link rel="icon" href="{{ asset('img/favicon.ico') }}" type="image/x-icon">
 
     <meta charset="utf-8">
