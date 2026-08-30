@@ -435,9 +435,9 @@
 
                         {{-- PUBLISHED DATE --}}
 
-                        <!-- <div class="small text-secondary">
-
-                            Published:
+                        <div class="small text-secondary">
+                            Published By : Manisha Jalu || 
+                            Published At :
 
                             <strong>
 
@@ -447,7 +447,7 @@
 
                             </strong>
 
-                        </div> -->
+                        </div>
 
 
                     </div>
@@ -793,7 +793,90 @@
 
                 </article>
 
+                {{-- =========================================================
+                    AUTHOR BOX
+                ========================================================== --}}
 
+                <section class="bg-white py-3 mt-4">
+
+                    <div class="container">
+                                            <div
+                                                class="px-3 py-3 text-white"
+                                                style="background:#06245f;">
+
+                                                <h2 class="h5 fw-bold mb-0">
+
+                                                    Author
+
+                                                </h2>
+
+                                            </div>
+                        <div
+                            class="p-3 p-md-4"
+                            style="
+                                background:#fff;
+                                box-shadow:0 8px 25px rgba(0,0,0,0.05);
+                            "
+                        >
+
+                            <div class="d-flex align-items-start gap-3">
+
+                                {{-- Author Initial --}}
+                                <div
+                                    class="d-flex align-items-center justify-content-center flex-shrink-0"
+                                    style="
+                                        width:58px;
+                                        height:58px;
+                                        border-radius:50%;
+                                        background:#f1f3f5;
+                                        color:#0d2b52;
+                                        font-size:24px;
+                                        font-weight:700;
+                                    "
+                                >
+                                    M
+                                </div>
+
+
+                                {{-- Author Content --}}
+                                <div>
+
+                                    <h3
+                                        class="mb-2"
+                                        style="
+                                            font-size:20px;
+                                            font-weight:700;
+                                            color:#102a43;
+                                        "
+                                    >
+                                        Manisha Jalu
+                                    </h3>
+
+
+                                    <p
+                                        class="mb-0"
+                                        style="
+                                            font-size:15px;
+                                            line-height:1.7;
+                                            color:#36506b;
+                                        "
+                                    >
+                                        Manisha Jalu writes about government jobs, recruitment
+                                        notifications, admit cards, results and other important
+                                        career updates. Her content focuses on clear and useful
+                                        information to help job seekers stay updated with the
+                                        latest opportunities.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
 
                 {{-- =====================================================
                      RELATED POSTS

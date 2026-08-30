@@ -403,17 +403,53 @@
     </header>
 
 
+{{-- =========================================================
+     SOCIAL CHANNELS
+========================================================== --}}
 
-    {{-- =========================================================
-         MAIN CONTENT
-    ========================================================== --}}
+<section class="bg-white py-2">
 
-    <main class="site-main">
+    <div class="container">
 
-        @yield('content')
+        <div class="d-flex flex-column flex-sm-row justify-content-center align-items-stretch gap-2">
 
-    </main>
+            <a
+                href="https://chat.whatsapp.com/JMmdyvc4N887mPpj2KGsUE?s=cl&p=a&mlu=4"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-success fw-semibold">
 
+                💬 Join Our WhatsApp Channel
+
+            </a>
+
+
+            <a
+                href="https://t.me/joblavo"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-primary fw-semibold">
+
+                ✈️ Join Our Telegram Channel
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{{-- =========================================================
+     MAIN CONTENT
+========================================================== --}}
+
+<main class="site-main">
+
+    @yield('content')
+
+</main>
 
 
     {{-- =========================================================
