@@ -458,20 +458,30 @@
 
                 @if($post->featured_image)
 
+                @if($post->featured_image)
+
                     <div class="p-3 p-md-4 pb-0">
 
-                        <picture>
+                        @php
+                            $isMobile = preg_match(
+                                '/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i',
+                                request()->userAgent()
+                            );
+                        @endphp
 
-                            @if($post->mobile_image)
 
-                                <source
-                                    media="(max-width: 767px)"
-                                    srcset="{{ asset($post->mobile_image) }}"
-                                    width="354"
-                                    height="199">
+                        @if($isMobile && $post->mobile_image)
 
-                            @endif
+                            <img
+                                src="{{ asset($post->mobile_image) }}"
+                                alt="{{ $post->title }}"
+                                class="img-fluid rounded"
+                                width="354"
+                                height="199"
+                                loading="eager"
+                                fetchpriority="high">
 
+                        @else
 
                             <img
                                 src="{{ asset($post->featured_image) }}"
@@ -480,12 +490,13 @@
                                 width="1280"
                                 height="720"
                                 loading="eager"
-                                fetchpriority="high"
-                                sizes="(max-width: 767px) 100vw, 620px">
+                                fetchpriority="high">
 
-                        </picture>
+                        @endif
 
                     </div>
+
+                @endif
 
                 @endif
 
