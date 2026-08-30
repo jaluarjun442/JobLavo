@@ -176,7 +176,7 @@ class PostController extends Controller
 
 
                 $imageUrl = asset(
-                    'storage/' . $post->featured_image
+                    $post->featured_image
                 );
 
 
