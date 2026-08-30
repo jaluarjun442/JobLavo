@@ -337,8 +337,24 @@ class PostController extends Controller
                 );
 
 
+                $viewUrl = route(
+                    'post',
+                    $post->slug
+                );
+
+
                 return '
                     <div class="d-flex gap-1">
+
+                        <a
+                            href="' . $viewUrl . '"
+                            target="_blank"
+                            class="btn btn-sm btn-outline-secondary">
+
+                            View
+
+                        </a>
+
 
                         <a
                             href="' . $editUrl . '"
