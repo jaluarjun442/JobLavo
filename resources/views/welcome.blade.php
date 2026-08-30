@@ -31,7 +31,7 @@
 
             @foreach($homeTileCategories as $category)
 
-                <div class="col-6 col-md-4 col-lg-3">
+                <div class="col-6 col-md-4 col-lg-3 tile_category_h1">
 
                     <a
                         href="{{ route(
@@ -50,9 +50,9 @@
                         @endif"
                     >
 
-                        <h2>
+                        <h1>
                             {{ $category->name }}
-                        </h2>
+                        </h1>
 
                     </a>
 
