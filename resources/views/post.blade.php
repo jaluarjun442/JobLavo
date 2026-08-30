@@ -455,25 +455,38 @@
 
 
 
+
                     @if($post->featured_image)
 
                         <div class="p-3 p-md-4 pb-0">
 
-                            <img
-                                src="{{ asset(
-                                    $post->featured_image
-                                ) }}"
-                                alt="{{ $post->title }}"
-                                class="img-fluid rounded"
-                                width="1280"
-                                height="720"
-                                loading="eager"
-                                fetchpriority="high">
+                            <picture>
+
+                                @if($post->mobile_image)
+
+                                    <source
+                                        media="(max-width: 767px)"
+                                        srcset="{{ asset(
+                                            $post->mobile_image
+                                        ) }}">
+
+                                @endif
+
+
+                                <img
+                                    src="{{ asset(
+                                        $post->featured_image
+                                    ) }}"
+                                    alt="{{ $post->title }}"
+                                    class="img-fluid rounded"
+                                    loading="eager"
+                                    fetchpriority="high">
+
+                            </picture>
 
                         </div>
 
                     @endif
-
 
 
 

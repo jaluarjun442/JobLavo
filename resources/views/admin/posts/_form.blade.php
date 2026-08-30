@@ -878,7 +878,30 @@
                 </div>
 
             </div>
+            <div class="mb-3">
 
+                <label
+                    for="mobile_image"
+                    class="form-label">
+
+                    Mobile Image
+
+                </label>
+
+
+                <input
+                    type="file"
+                    name="mobile_image"
+                    id="mobile_image"
+                    class="form-control"
+                    accept="image/*">
+
+
+                <small class="text-muted">
+                    Optional. Recommended for mobile display.
+                </small>
+
+            </div>
 
 
             {{-- =====================================================

@@ -87,6 +87,7 @@ class Post extends Model
 
         'is_important',
         'is_indexed',
+        'mobile_image',
     ];
 
 

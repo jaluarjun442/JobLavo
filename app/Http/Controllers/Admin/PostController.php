@@ -92,7 +92,7 @@ class PostController extends Controller
                 $query->where('is_indexed', false)
                     ->orWhereNull('is_indexed');
             })
-        ->count();
+            ->count();
         return DataTables::eloquent($query)
             ->with([
                 'indexed_count' => $indexedCount,
@@ -641,7 +641,40 @@ class PostController extends Controller
                 $filename;
         }
 
+        /*
+|--------------------------------------------------------------------------
+| Mobile Image
+|--------------------------------------------------------------------------
+*/
 
+        if (
+            $request->hasFile(
+                'mobile_image'
+            )
+        ) {
+
+            $image =
+                $request->file(
+                    'mobile_image'
+                );
+
+
+            $filename =
+                $image->getClientOriginalName();
+
+
+            $image->move(
+                base_path(
+                    'uploads/posts'
+                ),
+                $filename
+            );
+
+
+            $validated['mobile_image'] =
+                'uploads/posts/' .
+                $filename;
+        }
         /*
         |--------------------------------------------------------------------------
         | Categories
@@ -1477,7 +1510,7 @@ class PostController extends Controller
                 );
 
 
-        $filename = $image->getClientOriginalName();
+            $filename = $image->getClientOriginalName();
 
 
             $image->move(
@@ -1492,7 +1525,40 @@ class PostController extends Controller
                 'uploads/posts/' .
                 $filename;
         }
+        /*
+        |--------------------------------------------------------------------------
+        | Mobile Image
+        |--------------------------------------------------------------------------
+        */
 
+        if (
+            $request->hasFile(
+                'mobile_image'
+            )
+        ) {
+
+            $image =
+                $request->file(
+                    'mobile_image'
+                );
+
+
+            $filename =
+                $image->getClientOriginalName();
+
+
+            $image->move(
+                base_path(
+                    'uploads/posts'
+                ),
+                $filename
+            );
+
+
+            $validated['mobile_image'] =
+                'uploads/posts/' .
+                $filename;
+        }
 
         /*
         |--------------------------------------------------------------------------
