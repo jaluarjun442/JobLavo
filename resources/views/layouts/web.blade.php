@@ -178,7 +178,7 @@
          BOOTSTRAP 5
     ========================================================== --}}
 
-   <link rel="stylesheet" href="{{ asset('web_assets/css/bootstrap.min.css?v=2') }}">
+   <link rel="stylesheet" href="{{ asset('web_assets/css/bootstrap.min.css?v=3') }}">
     @stack('head')
 
 </head>
