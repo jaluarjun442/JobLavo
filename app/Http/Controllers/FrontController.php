@@ -507,6 +507,22 @@ class FrontController extends Controller
             )
         );
     }
+    public function author($page)
+    {
+
+        return view('pages.author', [
+
+            'pageTitle' => "Manisha Jalu - JobLavo Author",
+
+            'metaDescription' => "Learn about Manisha Jalu, a JobLavo author covering government jobs, recruitment notifications, admit cards, results, exams and career-related updates.",
+
+            'metaKeywords' => "Manisha Jalu, JobLavo author, government jobs, govt jobs, recruitment updates, government recruitment, admit card, exam results",
+
+
+            'content' => "",
+
+        ]);
+    }
 
 
     /**
@@ -593,7 +609,11 @@ website covers useful information related to government vacancies,
 recruitment notifications, admit cards, examination results, answer keys,
 selection updates and other employment-related announcements.
 </p>
-
+<p>JobLavo prepares recruitment updates by reviewing publicly available recruitment notifications and official recruitment websites. We organize important information such as vacancies, eligibility, dates, selection process and application instructions into a simpler format for job seekers. Whenever possible, we provide a link to the official notification or recruitment website so candidates can verify the information directly.
+</p>
+<p>
+    JobLavo does not publish recruitment information with the intention of replacing an official notification. Our editorial team reviews available recruitment information before publication and updates articles when important official changes are identified.
+    </p>
 <p>
 Finding a suitable government job can sometimes require checking multiple
 department websites, recruitment boards and official notification pages.

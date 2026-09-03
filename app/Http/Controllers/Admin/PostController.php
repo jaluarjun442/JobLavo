@@ -40,6 +40,53 @@ class PostController extends Controller
         );
     }
 
+    public function bulkContentUpdate()
+    {
+        return view('admin.posts.bulk-content-update');
+    }
+
+    public function bulkContentUpdateSave(Request $request)
+    {
+        $request->validate([
+            'json_data' => ['required', 'json'],
+        ]);
+
+        $data = json_decode($request->json_data, true);
+
+        if (!is_array($data)) {
+            return back()->with('error', 'Invalid JSON format.');
+        }
+
+        $updated = 0;
+        $notFound = [];
+
+        foreach ($data as $postId => $content) {
+
+            if (!is_numeric($postId) || !is_string($content)) {
+                continue;
+            }
+
+            $post = Post::find((int) $postId);
+
+            if (!$post) {
+                $notFound[] = $postId;
+                continue;
+            }
+
+            $post->content = $content;
+            $post->save();
+
+            $updated++;
+        }
+
+        $message = "{$updated} post(s) content updated successfully.";
+
+        if (!empty($notFound)) {
+            $message .= ' Not found IDs: ' . implode(', ', $notFound);
+        }
+
+        return back()->with('success', $message);
+    }
 
     /*
     |--------------------------------------------------------------------------

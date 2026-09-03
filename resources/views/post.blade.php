@@ -436,7 +436,7 @@
                         {{-- PUBLISHED DATE --}}
 
                         <div class="small text-secondary">
-                            Published By : Manisha Jalu || 
+                            Published By : <a href="{{ route('manisha_jalu') }}" >  Manisha Jalu </a> || 
                             Published At :
 
                             <strong>
@@ -545,251 +545,7 @@
 
 
 
-                    @if($post->important_dates)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                Important Dates
-
-                            </div>
-
-
-                            <div class="job-detail-content">
-
-                                {!! $post->important_dates !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-
-                    @if($post->application_fee)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                Application Fee
-
-                            </div>
-
-
-                            <div class="job-detail-content">
-
-                                {!! $post->application_fee !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-
-                    @if($post->age_limit)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                Age Limit
-
-                            </div>
-
-
-                            <div class="job-detail-content">
-
-                                {!! $post->age_limit !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-
-                    @if($post->vacancy_details)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                Vacancy Details
-
-                            </div>
-
-
-                            <div class="job-detail-content">
-
-                                {!! $post->vacancy_details !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-
-                    @if($post->eligibility)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                Eligibility
-
-                            </div>
-
-
-                            <div class="job-detail-content">
-
-                                {!! $post->eligibility !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-                    @if($post->selection_process)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                Selection Process
-
-                            </div>
-
-
-                            <div class="job-detail-content">
-
-                                {!! $post->selection_process !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-                    @if($post->salary_details)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                Salary Details
-
-                            </div>
-
-
-                            <div class="job-detail-content">
-
-                                {!! $post->salary_details !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-
-                    @if($post->how_to_apply)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                How to Apply
-
-                            </div>
-
-
-                            <div class="job-detail-content">
-
-                                {!! $post->how_to_apply !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-
-                    @if($post->important_links)
-
-                        <section class="job-detail-box">
-
-                            <div class="job-detail-title">
-
-                                Important Links
-
-                            </div>
-
-                            <div class="job-detail-content important-links-content">
-
-                                {!! $post->important_links !!}
-
-                            </div>
-
-                        </section>
-
-                    @endif
-
-
-
-                    @if($post->official_website)
-
-                        <div class="p-3 p-md-4">
-
-                            @php
-
-                                $officialWebsite = $post->official_website;
-
-                                /*
-                                |--------------------------------------------------------------------------
-                                | If AI returned an <a> tag,
-                                | extract its href.
-                                |--------------------------------------------------------------------------
-                                */
-
-                                if (
-                                    preg_match(
-                                        '/href=["\']([^"\']+)["\']/i',
-                                        $officialWebsite,
-                                        $matches
-                                    )
-                                ) {
-                                    $officialWebsite = $matches[1];
-                                }
-
-                            @endphp
-
-                            <a
-                                href="{{ $officialWebsite }}"
-                                target="_blank"
-                                rel="nofollow noopener noreferrer"
-                                class="job-official-btn">
-
-                                Visit Official Website
-
-                            </a>
-
-                        </div>
-
-                    @endif
-
+                  
 
                 </article>
 
@@ -849,7 +605,9 @@
                                             color:#102a43;
                                         "
                                     >
+                                    <a href="{{ route('manisha_jalu') }}" >   
                                         Manisha Jalu
+                                    </a>
                                     </h3>
 
 
@@ -861,11 +619,7 @@
                                             color:#36506b;
                                         "
                                     >
-                                        Manisha Jalu writes about government jobs, recruitment
-                                        notifications, admit cards, results and other important
-                                        career updates. Her content focuses on clear and useful
-                                        information to help job seekers stay updated with the
-                                        latest opportunities.
+Manisha Jalu is an editor at JobLavo who covers government recruitment notifications, examination updates, admit cards, results and other career-related announcements. Her work focuses on organizing official recruitment information into clear, easy-to-understand guides for job seekers.
                                     </p>
 
                                 </div>

@@ -45,6 +45,8 @@ Route::get(
 |
 */
 // Auth::routes();
+
+
 Auth::routes(['register' => false]);
 
 Route::get('/', [FrontController::class, 'home'])
@@ -111,6 +113,10 @@ Route::get('/post/{slug}', [FrontController::class, 'post'])
     ->where('slug', '[a-zA-Z0-9\-]+')
     ->name('post');
 
+Route::get('/author/manisha-jalu', function () {
+    return app(\App\Http\Controllers\FrontController::class)
+        ->author('manisha-jalu');
+})->name('manisha_jalu');
 Route::get('/about-us', function () {
     return app(\App\Http\Controllers\FrontController::class)
         ->staticPage('about-us');
@@ -311,9 +317,17 @@ Route::middleware(['auth', 'admin'])
             ]);
         });
 
+
+
+
         Route::post('/logout', [
             AdminController::class,
             'logout'
         ])->name('logout');
     });
+        Route::get('/bulk-content-update', [PostController::class, 'bulkContentUpdate'])
+        ->name('admin.bulk-content-update');
+
+    Route::post('/bulk-content-update', [PostController::class, 'bulkContentUpdateSave'])
+        ->name('admin.bulk-content-update.save');
 Route::fallback([FrontController::class, 'noRoute']);
