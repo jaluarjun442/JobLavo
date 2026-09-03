@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\Blog;
+use App\Models\BlogPost;
 use App\Models\Sitemap;
 
 class SitemapService
@@ -34,7 +36,12 @@ class SitemapService
         */
 
         $categoryCount = Category::query()
-            ->where('status', true)
+
+            ->where(
+                'status',
+                true
+            )
+
             ->count();
 
 
@@ -49,7 +56,9 @@ class SitemapService
             ],
             [
                 'type' => 'main',
-                'url_count' => $mainUrlCount,
+
+                'url_count' =>
+                $mainUrlCount,
             ]
         );
 
@@ -59,15 +68,22 @@ class SitemapService
         | Published Posts Query
         |--------------------------------------------------------------------------
         |
-        | Only posts which are currently published are included.
+        | Only posts with:
+        |
+        | http_status = 200
+        | status = published
+        | published_at is set
+        | published_at <= now
         |
         */
 
         $publishedPostsQuery = Post::query()
+
             ->where(
                 'http_status',
                 200
             )
+
             ->where(
                 'status',
                 'published'
@@ -83,6 +99,49 @@ class SitemapService
                 now()
             );
 
+        /*
+        |--------------------------------------------------------------------------
+        | Published Blogs
+        |--------------------------------------------------------------------------
+        |
+        | Blog sitemap is separate from job post sitemaps.
+        |
+        */
+
+        $publishedBlogs = BlogPost::query()
+
+            ->whereNotNull(
+                'published_date'
+            )
+
+            ->where(
+                'published_date',
+                '<=',
+                now()
+            )
+
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Blog Sitemap
+        |--------------------------------------------------------------------------
+        */
+
+        Sitemap::updateOrCreate(
+            [
+                'filename' =>
+                'sitemap-blogs.xml',
+            ],
+            [
+                'type' =>
+                'blogs',
+
+                'url_count' =>
+                $publishedBlogs,
+            ]
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -100,7 +159,7 @@ class SitemapService
         | Sitemap Count
         |--------------------------------------------------------------------------
         |
-        | Maximum 100 published posts per sitemap.
+        | Maximum 500 posts per sitemap.
         |
         */
 
@@ -115,10 +174,6 @@ class SitemapService
         |--------------------------------------------------------------------------
         | No Published Posts
         |--------------------------------------------------------------------------
-        |
-        | If there are no published posts, remove all post sitemap
-        | records instead of creating an empty sitemap-1.xml.
-        |
         */
 
         if ($sitemapCount === 0) {
@@ -155,14 +210,6 @@ class SitemapService
                 |--------------------------------------------------------------------------
                 | Calculate URLs In This Sitemap
                 |--------------------------------------------------------------------------
-                |
-                | Example:
-                |
-                | 114 posts
-                |
-                | Sitemap 1 = 100
-                | Sitemap 2 = 14
-                |
                 */
 
                 $offset =
@@ -178,7 +225,10 @@ class SitemapService
                 $urlCount =
                     min(
                         self::POSTS_PER_SITEMAP,
-                        max(0, $remaining)
+                        max(
+                            0,
+                            $remaining
+                        )
                     );
 
 
@@ -212,6 +262,7 @@ class SitemapService
                     $sitemapCount
                 )
             )
+
                 ->map(
                     function ($number) {
 
@@ -221,6 +272,7 @@ class SitemapService
                             '.xml';
                     }
                 )
+
                 ->toArray();
 
 
@@ -244,6 +296,8 @@ class SitemapService
 
                 ->delete();
         }
+
+
 
 
         /*

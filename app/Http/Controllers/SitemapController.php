@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Post;
 
@@ -46,6 +47,10 @@ class SitemapController extends Controller
             url('/terms-and-conditions'),
 
             url('/disclaimer'),
+
+            url('/blog'),
+
+            url('/author/manisha-jalu'),
 
         ];
 
@@ -182,6 +187,55 @@ class SitemapController extends Controller
             ->view(
                 'sitemap.posts',
                 compact('posts')
+            )
+
+            ->header(
+                'Content-Type',
+                'application/xml'
+            );
+    }
+    /*
+|--------------------------------------------------------------------------
+| Blog Sitemap
+|--------------------------------------------------------------------------
+|
+| /sitemap-blogs.xml
+|
+| Only published blogs are included.
+|
+*/
+
+    public function blogs()
+    {
+        $blogs = BlogPost::query()
+
+            ->whereNotNull(
+                'published_date'
+            )
+
+            ->where(
+                'published_date',
+                '<=',
+                now()
+            )
+
+            ->orderBy(
+                'published_date',
+                'desc'
+            )
+
+            ->get([
+                'slug',
+                'updated_at',
+                'published_date',
+            ]);
+
+
+        return response()
+
+            ->view(
+                'sitemap.blogs',
+                compact('blogs')
             )
 
             ->header(

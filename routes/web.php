@@ -28,6 +28,11 @@ Route::get('/sitemap-{page}.xml', [
     ->where('page', '[1-9][0-9]*')
     ->name('sitemap.posts');
 
+Route::get('/sitemap-blogs.xml', [
+    \App\Http\Controllers\SitemapController::class,
+    'blogs'
+])->name('sitemap.blogs');
+
 Route::get('/cron/google-indexing', [
     PostController::class,
     'googleIndexingCron'
@@ -328,7 +333,10 @@ Route::middleware(['auth', 'admin'])
         )->except([
             'show'
         ]);
-
+        Route::get('/blog/data', [
+            BlogPostController::class,
+            'data'
+        ])->name('blog.data');
 
 
         Route::post('/logout', [

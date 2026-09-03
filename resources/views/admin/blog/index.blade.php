@@ -1,52 +1,52 @@
 @extends('layouts.admin')
 
-@section('title', 'Blog Posts | Admin')
+@section('title', 'Blogs | Admin')
 
 @section('content')
 
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
 
     <div>
-
         <h1 class="h3 fw-bold mb-1">
-            Blog Posts
+            Blogs
         </h1>
 
         <p class="text-secondary mb-0">
-            Manage tips, guides and career related blog posts.
+            Manage tips, guides and other blog posts.
         </p>
-
     </div>
-
 
     <a
         href="{{ route('admin.blog.create') }}"
         class="btn btn-primary"
     >
-
         + Add Blog
-
     </a>
 
 </div>
 
 
+{{-- =========================================================
+     BLOG TABLE
+========================================================= --}}
 
+<div class="card border-0 shadow-sm">
 
-@if($posts->count())
-
-    <div class="card border-0 shadow-sm">
+    <div class="card-body">
 
         <div class="table-responsive">
 
-            <table class="table table-hover align-middle mb-0">
+            <table
+                id="blogsTable"
+                class="table table-bordered table-hover align-middle w-100"
+            >
 
-                <thead class="table-light">
+                <thead>
 
                     <tr>
 
                         <th>
-                            #
+                            No
                         </th>
 
                         <th>
@@ -58,7 +58,11 @@
                         </th>
 
                         <th>
-                            Published
+                            Published Date
+                        </th>
+
+                        <th>
+                            Published By
                         </th>
 
                         <th>
@@ -66,225 +70,222 @@
                         </th>
 
                         <th>
-                            Published By
-                        </th>
-
-                        <th class="text-end">
-                            Action
+                            Actions
                         </th>
 
                     </tr>
 
                 </thead>
 
-
                 <tbody>
-
-                    @foreach($posts as $post)
-
-                        <tr>
-
-                            {{-- ID --}}
-
-                            <td>
-
-                                {{ $post->id }}
-
-                            </td>
-
-
-                            {{-- IMAGE --}}
-
-                            <td>
-
-                                @if($post->desktop_image)
-
-                                    <img
-                                        src="{{ asset($post->desktop_image) }}"
-                                        alt="{{ $post->title }}"
-                                        width="80"
-                                        height="45"
-                                        class="rounded object-fit-cover"
-                                    >
-
-                                @else
-
-                                    <span class="text-muted">
-                                        —
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-
-                            {{-- TITLE --}}
-
-                            <td>
-
-                                <div class="fw-semibold">
-
-                                    {{ $post->title }}
-
-                                </div>
-
-                                <small class="text-muted">
-
-                                    /blog/{{ $post->slug }}
-
-                                </small>
-
-                            </td>
-
-
-                            {{-- DATE --}}
-
-                            <td>
-
-                                @if($post->published_date)
-
-                                    {{ $post->published_date->format('d M Y') }}
-
-                                @else
-
-                                    <span class="text-muted">
-                                        —
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-
-                            {{-- VIEWS --}}
-
-                            <td>
-
-                                {{ number_format($post->views_count) }}
-
-                            </td>
-
-
-                            {{-- AUTHOR --}}
-
-                            <td>
-
-                                {{ $post->published_by ?: '—' }}
-
-                            </td>
-
-
-                            {{-- ACTION --}}
-
-                            <td class="text-end">
-
-                                <div class="d-flex justify-content-end gap-1">
-
-                                    {{-- VIEW --}}
-
-                                    <a
-                                        href="{{ route('blog.show', $post->slug) }}"
-                                        target="_blank"
-                                        class="btn btn-sm btn-outline-secondary"
-                                    >
-
-                                        View
-
-                                    </a>
-
-
-                                    {{-- EDIT --}}
-
-                                    <a
-                                        href="{{ route('admin.blog.edit', $post->id) }}"
-                                        class="btn btn-sm btn-primary"
-                                    >
-
-                                        Edit
-
-                                    </a>
-
-
-                                    {{-- DELETE --}}
-
-                                    <form
-                                        action="{{ route('admin.blog.destroy', $post->id) }}"
-                                        method="POST"
-                                        onsubmit="return confirm('Are you sure you want to delete this blog post?');"
-                                    >
-
-                                        @csrf
-
-                                        @method('DELETE')
-
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-sm btn-outline-danger"
-                                        >
-
-                                            Delete
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    @endforeach
-
                 </tbody>
 
             </table>
 
         </div>
 
-
-        {{-- PAGINATION --}}
-
-        @if($posts->hasPages())
-
-            <div class="p-3 border-top">
-
-                {{ $posts->links() }}
-
-            </div>
-
-        @endif
-
     </div>
 
-@else
-
-    <div class="card border-0 shadow-sm">
-
-        <div class="card-body text-center py-5">
-
-            <h5 class="fw-semibold mb-2">
-                No Blog Posts Yet
-            </h5>
-
-            <p class="text-muted mb-3">
-                Start creating useful tips and guides for your visitors.
-            </p>
-
-            <a
-                href="{{ route('admin.blog.create') }}"
-                class="btn btn-primary"
-            >
-
-                + Add First Blog
-
-            </a>
-
-        </div>
-
-    </div>
-
-@endif
+</div>
 
 @endsection
+
+
+@push('head')
+
+{{-- DataTables CSS --}}
+
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css"
+>
+
+@endpush
+
+
+@push('scripts')
+
+{{-- =========================================================
+     DATATABLE JS
+========================================================= --}}
+
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+
+<script>
+
+$(document).ready(function () {
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Blog DataTable
+    |--------------------------------------------------------------------------
+    */
+
+    $('#blogsTable').DataTable({
+
+        processing: true,
+
+        serverSide: true,
+
+        responsive: false,
+
+        ajax: {
+
+            url: "{{ route('admin.blog.data') }}",
+
+            type: "GET"
+
+        },
+
+
+        pageLength: 10,
+
+
+        lengthMenu: [
+
+            [10, 25, 50, 100],
+
+            [10, 25, 50, 100]
+
+        ],
+
+
+        order: [
+
+            [0, 'desc']
+
+        ],
+
+
+        columns: [
+
+            /*
+            |--------------------------------------------------------------------------
+            | No
+            |--------------------------------------------------------------------------
+            */
+
+            {
+
+                data: 'DT_RowIndex',
+
+                name: 'DT_RowIndex',
+
+                orderable: false,
+
+                searchable: false
+
+            },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Image
+            |--------------------------------------------------------------------------
+            */
+
+            {
+
+                data: 'image',
+
+                name: 'image',
+
+                orderable: false,
+
+                searchable: false
+
+            },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Title
+            |--------------------------------------------------------------------------
+            */
+
+            {
+
+                data: 'title',
+
+                name: 'title'
+
+            },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Published Date
+            |--------------------------------------------------------------------------
+            */
+
+            {
+
+                data: 'published_date',
+
+                name: 'published_date'
+
+            },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Published By
+            |--------------------------------------------------------------------------
+            */
+
+            {
+
+                data: 'published_by',
+
+                name: 'published_by'
+
+            },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Views
+            |--------------------------------------------------------------------------
+            */
+
+            {
+
+                data: 'views_count',
+
+                name: 'views_count'
+
+            },
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Actions
+            |--------------------------------------------------------------------------
+            */
+
+            {
+
+                data: 'action',
+
+                name: 'action',
+
+                orderable: false,
+
+                searchable: false
+
+            }
+
+        ]
+
+    });
+
+
+});
+
+</script>
+
+@endpush

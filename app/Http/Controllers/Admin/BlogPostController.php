@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
 
 class BlogPostController extends Controller
 {
@@ -384,12 +385,10 @@ class BlogPostController extends Controller
             $slugRule[] =
                 'unique:blog_posts,slug,' .
                 $blog->id;
-
         } else {
 
             $slugRule[] =
                 'unique:blog_posts,slug';
-
         }
 
 
@@ -492,5 +491,144 @@ class BlogPostController extends Controller
             ],
 
         ]);
+    }
+    public function data(Request $request)
+    {
+        $query = BlogPost::query();
+
+
+        return DataTables::of($query)
+
+            /*
+        |--------------------------------------------------------------------------
+        | Row Index
+        |--------------------------------------------------------------------------
+        */
+
+            ->addIndexColumn()
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Image
+        |--------------------------------------------------------------------------
+        */
+
+            ->addColumn('image', function ($blog) {
+
+                if (!$blog->desktop_image) {
+
+                    return '<span class="text-muted">No Image</span>';
+                }
+
+                return '
+                <img
+                    src="' . asset($blog->desktop_image) . '"
+                    alt="' . e($blog->title) . '"
+                    width="70"
+                    height="40"
+                    style="object-fit:cover;border-radius:4px;"
+                >
+            ';
+            })
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Published Date
+        |--------------------------------------------------------------------------
+        */
+
+            ->editColumn('published_date', function ($blog) {
+
+                return $blog->published_date
+                    ? $blog->published_date->format('d M Y')
+                    : '-';
+            })
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Views
+        |--------------------------------------------------------------------------
+        */
+
+            ->editColumn('views_count', function ($blog) {
+
+                return number_format(
+                    $blog->views_count
+                );
+            })
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Actions
+        |--------------------------------------------------------------------------
+        */
+
+            ->addColumn('action', function ($blog) {
+
+                $editUrl = route(
+                    'admin.blog.edit',
+                    $blog->id
+                );
+
+
+                $deleteUrl = route(
+                    'admin.blog.destroy',
+                    $blog->id
+                );
+
+
+                return '
+                <div class="d-flex gap-1">
+
+                    <a
+                        href="' . $editUrl . '"
+                        class="btn btn-sm btn-outline-primary"
+                    >
+                        Edit
+                    </a>
+
+
+                    <form
+                        action="' . $deleteUrl . '"
+                        method="POST"
+                        class="d-inline"
+                        onsubmit="return confirm(\'Are you sure you want to delete this blog?\');"
+                    >
+
+                        ' . csrf_field() . '
+
+                        ' . method_field('DELETE') . '
+
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-outline-danger"
+                        >
+                            Delete
+                        </button>
+
+                    </form>
+
+                </div>
+            ';
+            })
+
+
+            /*
+        |--------------------------------------------------------------------------
+        | Raw HTML Columns
+        |--------------------------------------------------------------------------
+        */
+
+            ->rawColumns([
+                'image',
+                'action'
+            ])
+
+
+            ->make(true);
     }
 }

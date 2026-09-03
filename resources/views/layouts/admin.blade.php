@@ -37,7 +37,7 @@
 
 
             <a class="navbar-brand fw-bold"
-                href="{{ url('/admin/categories') }}">
+                href="{{ url('/admin') }}">
 
                 Admin Panel
 
@@ -80,6 +80,16 @@
                             class="nav-link">
 
                             Posts
+
+                        </a>
+
+                    </li>
+                    <li class="nav-item">
+
+                        <a href="{{ route('admin.blog.index') }}"
+                            class="nav-link">
+
+                            Blogs
 
                         </a>
 
