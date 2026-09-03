@@ -81,7 +81,43 @@
 
 
                 <div class="card-body p-3 p-md-4">
+<div class="mb-3">
 
+    <label
+        for="http_status"
+        class="form-label">
+
+        Page Status
+
+    </label>
+
+
+  <select
+    name="http_status"
+    class="form-select"
+>
+
+    <option
+        value="200"
+        {{ old('http_status', $post?->http_status ?? 200) == 200 ? 'selected' : '' }}
+    >
+        200 - Active
+    </option>
+
+    <option
+        value="410"
+        {{ old('http_status', $post?->http_status ?? 200) == 410 ? 'selected' : '' }}
+    >
+        410 - Gone
+    </option>
+
+</select>
+
+    <small class="text-muted">
+        200 = normal active post, 410 = permanently removed post.
+    </small>
+
+</div>
 
                     {{-- =================================================
                          MULTIPLE CATEGORIES
@@ -671,45 +707,26 @@
                         </label>
 
 
-                        <select
-                            id="status"
-                            name="status"
-                            class="form-select">
+<select
+    name="status"
+    class="form-select"
+>
+
+<option
+    value="draft"
+    {{ old('status', $post?->status) === 'draft' ? 'selected' : '' }}
+>
+    Draft
+</option>
+    <option
+        value="published"
+        {{ old('status', $post?->status ?? 'published') === 'published' ? 'selected' : '' }}
+    >
+        Published
+    </option>
 
 
-                            <option
-                                value="draft"
-                                {{ old(
-                                    'status',
-                                    isset($post->status)
-                                        ? $post->status
-                                        : 'draft'
-                                ) == 'draft'
-                                    ? 'selected'
-                                    : '' }}>
-
-                                Draft
-
-                            </option>
-
-
-                            <option
-                                value="published"
-                                {{ old(
-                                    'status',
-                                    isset($post->status)
-                                        ? $post->status
-                                        : ''
-                                ) == 'published'
-                                    ? 'selected'
-                                    : '' }}>
-
-                                Published
-
-                            </option>
-
-
-                        </select>
+</select>
 
                     </div>
 
@@ -730,18 +747,15 @@
 
                         <input
                             type="datetime-local"
-                            id="published_at"
                             name="published_at"
                             class="form-control"
                             value="{{ old(
                                 'published_at',
-                                isset($post->published_at)
-                                    && $post->published_at
-                                    ? $post->published_at->format(
-                                        'Y-m-d\TH:i'
-                                    )
-                                    : ''
-                            ) }}">
+                                $post?->published_at
+                                    ? $post->published_at->format('Y-m-d\TH:i')
+                                    : now()->format('Y-m-d\TH:i')
+                            ) }}"
+                        >
 
                     </div>
 

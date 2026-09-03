@@ -11,10 +11,10 @@ class FrontController extends Controller
     public function home()
     {
         /*
-    |--------------------------------------------------------------------------
-    | Home Small Tiles
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Home Small Tiles
+        |--------------------------------------------------------------------------
+        */
 
         $homeTileCategories = Category::query()
 
@@ -32,10 +32,10 @@ class FrontController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Home Large Categories
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Home Large Categories
+        |--------------------------------------------------------------------------
+        */
 
         $homeLargeCategories = Category::query()
 
@@ -53,44 +53,55 @@ class FrontController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Load Latest Posts For Each Category
-    |--------------------------------------------------------------------------
-    |
-    | Use category_post pivot through whereHas('categories').
-    | This supports posts assigned to multiple categories.
-    |
-    */
+        |--------------------------------------------------------------------------
+        | Load Latest Posts For Each Category
+        |--------------------------------------------------------------------------
+        */
 
         $homeLargeCategories->each(function ($category) {
 
             /*
-    |--------------------------------------------------------------------------
-    | Parent + Child Category IDs
-    |--------------------------------------------------------------------------
-    */
+            |--------------------------------------------------------------------------
+            | Parent + Child Category IDs
+            |--------------------------------------------------------------------------
+            */
 
             $categoryIds = collect([
                 $category->id
             ]);
 
+
             $childCategoryIds = Category::query()
-                ->where('parent_id', $category->id)
-                ->where('status', true)
+
+                ->where(
+                    'parent_id',
+                    $category->id
+                )
+
+                ->where(
+                    'status',
+                    true
+                )
+
                 ->pluck('id');
 
+
             $categoryIds = $categoryIds
+
                 ->merge($childCategoryIds)
+
                 ->unique()
+
                 ->values()
+
                 ->all();
 
 
             /*
-    |--------------------------------------------------------------------------
-    | Posts From Parent + Child Categories
-    |--------------------------------------------------------------------------
-    */
+            |--------------------------------------------------------------------------
+            | Posts From Parent + Child Categories
+            |--------------------------------------------------------------------------
+            */
 
             $posts = Post::query()
 
@@ -107,9 +118,19 @@ class FrontController extends Controller
                     }
                 )
 
-                ->where('status', 'published')
+                ->where(
+                    'http_status',
+                    200
+                )
 
-                ->whereNotNull('published_at')
+                ->where(
+                    'status',
+                    'published'
+                )
+
+                ->whereNotNull(
+                    'published_at'
+                )
 
                 ->where(
                     'published_at',
@@ -117,7 +138,9 @@ class FrontController extends Controller
                     now()
                 )
 
-                ->latest('published_at')
+                ->latest(
+                    'published_at'
+                )
 
                 ->take(10)
 
@@ -125,10 +148,10 @@ class FrontController extends Controller
 
 
             /*
-    |--------------------------------------------------------------------------
-    | Attach Posts To Home Category
-    |--------------------------------------------------------------------------
-    */
+            |--------------------------------------------------------------------------
+            | Attach Posts To Home Category
+            |--------------------------------------------------------------------------
+            */
 
             $category->setRelation(
                 'posts',
@@ -138,18 +161,28 @@ class FrontController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Latest Updates
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Latest Updates
+        |--------------------------------------------------------------------------
+        */
 
         $latestPosts = Post::query()
 
             ->with('categories')
 
-            ->where('status', 'published')
+            ->where(
+                'http_status',
+                200
+            )
 
-            ->whereNotNull('published_at')
+            ->where(
+                'status',
+                'published'
+            )
+
+            ->whereNotNull(
+                'published_at'
+            )
 
             ->where(
                 'published_at',
@@ -157,7 +190,9 @@ class FrontController extends Controller
                 now()
             )
 
-            ->latest('published_at')
+            ->latest(
+                'published_at'
+            )
 
             ->take(20)
 
@@ -165,10 +200,10 @@ class FrontController extends Controller
 
 
         /*
-    |--------------------------------------------------------------------------
-    | Home View
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Home View
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'welcome',
@@ -179,6 +214,8 @@ class FrontController extends Controller
             )
         );
     }
+
+
     /**
      * Latest Jobs
      */
@@ -188,9 +225,19 @@ class FrontController extends Controller
 
             ->with('categories')
 
-            ->where('status', 'published')
+            ->where(
+                'http_status',
+                200
+            )
 
-            ->whereNotNull('published_at')
+            ->where(
+                'status',
+                'published'
+            )
+
+            ->whereNotNull(
+                'published_at'
+            )
 
             ->where(
                 'published_at',
@@ -198,7 +245,9 @@ class FrontController extends Controller
                 now()
             )
 
-            ->latest('published_at')
+            ->latest(
+                'published_at'
+            )
 
             ->paginate(15)
 
@@ -223,15 +272,31 @@ class FrontController extends Controller
                 'children' => function ($query) {
 
                     $query
-                        ->where('status', true)
-                        ->orderBy('sort_order')
-                        ->orderBy('name');
+
+                        ->where(
+                            'status',
+                            true
+                        )
+
+                        ->orderBy(
+                            'sort_order'
+                        )
+
+                        ->orderBy(
+                            'name'
+                        );
                 }
             ])
 
-            ->where('slug', $slug)
+            ->where(
+                'slug',
+                $slug
+            )
 
-            ->where('status', true)
+            ->where(
+                'status',
+                true
+            )
 
             ->firstOrFail();
 
@@ -240,13 +305,6 @@ class FrontController extends Controller
         |--------------------------------------------------------------------------
         | Category IDs
         |--------------------------------------------------------------------------
-        |
-        | Parent category:
-        | current category + all direct sub-categories
-        |
-        | Sub-category:
-        | only itself
-        |
         */
 
         $categoryIds = collect([
@@ -254,11 +312,14 @@ class FrontController extends Controller
         ]);
 
 
-        if ($category->children->count()) {
+        if (
+            $category->children->count()
+        ) {
 
-            $categoryIds = $categoryIds->merge(
-                $category->children->pluck('id')
-            );
+            $categoryIds =
+                $categoryIds->merge(
+                    $category->children->pluck('id')
+                );
         }
 
 
@@ -266,12 +327,6 @@ class FrontController extends Controller
         |--------------------------------------------------------------------------
         | Posts
         |--------------------------------------------------------------------------
-        |
-        | A post can belong to multiple categories.
-        |
-        | Therefore we use whereHas('categories')
-        | instead of category_id.
-        |
         */
 
         $posts = Post::query()
@@ -292,9 +347,19 @@ class FrontController extends Controller
                 }
             )
 
-            ->where('status', 'published')
+            ->where(
+                'http_status',
+                200
+            )
 
-            ->whereNotNull('published_at')
+            ->where(
+                'status',
+                'published'
+            )
+
+            ->whereNotNull(
+                'published_at'
+            )
 
             ->where(
                 'published_at',
@@ -302,7 +367,9 @@ class FrontController extends Controller
                 now()
             )
 
-            ->latest('published_at')
+            ->latest(
+                'published_at'
+            )
 
             ->paginate(15)
 
@@ -315,13 +382,19 @@ class FrontController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $seoTitle = $category->seo_title
-            ?: $category->name . ' - Latest Government Jobs';
+        $seoTitle =
+            $category->seo_title
+            ?:
+            $category->name .
+            ' - Latest Government Jobs';
 
 
-        $metaDescription = $category->meta_description
-            ?: $category->description
-            ?: 'Check the latest ' .
+        $metaDescription =
+            $category->meta_description
+            ?:
+            $category->description
+            ?:
+            'Check the latest ' .
             $category->name .
             ' government jobs, recruitment notifications and updates.';
 
@@ -338,6 +411,7 @@ class FrontController extends Controller
     }
 
 
+
     /**
      * Single Post
      */
@@ -347,34 +421,47 @@ class FrontController extends Controller
 
             ->where('slug', $slug)
 
-            ->where('status', 'published')
-
-            ->whereNotNull('published_at')
-
-            ->where(
-                'published_at',
-                '<=',
-                now()
-            )
-
             ->firstOrFail();
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Related Posts
-        |--------------------------------------------------------------------------
-        |
-        | A post can have multiple categories.
-        |
-        | Example:
-        |
-        | Current Post:
-        | Gujarat + Latest Jobs + Police
-        |
-        | Related posts can match ANY of these categories.
-        |
-        */
+    |--------------------------------------------------------------------------
+    | HTTP Status
+    |--------------------------------------------------------------------------
+    */
+
+        if ((int) $post->http_status === 410) {
+
+            abort(410);
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Published Check
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            $post->status !== 'published' ||
+            !$post->published_at ||
+            $post->published_at > now()
+        ) {
+
+            abort(404);
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Related Posts
+    |--------------------------------------------------------------------------
+    |
+    | A post can have multiple categories.
+    |
+    | Current post categories are used to find related posts.
+    |
+    */
 
         $categoryIds = $post->categories
             ->pluck('id')
@@ -388,6 +475,8 @@ class FrontController extends Controller
             ->with('categories')
 
             ->where('id', '!=', $post->id)
+
+            ->where('http_status', 200)
 
             ->where('status', 'published')
 
@@ -431,7 +520,6 @@ class FrontController extends Controller
             )
         );
     }
-
 
     /**
      * Search

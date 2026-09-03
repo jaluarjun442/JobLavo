@@ -120,7 +120,7 @@ class SitemapController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $perPage = 100;
+        $perPage = 500;
 
 
         /*
@@ -133,7 +133,10 @@ class SitemapController extends Controller
         */
 
         $posts = Post::query()
-
+            ->where(
+                'http_status',
+                200
+            )
             ->where(
                 'status',
                 'published'

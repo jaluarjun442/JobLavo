@@ -92,6 +92,7 @@ class AppServiceProvider extends ServiceProvider
 
                 $sidebarLatestPosts = \App\Models\Post::query()
 
+                    ->where('http_status', 200)
                     ->where('status', 'published')
 
                     ->whereNotNull('published_at')

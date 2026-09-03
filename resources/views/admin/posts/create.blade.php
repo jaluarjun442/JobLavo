@@ -34,9 +34,8 @@
 
     'submitText' => 'Create Post',
 
-    'post' => $post,
+    'post' => null,
 
 ])
-
 
 @endsection

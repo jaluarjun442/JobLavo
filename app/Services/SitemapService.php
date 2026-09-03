@@ -14,7 +14,7 @@ class SitemapService
     |--------------------------------------------------------------------------
     */
 
-    private const POSTS_PER_SITEMAP = 100;
+    private const POSTS_PER_SITEMAP = 500;
 
     private const STATIC_PAGE_COUNT = 7;
 
@@ -64,7 +64,10 @@ class SitemapService
         */
 
         $publishedPostsQuery = Post::query()
-
+            ->where(
+                'http_status',
+                200
+            )
             ->where(
                 'status',
                 'published'
@@ -89,7 +92,7 @@ class SitemapService
 
         $publishedPosts =
             (clone $publishedPostsQuery)
-                ->count();
+            ->count();
 
 
         /*
@@ -104,7 +107,7 @@ class SitemapService
         $sitemapCount =
             (int) ceil(
                 $publishedPosts /
-                self::POSTS_PER_SITEMAP
+                    self::POSTS_PER_SITEMAP
             );
 
 
@@ -134,7 +137,6 @@ class SitemapService
                 )
 
                 ->delete();
-
         } else {
 
             /*
@@ -183,16 +185,16 @@ class SitemapService
                 Sitemap::updateOrCreate(
                     [
                         'filename' =>
-                            'sitemap-' .
+                        'sitemap-' .
                             $i .
                             '.xml',
                     ],
                     [
                         'type' =>
-                            'posts',
+                        'posts',
 
                         'url_count' =>
-                            $urlCount,
+                        $urlCount,
                     ]
                 );
             }
