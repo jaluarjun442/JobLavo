@@ -43,7 +43,7 @@ class FrontController extends Controller
 
             ->where('display_home_large', true)
 
-            ->whereNull('parent_id')
+            // ->whereNull('parent_id')
 
             ->orderBy('sort_order')
 
