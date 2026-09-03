@@ -366,7 +366,7 @@
             </h2>
 
             <p class="text-muted mb-0">
-                Tips, guides and useful information
+                Practical tips, helpful guides and useful career information for job seekers.
             </p>
 
         </div>
@@ -418,7 +418,7 @@
 
                                 <a
                                     href="{{ route('blog.show', $blog->slug) }}"
-                                    class="text-decoration-none text-dark"
+                                    class="text-decoration-none text-dark-blog"
                                 >
 
                                     {{ $blog->title }}

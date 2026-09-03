@@ -45,7 +45,7 @@
 
                     <div class="col-md-6 col-lg-4">
 
-                        <article class="card h-100 border-0 shadow-sm overflow-hidden">
+                        <article class="card h-100 border-0 shadow-sm-blog overflow-hidden">
 
 
                             {{-- IMAGE --}}
