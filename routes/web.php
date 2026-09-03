@@ -325,8 +325,8 @@ Route::middleware(['auth', 'admin'])
             'logout'
         ])->name('logout');
     });
-        Route::get('/bulk-content-update', [PostController::class, 'bulkContentUpdate'])
-        ->name('admin.bulk-content-update');
+        // Route::get('/bulk-content-update', [PostController::class, 'bulkContentUpdate'])
+        // ->name('admin.bulk-content-update');
 
     Route::post('/bulk-content-update', [PostController::class, 'bulkContentUpdateSave'])
         ->name('admin.bulk-content-update.save');
