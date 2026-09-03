@@ -345,7 +345,134 @@
     </div>
 
 </section>
+{{-- =========================================================
+     LATEST BLOGS
+========================================================= --}}
 
+@if($latestBlogs->count())
+
+<section class="py-4">
+
+    <div class="container">
+
+        {{-- =====================================================
+             SECTION HEADER
+        ====================================================== --}}
+
+        <div class="mb-3">
+
+            <h2 class="h4 fw-bold mb-1">
+                Latest Blogs
+            </h2>
+
+            <p class="text-muted mb-0">
+                Tips, guides and useful information
+            </p>
+
+        </div>
+
+
+        {{-- =====================================================
+             BLOG CARDS
+        ====================================================== --}}
+
+        <div class="row g-3">
+
+            @foreach($latestBlogs as $blog)
+
+                <div class="col-12 col-md-6 col-lg-4">
+
+                    <article class="card h-100 border-0 shadow-sm overflow-hidden">
+
+                        {{-- =================================================
+                             BLOG IMAGE
+                        ================================================== --}}
+
+                        @if($blog->desktop_image)
+
+                            <a
+                                href="{{ route('blog.show', $blog->slug) }}"
+                            >
+
+                                <img
+                                    src="{{ asset($blog->desktop_image) }}"
+                                    alt="{{ $blog->title }}"
+                                    class="card-img-top"
+                                    width="400"
+                                    height="225"
+                                    loading="lazy"
+                                >
+
+                            </a>
+
+                        @endif
+
+
+                        {{-- =================================================
+                             BLOG CONTENT
+                        ================================================== --}}
+
+                        <div class="card-body d-flex flex-column">
+
+                            <h3 class="h6 fw-bold mb-2">
+
+                                <a
+                                    href="{{ route('blog.show', $blog->slug) }}"
+                                    class="text-decoration-none text-dark"
+                                >
+
+                                    {{ $blog->title }}
+
+                                </a>
+
+                            </h3>
+
+
+                            {{-- =================================================
+                                 PUBLISHED DATE
+                            ================================================== --}}
+
+                            @if($blog->published_date)
+
+                                <div class="small text-muted mt-auto">
+
+                                    {{ $blog->published_date->format('d M Y') }}
+
+                                </div>
+
+                            @endif
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            @endforeach
+
+        </div>
+
+
+        {{-- =====================================================
+             VIEW ALL BLOGS
+        ====================================================== --}}
+
+        <div class="text-center mt-4">
+
+            <a
+                href="{{ route('blog.index') }}"
+                class="btn btn-outline-primary"
+            >
+                View All Blogs →
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+@endif
 {{-- =========================================================
      HOME INFORMATIONAL CONTENT
 ========================================================= --}}

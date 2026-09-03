@@ -3,10 +3,12 @@
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AiJobImportController;
+use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\SourceController;
 use App\Http\Controllers\Admin\SourcePostController;
+use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\FrontController;
@@ -46,6 +48,22 @@ Route::get(
 */
 // Auth::routes();
 
+
+Route::get(
+    '/blog',
+    [BlogController::class, 'index']
+)->name('blog.index');
+
+
+Route::get(
+    '/blog/{slug}',
+    [BlogController::class, 'show']
+)
+    ->where(
+        'slug',
+        '[a-zA-Z0-9\-]+'
+    )
+    ->name('blog.show');
 
 Auth::routes(['register' => false]);
 
@@ -302,21 +320,14 @@ Route::middleware(['auth', 'admin'])
             'clear'
         ])->name('logs.clear');
 
-        Route::get('/test-google-indexing/{post}', function (
-            \App\Models\Post $post,
-            \App\Services\GoogleIndexingService $indexing
-        ) {
 
-            $url = route('post', $post->slug);
-            // $url = 'https://joblavo.com/post/' . $post->slug;
-            $success = $indexing->update($url);
 
-            return response()->json([
-                'success' => $success,
-                'url' => $url,
-            ]);
-        });
-
+        Route::resource(
+            'blog',
+            BlogPostController::class
+        )->except([
+            'show'
+        ]);
 
 
 
@@ -325,9 +336,5 @@ Route::middleware(['auth', 'admin'])
             'logout'
         ])->name('logout');
     });
-        // Route::get('/bulk-content-update', [PostController::class, 'bulkContentUpdate'])
-        // ->name('admin.bulk-content-update');
 
-    Route::post('/bulk-content-update', [PostController::class, 'bulkContentUpdateSave'])
-        ->name('admin.bulk-content-update.save');
 Route::fallback([FrontController::class, 'noRoute']);
