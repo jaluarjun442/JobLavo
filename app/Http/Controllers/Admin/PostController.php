@@ -521,36 +521,45 @@ class PostController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $categories = Category::query()
+      $categories = Category::query()
 
-            ->where(
-                'status',
-                true
-            )
+    ->where(
+        'status',
+        true
+    )
 
-            ->with([
-                'children' => function ($query) {
+    ->whereNull(
+        'parent_id'
+    )
 
-                    $query
-                        ->where(
-                            'status',
-                            true
-                        )
-                        ->orderBy('sort_order')
-                        ->orderBy('name');
-                }
-            ])
+    ->with([
+        'children' => function ($query) {
 
-            ->whereNull(
-                'parent_id'
-            )
+            $query
+                ->where(
+                    'status',
+                    true
+                )
 
-            ->orderBy('sort_order')
+                ->orderBy(
+                    'sort_order'
+                )
 
-            ->orderBy('name')
+                ->orderBy(
+                    'name'
+                );
+        }
+    ])
 
-            ->get();
+    ->orderBy(
+        'sort_order'
+    )
 
+    ->orderBy(
+        'name'
+    )
+
+    ->get();
 
         return view(
             'admin.posts.create',
@@ -1418,43 +1427,73 @@ class PostController extends Controller
     | Edit Post
     |--------------------------------------------------------------------------
     */
+public function edit(Post $post)
+{
+    /*
+    |--------------------------------------------------------------------------
+    | Categories
+    |--------------------------------------------------------------------------
+    */
 
-    public function edit(Post $post)
-    {
-        $categories =
-            Category::query()
+  $categories = Category::query()
 
-            ->where(
-                'status',
-                true
-            )
+    ->where(
+        'status',
+        true
+    )
 
-            ->orderBy(
-                'sort_order'
-            )
+    ->whereNull(
+        'parent_id'
+    )
 
-            ->orderBy(
-                'name'
-            )
+    ->with([
+        'children' => function ($query) {
 
-            ->get();
+            $query
+                ->where(
+                    'status',
+                    true
+                )
+
+                ->orderBy(
+                    'sort_order'
+                )
+
+                ->orderBy(
+                    'name'
+                );
+        }
+    ])
+
+    ->orderBy(
+        'sort_order'
+    )
+
+    ->orderBy(
+        'name'
+    )
+
+    ->get();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Selected Categories
+    |--------------------------------------------------------------------------
+    */
+
+    $post->load(
+        'categories'
+    );
 
 
-        $post->load(
+    return view(
+        'admin.posts.edit',
+        compact(
+            'post',
             'categories'
-        );
-
-
-        return view(
-            'admin.posts.edit',
-            compact(
-                'post',
-                'categories'
-            )
-        );
-    }
-
-
+        )
+    );
+}
     /*
     |--------------------------------------------------------------------------
     | Update Post

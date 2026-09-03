@@ -122,74 +122,79 @@
                     {{-- =================================================
                          MULTIPLE CATEGORIES
                     ================================================== --}}
+<div class="mb-3">
 
-                    <div class="mb-3">
-
-                        <label
-                            for="category_ids"
-                            class="form-label fw-semibold">
-
-                            Categories
-                            <span class="text-danger">*</span>
-
-                        </label>
+    <label
+        for="category_ids"
+        class="form-label"
+    >
+        Categories <span class="text-danger">*</span>
+    </label>
 
 
-                        @php
+<select
+    name="category_ids[]"
+    id="category_ids"
+    class="form-select select2"
+    multiple
+    required
+>
 
-                            $selectedCategoryIds = old(
-                                'category_ids',
-                                isset($post->category_ids)
-                                    ? $post->category_ids
-                                    : (
-                                        isset($post->categories)
-                                            ? $post->categories
-                                                ->pluck('id')
-                                                ->toArray()
-                                            : []
-                                    )
-                            );
+    @php
 
-                            if (!is_array($selectedCategoryIds)) {
-                                $selectedCategoryIds = [];
-                            }
+        $selectedCategories = old(
+            'category_ids',
+            isset($post)
+                ? $post->categories
+                    ->pluck('id')
+                    ->toArray()
+                : []
+        );
 
-                        @endphp
-
-
-                        <select
-                            name="category_ids[]"
-                            id="category_ids"
-                            class="form-select"
-                            multiple
-                            required>
-
-                            @foreach($categories as $category)
-
-                                <option
-                                    value="{{ $category->id }}"
-                                    {{ in_array(
-                                        $category->id,
-                                        $selectedCategoryIds
-                                    ) ? 'selected' : '' }}>
-
-                                    {{ $category->name }}
-
-                                </option>
-
-                            @endforeach
-
-                        </select>
+    @endphp
 
 
-                        <div class="form-text">
+    @foreach($categories as $category)
 
-                            Select one or multiple categories.
+        {{-- Parent --}}
 
-                        </div>
+        <option
+            value="{{ $category->id }}"
+            {{ in_array(
+                $category->id,
+                $selectedCategories
+            ) ? 'selected' : '' }}
+        >
+            {{ $category->name }}
+        </option>
 
-                    </div>
 
+        {{-- Children --}}
+
+        @foreach($category->children as $child)
+
+            <option
+                value="{{ $child->id }}"
+                {{ in_array(
+                    $child->id,
+                    $selectedCategories
+                ) ? 'selected' : '' }}
+            >
+                -- {{ $child->name }}
+            </option>
+
+        @endforeach
+
+    @endforeach
+
+</select>
+
+
+    <div class="form-text">
+        Select one or multiple categories.
+    </div>
+
+</div>
 
 
                     {{-- =================================================
