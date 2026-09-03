@@ -129,7 +129,15 @@ class PostController extends Controller
                 );
             }
         }
+        if (
+            $request->filled('http_status')
+        ) {
 
+            $query->where(
+                'posts.http_status',
+                $request->http_status
+            );
+        }
         $indexedCount = Post::query()
             ->where('is_indexed', true)
             ->count();

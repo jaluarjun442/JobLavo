@@ -6,225 +6,296 @@
 
 @section('content')
 
-    <div>
 
-        <h1 class="h3 fw-bold mb-1">
-            Posts
-        </h1>
-
-        <p class="text-secondary mb-0">
-            Manage government job posts and updates.
-        </p>
-
-    </div>
-
-<div class="d-flex
-            flex-column
-            flex-md-row
-            justify-content-between
-            align-items-md-center
-            gap-3
-            mb-4">
-
-
-
+<div>
 
     <div class="d-flex
-                flex-wrap
-                gap-2
-                align-items-center">
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3
+                mb-4">
 
 
-        {{-- INDEXING FILTER --}}
-        <div class="d-flex
-                    align-items-center
-                    gap-2">
+        <div>
 
-            <label
-                for="indexStatus"
-                class="mb-0
-                       fw-semibold
-                       text-nowrap">
+            <h1 class="h3 fw-bold mb-1">
+                Posts
+            </h1>
 
-                Indexing:
-
-            </label>
-
-
-            <select
-                id="indexStatus"
-                class="form-select form-select-sm"
-                style="width: 150px;">
-
-                <option value="">
-                    All
-                </option>
-
-                <option value="indexed">
-                    Indexed
-                </option>
-
-                <option value="not_indexed">
-                    Not Indexed
-                </option>
-
-            </select>
+            <p class="text-secondary mb-0">
+                Manage government job posts and updates.
+            </p>
 
         </div>
 
 
-        {{-- INDEXED COUNT --}}
-        <span
-            class="badge
-                   bg-success-subtle
-                   text-success
-                   border
-                   px-3
-                   py-2">
+        <div class="d-flex
+                    flex-wrap
+                    gap-2
+                    align-items-center">
 
-            Indexed:
-            <span id="indexedCount">
-                0
+
+            {{-- =========================================================
+                 INDEXING FILTER
+            ========================================================== --}}
+
+            <div class="d-flex
+                        align-items-center
+                        gap-2">
+
+                <label
+                    for="indexStatus"
+                    class="mb-0
+                           fw-semibold
+                           text-nowrap">
+
+                    Indexing:
+
+                </label>
+
+
+                <select
+                    id="indexStatus"
+                    class="form-select form-select-sm"
+                    style="width: 150px;">
+
+                    <option value="">
+                        All
+                    </option>
+
+                    <option value="indexed">
+                        Indexed
+                    </option>
+
+                    <option value="not_indexed">
+                        Not Indexed
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            {{-- =========================================================
+                 HTTP STATUS FILTER
+            ========================================================== --}}
+
+            <div class="d-flex
+                        align-items-center
+                        gap-2">
+
+                <label
+                    for="httpStatus"
+                    class="mb-0
+                           fw-semibold
+                           text-nowrap">
+
+                    HTTP:
+
+                </label>
+
+
+                <select
+                    id="httpStatus"
+                    class="form-select form-select-sm"
+                    style="width: 150px;">
+
+                    <option value="">
+                        All
+                    </option>
+
+                    <option value="200">
+                        200 - Active
+                    </option>
+
+                    <option value="410">
+                        410 - Gone
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            {{-- =========================================================
+                 INDEXED COUNT
+            ========================================================== --}}
+
+            <span
+                class="badge
+                       bg-success-subtle
+                       text-success
+                       border
+                       px-3
+                       py-2">
+
+                Indexed:
+
+                <span id="indexedCount">
+                    0
+                </span>
+
             </span>
 
-        </span>
 
+            {{-- =========================================================
+                 NOT INDEXED COUNT
+            ========================================================== --}}
 
-        {{-- NOT INDEXED COUNT --}}
-        <span
-            class="badge
-                   bg-warning-subtle
-                   text-warning-emphasis
-                   border
-                   px-3
-                   py-2">
+            <span
+                class="badge
+                       bg-warning-subtle
+                       text-warning-emphasis
+                       border
+                       px-3
+                       py-2">
 
-            Not Indexed:
-            <span id="notIndexedCount">
-                0
+                Not Indexed:
+
+                <span id="notIndexedCount">
+                    0
+                </span>
+
             </span>
 
-        </span>
+
+            {{-- =========================================================
+                 INDEX PENDING
+            ========================================================== --}}
+
+            <form
+                action="{{ route('admin.posts.index-pending') }}"
+                method="POST"
+                class="d-inline"
+                onsubmit="return confirm('Index all pending published posts?');">
+
+                @csrf
+
+                <button
+                    type="submit"
+                    class="btn btn-outline-primary">
+
+                    <i class="bi bi-google me-1"></i>
+
+                    Index Pending
+
+                </button>
+
+            </form>
 
 
-        {{-- INDEX PENDING --}}
-        <form
-            action="{{ route('admin.posts.index-pending') }}"
-            method="POST"
-            class="d-inline"
-            onsubmit="return confirm('Index all pending published posts?');">
+            {{-- =========================================================
+                 AI IMPORT
+            ========================================================== --}}
 
-            @csrf
+            <a
+                href="{{ route('admin.ai-jobs.import') }}"
+                class="btn btn-dark">
 
-            <button
-                type="submit"
-                class="btn btn-outline-primary">
+                🤖 AI Import
 
-                <i class="bi bi-google me-1"></i>
-
-                Index Pending
-
-            </button>
-
-        </form>
+            </a>
 
 
-        {{-- AI IMPORT --}}
-        <a
-            href="{{ route('admin.ai-jobs.import') }}"
-            class="btn btn-dark">
+            {{-- =========================================================
+                 ADD POST
+            ========================================================== --}}
 
-            🤖 AI Import
+            <a
+                href="{{ route('admin.posts.create') }}"
+                class="btn btn-primary">
 
-        </a>
+                + Add Post
+
+            </a>
 
 
-        {{-- ADD POST --}}
-        <a
-            href="{{ route('admin.posts.create') }}"
-            class="btn btn-primary">
-
-            + Add Post
-
-        </a>
+        </div>
 
     </div>
 
-</div>
 
 
+    {{-- =========================================================
+         POSTS TABLE
+    ========================================================== --}}
 
-<div class="card border-0 shadow-sm">
-
-
-    <div class="card-body">
-
-
-        <div class="table-responsive">
+    <div class="card border-0 shadow-sm">
 
 
-            <table
-                id="postsTable"
-                class="table table-bordered
-                       table-hover
-                       align-middle
-                       w-100">
+        <div class="card-body">
 
 
-                <thead class="table-light">
-
-                    <tr>
-
-                        <th>
-                            No
-                        </th>
-
-                        <th>
-                            Image
-                        </th>
-
-                        <th>
-                            Title
-                        </th>
-
-                        <th>
-                            Categories
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th>
-                            Published
-                        </th>
-
-                        <th>
-                            Featured
-                        </th>
-
-                        <th>
-                            Important
-                        </th>
-
-                        <th>
-                            Indexing
-                        </th>
-
-                        <th>
-                            Action
-                        </th>
-
-                    </tr>
-
-                </thead>
+            <div class="table-responsive">
 
 
-                <tbody>
-                </tbody>
+                <table
+                    id="postsTable"
+                    class="table table-bordered
+                           table-hover
+                           align-middle
+                           w-100">
 
 
-            </table>
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                No
+                            </th>
+
+                            <th>
+                                Image
+                            </th>
+
+                            <th>
+                                Title
+                            </th>
+
+                            <th>
+                                Categories
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Published
+                            </th>
+
+                            <th>
+                                Featured
+                            </th>
+
+                            <th>
+                                Important
+                            </th>
+
+                            <th>
+                                Indexing
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
 
 
         </div>
@@ -298,8 +369,24 @@
 
                     data: function (d) {
 
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Indexing Filter
+                        |--------------------------------------------------------------------------
+                        */
+
                         d.index_status =
                             $('#indexStatus').val();
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | HTTP Status Filter
+                        |--------------------------------------------------------------------------
+                        */
+
+                        d.http_status =
+                            $('#httpStatus').val();
 
                     },
 
@@ -598,6 +685,25 @@
         */
 
         $('#indexStatus').on(
+            'change',
+            function () {
+
+                postsTable
+                    .ajax
+                    .reload();
+
+            }
+        );
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HTTP Status Filter
+        |--------------------------------------------------------------------------
+        */
+
+        $('#httpStatus').on(
             'change',
             function () {
 
