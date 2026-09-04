@@ -6,7 +6,9 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Category;
+use App\Models\Post;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,73 +49,77 @@ class AppServiceProvider extends ServiceProvider
         |--------------------------------------------------------------------------
         */
 
-        View::composer(
-            [
-                'layouts.web',
-                'layouts.partials.sidebar',
-            ],
-            function ($view) {
+        View::composer('layouts.web', function ($view) {
 
-                $headerCategories = Category::query()
+            $headerCategories = Cache::remember(
+                'header_categories',
+                now()->addMinutes(2880),
+                function () {
 
-                    ->where('status', true)
+                    return Category::query()
+                        ->where('status', true)
+                        ->where('display_header', true)
+                        ->orderBy('sort_order')
+                        ->orderBy('name')
+                        ->get();
+                }
+            );
 
-                    ->where('display_header', true)
+            $view->with('headerCategories', $headerCategories);
+        });
 
-                    // ->whereNull('parent_id')
+        /*
+        |--------------------------------------------------------------------------
+        | Sidebar
+        |--------------------------------------------------------------------------
+        */
 
-                    ->orderBy('sort_order')
+        View::composer('layouts.partials.sidebar', function ($view) {
 
-                    ->orderBy('name')
+            $sidebarCategories = Cache::remember(
+                'sidebar_categories',
+                now()->addMinutes(2880),
+                function () {
 
-                    ->get();
+                    return Category::query()
+                        ->with([
+                            'children' => function ($query) {
 
-                $sidebarCategories = Category::query()
+                                $query
+                                    ->where('status', true)
+                                    ->orderBy('sort_order')
+                                    ->orderBy('name');
 
-                    ->with([
-                        'children' => function ($query) {
+                            }
+                        ])
+                        ->where('status', true)
+                        ->whereNull('parent_id')
+                        ->orderBy('sort_order')
+                        ->orderBy('name')
+                        ->get();
+                }
+            );
 
-                            $query
-                                ->where('status', true)
-                                ->orderBy('sort_order')
-                                ->orderBy('name');
-                        }
-                    ])
+            $sidebarLatestPosts = Cache::remember(
+                'sidebar_latest_posts',
+                now()->addMinutes(2880),
+                function () {
 
-                    ->where('status', true)
+                    return Post::query()
+                        ->where('http_status', 200)
+                        ->where('status', 'published')
+                        ->whereNotNull('published_at')
+                        ->where('published_at', '<=', now())
+                        ->latest('published_at')
+                        ->take(8)
+                        ->get();
+                }
+            );
 
-                    ->whereNull('parent_id')
-
-                    ->orderBy('sort_order')
-
-                    ->orderBy('name')
-
-                    ->get();
-
-                $sidebarLatestPosts = \App\Models\Post::query()
-
-                    ->where('http_status', 200)
-                    ->where('status', 'published')
-
-                    ->whereNotNull('published_at')
-
-                    ->where(
-                        'published_at',
-                        '<=',
-                        now()
-                    )
-
-                    ->latest('published_at')
-
-                    ->take(8)
-
-                    ->get();
-                $view->with([
-                    'headerCategories' => $headerCategories,
-                    'sidebarCategories' => $sidebarCategories,
-                    'sidebarLatestPosts' => $sidebarLatestPosts,
-                ]);
-            }
-        );
+            $view->with([
+                'sidebarCategories' => $sidebarCategories,
+                'sidebarLatestPosts' => $sidebarLatestPosts,
+            ]);
+        });
     }
 }
