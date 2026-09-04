@@ -514,6 +514,17 @@
                             </a>
 
                         </li>
+                        <li class="mb-2">
+
+                            <a
+                                href="{{ url('/blog') }}"
+                                class="footer-link">
+
+                                Blog
+
+                            </a>
+
+                        </li>
 
 
                         <li class="mb-2">
@@ -595,6 +606,17 @@
                                 class="footer-link">
 
                                 Disclaimer
+
+                            </a>
+
+                        </li>
+                        <li class="mb-2">
+
+                            <a
+                                href="{{ url('/cookie-policy') }}"
+                                class="footer-link">
+
+                                Cookie Policy
 
                             </a>
 

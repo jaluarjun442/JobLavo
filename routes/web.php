@@ -163,6 +163,21 @@ Route::get('/disclaimer', function () {
         ->staticPage('disclaimer');
 })->name('disclaimer');
 
+Route::get('/cookie-policy', function () {
+    return view('pages.cookie-policy');
+})->name('cookie.policy');
+Route::get('/about', function () {
+    return redirect()->route('about', [], 301);
+});
+Route::get('/contact-us', function () {
+    return redirect()->route('contact', [], 301);
+});
+Route::get('/privacy', function () {
+    return redirect()->route('privacy', [], 301);
+});
+Route::get('/terms', function () {
+    return redirect()->route('terms', [], 301);
+});
 /*
 |--------------------------------------------------------------------------
 | Search
