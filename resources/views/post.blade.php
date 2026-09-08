@@ -453,7 +453,7 @@
                     </div>
 
 
-                <!-- <div class="text-center">
+                <div class="text-center">
                     <script>
                     atOptions = {
                         'key' : '3fcb7650575fb10437b0505607d5653d',
@@ -463,7 +463,7 @@
                         'params' : {}
                     };
                     </script>
-                    <script src="https://www.highrevenueformat.com/3fcb7650575fb10437b0505607d5653d/invoke.js"></script> -->
+                    <script src="https://www.highrevenueformat.com/3fcb7650575fb10437b0505607d5653d/invoke.js"></script>
                 </div>
 
                 @if($post->featured_image)
