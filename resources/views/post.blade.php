@@ -453,18 +453,7 @@
                     </div>
 
 
-                <div class="text-center">
-                    <script>
-                    atOptions = {
-                        'key' : '3fcb7650575fb10437b0505607d5653d',
-                        'format' : 'iframe',
-                        'height' : 50,
-                        'width' : 320,
-                        'params' : {}
-                    };
-                    </script>
-                    <script src="https://www.highrevenueformat.com/3fcb7650575fb10437b0505607d5653d/invoke.js"></script>
-                </div>
+               
 
                 @if($post->featured_image)
 
@@ -536,31 +525,7 @@
                         </div>
 
                     @endif
-<div class="text-center">
 
-
-                    <script>
-                    atOptions = {
-                        'key' : 'edce0a4519a4dc72fb023ee610868ada',
-                        'format' : 'iframe',
-                        'height' : 250,
-                        'width' : 300,
-                        'params' : {}
-                    };
-                    </script>
-                    <script src="https://www.highrevenueformat.com/edce0a4519a4dc72fb023ee610868ada/invoke.js"></script>
-                    <script>
-                    atOptions = {
-                        'key' : 'edce0a4519a4dc72fb023ee610868ada',
-                        'format' : 'iframe',
-                        'height' : 250,
-                        'width' : 300,
-                        'params' : {}
-                    };
-                    </script>
-                    <script src="https://www.highrevenueformat.com/edce0a4519a4dc72fb023ee610868ada/invoke.js"></script>
-
-</div>
                     @if($post->content)
 
                         <div class="p-3 p-md-4">
