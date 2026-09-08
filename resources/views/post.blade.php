@@ -536,7 +536,7 @@
                         </div>
 
                     @endif
-<!-- <div class="text-center">
+<div class="text-center">
 
 
                     <script>
@@ -560,7 +560,7 @@
                     </script>
                     <script src="https://www.highrevenueformat.com/edce0a4519a4dc72fb023ee610868ada/invoke.js"></script>
 
-</div> -->
+</div>
                     @if($post->content)
 
                         <div class="p-3 p-md-4">
@@ -575,10 +575,10 @@
 
                     @endif
 
-                <!-- <div class="text-center">
+                <div class="text-center">
                     <script async="async" data-cfasync="false" src="https://pl31237402.profitableratecpmnetwork.com/f3a8bce8b6affdbb2b4ca6fd7bfb365d/invoke.js"></script>
                     <div id="container-f3a8bce8b6affdbb2b4ca6fd7bfb365d"></div>
-                </div> -->
+                </div>
 
                 </article>
 
