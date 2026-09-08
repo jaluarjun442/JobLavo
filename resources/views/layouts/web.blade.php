@@ -9,6 +9,7 @@
 
     <meta name="viewport"
         content="width=device-width, initial-scale=1">
+        <meta name="google-adsense-account" content="ca-pub-6503909676825287">
     @if(app()->environment('production'))
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-64LK51PQVX"></script>
@@ -19,7 +20,6 @@
 
         gtag('config', 'G-64LK51PQVX');
         </script>
-<script>(function(s){s.dataset.zone='11747343',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
     @endif
     {{-- =========================================================
          BASIC SEO
