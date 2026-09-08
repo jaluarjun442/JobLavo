@@ -10,9 +10,6 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1">
     @if(app()->environment('production'))
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7418008356921994"
-     crossorigin="anonymous"></script>
-    <meta name="google-adsense-account" content="ca-pub-7418008356921994">    
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-64LK51PQVX"></script>
         <script>
@@ -22,6 +19,7 @@
 
         gtag('config', 'G-64LK51PQVX');
         </script>
+<script src="https://quge5.com/88/tag.min.js" data-zone="277646" async data-cfasync="false"></script>
 
     @endif
     {{-- =========================================================
