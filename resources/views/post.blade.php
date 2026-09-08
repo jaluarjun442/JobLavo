@@ -525,7 +525,22 @@
                         </div>
 
                     @endif
-
+<div class="text-center">
+    <a href="https://printkidukan.com/">
+    <img
+                                src="{{ asset('print_ki_dukan_ads.webp') }}"
+                                alt="PrintKiDukan.com"
+                                class="img-fluid rounded"
+                                loading="eager"
+                                fetchpriority="high">    </a>
+    <a href="https://printkidukan.com/">
+    <img
+                                src="{{ asset('print_ki_dukan_ads.webp') }}"
+                                alt="PrintKiDukan.com"
+                                class="img-fluid rounded"
+                                loading="eager"
+                                fetchpriority="high">    </a>
+</div>
                     @if($post->content)
 
                         <div class="p-3 p-md-4">
@@ -540,10 +555,22 @@
 
                     @endif
 
-                <div class="text-center">
-                    <script async="async" data-cfasync="false" src="https://pl31237402.profitableratecpmnetwork.com/f3a8bce8b6affdbb2b4ca6fd7bfb365d/invoke.js"></script>
-                    <div id="container-f3a8bce8b6affdbb2b4ca6fd7bfb365d"></div>
-                </div>
+            <div class="text-center">
+    <a href="https://printkidukan.com/">
+    <img
+                                src="{{ asset('print_ki_dukan_ads.webp') }}"
+                                alt="PrintKiDukan.com"
+                                class="img-fluid rounded"
+                                loading="eager"
+                                fetchpriority="high">    </a>
+    <a href="https://printkidukan.com/">
+    <img
+                                src="{{ asset('print_ki_dukan_ads.webp') }}"
+                                alt="PrintKiDukan.com"
+                                class="img-fluid rounded"
+                                loading="eager"
+                                fetchpriority="high">    </a>
+</div>
 
                 </article>
 
