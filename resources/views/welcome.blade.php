@@ -16,6 +16,166 @@
 
 @section('content')
 
+<section class="bg-white py-4">
+
+    <div class="container">
+
+
+
+
+        {{-- =========================================================
+             BLOG POSTS
+        ========================================================== --}}
+
+        @if($latestBlogs->count())
+
+            <div class="row g-4">
+
+                @foreach($latestBlogs as $blog)
+
+                    <div class="col-md-6 col-lg-4">
+
+                        <article class="card h-100 border-0 shadow-sm-blog overflow-hidden">
+
+
+                            {{-- IMAGE --}}
+
+                            @if($blog->desktop_image)
+
+                                <a
+                                    href="{{ route('blog.show', $blog->slug) }}"
+                                >
+
+                                    <picture>
+
+                                        @if($blog->mobile_image)
+
+                                            <source
+                                                media="(max-width: 767px)"
+                                                srcset="{{ asset($blog->mobile_image) }}"
+                                            >
+
+                                        @endif
+
+                                        <img
+                                            src="{{ asset($blog->desktop_image) }}"
+                                            alt="{{ $blog->title }}"
+                                            class="img-fluid w-100"
+                                            width="1280"
+                                            height="720"
+                                            loading="lazy"
+                                        >
+
+                                    </picture>
+
+                                </a>
+
+                            @endif
+
+
+                            {{-- CONTENT --}}
+
+                            <div class="card-body p-3 p-md-4">
+
+                                <div class="small text-muted mb-2">
+
+                                    @if($blog->published_date)
+
+                                        {{ $blog->published_date->format('d M Y') }}
+
+                                    @endif
+
+                                    @if($blog->published_by)
+
+                                        <span class="mx-1">
+                                            ·
+                                        </span>
+
+                                        <a href="{{ route('manisha_jalu') }}" > {{ $blog->published_by }} </a>
+
+                                    @endif
+
+                                </div>
+
+
+                                <h2 class="h5 fw-semibold mb-2">
+
+                                    <a
+                                        href="{{ route('blog.show', $blog->slug) }}"
+                                        class="text-decoration-none text-dark"
+                                    >
+
+                                        {{ $blog->title }}
+
+                                    </a>
+
+                                </h2>
+
+
+                                <p class="text-secondary mb-3">
+
+                                    {{ \Illuminate\Support\Str::limit(
+                                        strip_tags($blog->content),
+                                        150
+                                    ) }}
+
+                                </p>
+
+
+                                <a
+                                    href="{{ route('blog.show', $blog->slug) }}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+
+                                    Read More →
+
+                                </a>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                @endforeach
+
+            </div>
+
+
+            {{-- =====================================================
+                 PAGINATION
+            ====================================================== --}}
+
+            @if($latestBlogs->hasPages())
+
+                <div class="mt-5 d-flex justify-content-center">
+
+                    {{ $latestBlogs->links() }}
+
+                </div>
+
+            @endif
+
+
+        @else
+
+            <div class="text-center py-5">
+
+                <h2 class="h5 fw-semibold">
+                    No Blog Posts Available
+                </h2>
+
+                <p class="text-muted mb-0">
+                    New tips and guides will be published here soon.
+                </p>
+
+            </div>
+
+        @endif
+
+    </div>
+
+</section>
 
 {{-- =========================================================
      SMALL HOME CATEGORY TILES
@@ -345,134 +505,7 @@
     </div>
 
 </section>
-{{-- =========================================================
-     LATEST BLOGS
-========================================================= --}}
 
-@if($latestBlogs->count())
-
-<section class="py-4">
-
-    <div class="container">
-
-        {{-- =====================================================
-             SECTION HEADER
-        ====================================================== --}}
-
-        <div class="mb-3">
-
-            <h2 class="h4 fw-bold mb-1">
-                Latest Blogs
-            </h2>
-
-            <p class="text-muted mb-0">
-                Practical tips, helpful guides and useful career information for job seekers.
-            </p>
-
-        </div>
-
-
-        {{-- =====================================================
-             BLOG CARDS
-        ====================================================== --}}
-
-        <div class="row g-3">
-
-            @foreach($latestBlogs as $blog)
-
-                <div class="col-12 col-md-6 col-lg-4">
-
-                    <article class="card h-100 border-0 shadow-sm overflow-hidden">
-
-                        {{-- =================================================
-                             BLOG IMAGE
-                        ================================================== --}}
-
-                        @if($blog->desktop_image)
-
-                            <a
-                                href="{{ route('blog.show', $blog->slug) }}"
-                            >
-
-                                <img
-                                    src="{{ asset($blog->desktop_image) }}"
-                                    alt="{{ $blog->title }}"
-                                    class="card-img-top"
-                                    width="400"
-                                    height="225"
-                                    loading="lazy"
-                                >
-
-                            </a>
-
-                        @endif
-
-
-                        {{-- =================================================
-                             BLOG CONTENT
-                        ================================================== --}}
-
-                        <div class="card-body d-flex flex-column">
-
-                            <h3 class="h6 fw-bold mb-2">
-
-                                <a
-                                    href="{{ route('blog.show', $blog->slug) }}"
-                                    class="text-decoration-none text-dark-blog"
-                                >
-
-                                    {{ $blog->title }}
-
-                                </a>
-
-                            </h3>
-
-
-                            {{-- =================================================
-                                 PUBLISHED DATE
-                            ================================================== --}}
-
-                            @if($blog->published_date)
-
-                                <div class="small text-muted mt-auto">
-
-                                    {{ $blog->published_date->format('d M Y') }}
-
-                                </div>
-
-                            @endif
-
-                        </div>
-
-                    </article>
-
-                </div>
-
-            @endforeach
-
-        </div>
-
-
-        {{-- =====================================================
-             VIEW ALL BLOGS
-        ====================================================== --}}
-
-        <div class="text-center mt-4">
-
-            <a
-                href="{{ route('blog.index') }}"
-                class="btn btn-outline-primary"
-            >
-                View All Blogs →
-            </a>
-
-        </div>
-
-    </div>
-
-</section>
-
-@endif
 {{-- =========================================================
      HOME INFORMATIONAL CONTENT
 ========================================================= --}}

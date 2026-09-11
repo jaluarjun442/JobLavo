@@ -26,7 +26,7 @@
             @endif
 
             <changefreq>
-                weekly
+                daily
             </changefreq>
 
             <priority>

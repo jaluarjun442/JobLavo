@@ -226,9 +226,7 @@ class FrontController extends Controller
                 'published_date'
             )
 
-            ->take(6)
-
-            ->get();
+            ->paginate(12);
 
 
         /*
