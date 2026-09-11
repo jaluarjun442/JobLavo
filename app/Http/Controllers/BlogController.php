@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Http\Request;
 use App\Models\BlogPost;
 
 class BlogController extends Controller
@@ -46,7 +46,7 @@ class BlogController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function show($slug)
+    public function show(Request $request, $slug)
     {
         $blog = BlogPost::query()
 
@@ -69,25 +69,60 @@ class BlogController extends Controller
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Views Count
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Views Count
+    |--------------------------------------------------------------------------
+    |
+    | Count only normal mobile / desktop browsers.
+    | Known bots, crawlers, CLI tools and headless browsers
+    | are excluded.
+    |
+    */
 
-        $blog->increment(
-            'views_count'
+        $userAgent = $request->userAgent();
+
+        $isBot = empty($userAgent) || preg_match(
+            '/bot|crawler|spider|slurp|bingpreview|facebookexternalhit|'
+                . 'linkedinbot|twitterbot|telegrambot|whatsapp|pinterest|'
+                . 'google-structured-data|mediapartners-google|adsbot|'
+                . 'headless|phantomjs|curl|wget|python|axios|postman|'
+                . 'java|go-http-client|httpclient|scrapy|selenium|playwright/i',
+            $userAgent
         );
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Related / Latest Blogs
-        |--------------------------------------------------------------------------
-        |
-        | Since blog categories are not being used,
-        | simply show latest blogs excluding current blog.
-        |
-        */
+    |--------------------------------------------------------------------------
+    | Normal Browser Check
+    |--------------------------------------------------------------------------
+    */
+
+        $isBrowser = preg_match(
+            '/chrome|crios|firefox|fxios|safari|edg|edge|opr|opera|'
+                . 'samsungbrowser|ucbrowser|android.*browser/i',
+            $userAgent
+        );
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Count View
+    |--------------------------------------------------------------------------
+    */
+
+        if (!$isBot && $isBrowser) {
+
+            $blog->increment(
+                'views_count'
+            );
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Related / Latest Blogs
+    |--------------------------------------------------------------------------
+    */
 
         $relatedBlogs = BlogPost::query()
 
