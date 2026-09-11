@@ -142,19 +142,20 @@
             </div>
 
 
-            {{-- =====================================================
-                 PAGINATION
-            ====================================================== --}}
+        {{-- =====================================================
+             VIEW ALL BLOGS
+        ====================================================== --}}
 
-            @if($latestBlogs->hasPages())
+        <div class="text-center mt-4">
 
-                <div class="mt-5 d-flex justify-content-center">
+            <a
+                href="{{ route('blog.index') }}"
+                class="btn btn-outline-primary"
+            >
+                View All Blogs →
+            </a>
 
-                    {{ $latestBlogs->links() }}
-
-                </div>
-
-            @endif
+        </div>
 
 
         @else
