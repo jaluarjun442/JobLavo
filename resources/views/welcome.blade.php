@@ -177,6 +177,71 @@
     </div>
 
 </section>
+{{-- =========================================================
+     SEARCH JOBS
+========================================================= --}}
+
+<section class="bg-white py-4">
+    <div class="container shadow-sm-blog">
+
+        <div class="row g-3">
+    <div
+        class="px-3 py-3 text-white"
+        style="background:#06245f;">
+
+        <h2 class="h6 fw-bold mb-0">
+            Search Jobs
+        </h2>
+
+    </div>
+
+
+    <div class="p-3">
+
+        <form
+            action="{{ url('/search') }}"
+            method="GET">
+
+            <label
+                for="sidebar-search"
+                class="visually-hidden">
+
+                Search government jobs
+
+            </label>
+
+
+            <div class="input-group">
+
+                <input
+                    type="search"
+                    id="sidebar-search"
+                    name="q"
+                    value="{{ request('q') }}"
+                    class="form-control"
+                    placeholder="Search jobs..."
+                    autocomplete="off">
+
+
+                <button
+                    type="submit"
+                    class="btn"
+                    aria-label="Search jobs"
+                    style="background:#06245f;color:#fff;">
+
+                    Search
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+    </div>
+    </div>
+
+</section>
 
 {{-- =========================================================
      SMALL HOME CATEGORY TILES
