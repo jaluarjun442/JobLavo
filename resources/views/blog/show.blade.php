@@ -95,7 +95,8 @@
     "dateModified": "{{ optional($blog->updated_at)->toIso8601String() }}",
     "author": {
         "@type": "Person",
-        "name": @json($blog->published_by ?: 'JobLavo')
+        "name": @json($blog->published_by ?: 'JobLavo'),
+        "url": "{{ url('/author/manisha-jalu') }}"
     },
     "publisher": {
         "@type": "Organization",
