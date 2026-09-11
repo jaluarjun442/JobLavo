@@ -72,7 +72,7 @@
 
 
 {{-- =========================================================
-     BLOG ARTICLE STRUCTURED DATA
+     BLOG ARTICLE + BREADCRUMB STRUCTURED DATA
 ========================================================= --}}
 
 @push('structured_data')
@@ -112,7 +112,40 @@
 }
 </script>
 
+
+{{-- =========================================================
+     BREADCRUMB SEO STRUCTURED DATA
+========================================================= --}}
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ url('/') }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Blog",
+            "item": "{{ route('blog.index') }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": @json($blog->title),
+            "item": "{{ $blog->canonical_url ?: route('blog.show', $blog->slug) }}"
+        }
+    ]
+}
+</script>
+
 @endpush
+
 
 @section('content')
 
@@ -123,6 +156,38 @@
         <div class="row">
 
             <div class="col-lg-8 mx-auto">
+
+
+                {{-- =====================================================
+                     VISIBLE BREADCRUMB
+                ====================================================== --}}
+
+                <nav aria-label="Breadcrumb" class="mb-3">
+
+                    <ol class="breadcrumb mb-0 small">
+
+                        <li class="breadcrumb-item">
+                            <a href="{{ url('/') }}">
+                                Home
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item">
+                            <a href="{{ route('blog.index') }}">
+                                Blog
+                            </a>
+                        </li>
+
+                        <li
+                            class="breadcrumb-item active"
+                            aria-current="page"
+                        >
+                            {{ \Illuminate\Support\Str::limit($blog->title, 70) }}
+                        </li>
+
+                    </ol>
+
+                </nav>
 
 
                 {{-- =====================================================
@@ -152,11 +217,11 @@
                                 ·
                             </span>
 
-                            <a href="{{ route('manisha_jalu') }}" >{{ $blog->published_by }}</a>
+                            <a href="{{ route('manisha_jalu') }}">
+                                {{ $blog->published_by }}
+                            </a>
 
                         @endif
-
-
 
                     </div>
 
